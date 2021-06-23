@@ -3,6 +3,7 @@ FROM ubuntu:20.04
 # Install locale and set
 RUN apt-get update &&            \
     apt-get install -y           \
+    --no-install-recommends      \
       locales &&                 \
     apt-get clean &&             \
     rm -rf /var/lib/apt/lists/*
@@ -44,8 +45,8 @@ RUN wget "https://www.strategylions.com.au/mirror/guacamole/${GUACAMOLE_VERSION}
 RUN echo "user-mapping: /etc/guacamole/user-mapping.xml" > /etc/guacamole/guacamole.properties && \
     touch /etc/guacamole/user-mapping.xml
 
-RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
-    sudo libxt6 openssh-server libvncserver-dev && \
+RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y \
+    lxde-core libxt6 openssh-server libvncserver-dev xauth xorg && \
     rm -rf /var/lib/apt/lists/*
 
 ARG    TURBOVNC_VERSION="2.2.6"
