@@ -1,4 +1,4 @@
-_Information available at [neurodesk.github.io](https://neurodesk.github.io)_
+_Further information available at [neurodesk.github.io](https://neurodesk.github.io)_
 
 # Neuromachine
 
