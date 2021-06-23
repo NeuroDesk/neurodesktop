@@ -46,21 +46,13 @@ RUN echo "user-mapping: /etc/guacamole/user-mapping.xml" > /etc/guacamole/guacam
     touch /etc/guacamole/user-mapping.xml
 
 RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y \
-    lxde && \
-    rm -rf /var/lib/apt/lists/*
-
-RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y \
-    sudo libxt6 openssh-server libvncserver-dev && \
+    lxde-core libxt6 openssh-server libvncserver-dev xauth xorg && \
     rm -rf /var/lib/apt/lists/*
 
 ARG    TURBOVNC_VERSION="2.2.6"
 RUN wget "https://sourceforge.net/projects/turbovnc/files/${TURBOVNC_VERSION}/turbovnc_${TURBOVNC_VERSION}_amd64.deb/download" -O /opt/turbovnc.deb && \
     dpkg -i /opt/turbovnc.deb && \
     rm -f /opt/turbovnc.deb
-
-RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y \
-    xauth && \
-    rm -rf /var/lib/apt/lists/*
 
 # Create user account with password-less sudo abilities
 RUN useradd -s /bin/bash -g 100 -G sudo -m user && \
