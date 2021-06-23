@@ -3,6 +3,7 @@ FROM ubuntu:20.04
 # Install locale and set
 RUN apt-get update &&            \
     apt-get install -y           \
+    --no-install-recommends      \
       locales &&                 \
     apt-get clean &&             \
     rm -rf /var/lib/apt/lists/*
@@ -44,7 +45,11 @@ RUN wget "https://www.strategylions.com.au/mirror/guacamole/${GUACAMOLE_VERSION}
 RUN echo "user-mapping: /etc/guacamole/user-mapping.xml" > /etc/guacamole/guacamole.properties && \
     touch /etc/guacamole/user-mapping.xml
 
-RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
+RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y \
+    lxde && \
+    rm -rf /var/lib/apt/lists/*
+
+RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y \
     sudo libxt6 openssh-server libvncserver-dev && \
     rm -rf /var/lib/apt/lists/*
 
@@ -52,6 +57,10 @@ ARG    TURBOVNC_VERSION="2.2.6"
 RUN wget "https://sourceforge.net/projects/turbovnc/files/${TURBOVNC_VERSION}/turbovnc_${TURBOVNC_VERSION}_amd64.deb/download" -O /opt/turbovnc.deb && \
     dpkg -i /opt/turbovnc.deb && \
     rm -f /opt/turbovnc.deb
+
+RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y \
+    xauth && \
+    rm -rf /var/lib/apt/lists/*
 
 # Create user account with password-less sudo abilities
 RUN useradd -s /bin/bash -g 100 -G sudo -m user && \
