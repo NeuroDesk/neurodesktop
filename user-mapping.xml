@@ -1,0 +1,13 @@
+<user-mapping>
+    <authorize username="user" password="password">
+        <connection name="SSH">
+            <protocol>ssh</protocol>
+            <param name="hostname">localhost</param>
+            <param name="username">user</param>
+            <param name="password">password</param>
+            <param name="port">22</param>
+            <param name="enable-sftp">true</param>
+            <param name="sftp-root-directory">/home/user</param>
+        </connection>
+    </authorize>
+</user-mapping>
