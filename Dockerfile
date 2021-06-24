@@ -15,8 +15,37 @@ ENV LC_ALL en_US.UTF-8
 
 # Install dependancies
 RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y \
-    sudo wget openjdk-11-jdk make gcc g++ libcairo2-dev libjpeg-turbo8-dev libpng-dev libtool-bin libossp-uuid-dev libavcodec-dev libavutil-dev libswscale-dev freerdp2-dev libpango1.0-dev libssh2-1-dev libvncserver-dev libtelnet-dev libssl-dev libvorbis-dev libwebp-dev && \
-    rm -rf /var/lib/apt/lists/*
+    sudo \
+    wget \
+    openjdk-11-jdk \
+    make \
+    gcc \
+    g++ \
+    libcairo2-dev \
+    libjpeg-turbo8-dev \
+    libpng-dev \
+    libtool-bin \
+    libossp-uuid-dev \
+    libavcodec-dev \
+    libavutil-dev \
+    libswscale-dev \
+    libpango1.0-dev \
+    libssh2-1-dev \
+    libtelnet-dev \
+    libssl-dev \
+    libvorbis-dev \
+    libwebp-dev \
+
+    # freerdp2-dev \
+    # libvncserver-dev \
+    # openssh-server \
+    # lxde-core \
+    # libxt6 \
+    # libvncserver-dev \
+    # xauth \
+    # xorg \
+    # xorgxrdp \
+    && rm -rf /var/lib/apt/lists/*
 
 # Install Apache Tomcat
 ARG TOMCAT_REL="9"
@@ -45,35 +74,44 @@ RUN wget "https://www.strategylions.com.au/mirror/guacamole/${GUACAMOLE_VERSION}
 RUN echo "user-mapping: /etc/guacamole/user-mapping.xml" > /etc/guacamole/guacamole.properties && \
     touch /etc/guacamole/user-mapping.xml
 
-RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y \
-    lxde-core libxt6 openssh-server libvncserver-dev xauth xorg && \
-    rm -rf /var/lib/apt/lists/*
+# # Install dependancies
+# RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y \
+    # freerdp2-dev \
+    # libvncserver-dev \
+    # openssh-server \
+    # lxde-core \
+    # libxt6 \
+    # libvncserver-dev \
+    # xauth \
+    # xorg \
+    # xorgxrdp \
+    # && rm -rf /var/lib/apt/lists/*
 
-ARG    TURBOVNC_VERSION="2.2.6"
-RUN wget "https://sourceforge.net/projects/turbovnc/files/${TURBOVNC_VERSION}/turbovnc_${TURBOVNC_VERSION}_amd64.deb/download" -O /opt/turbovnc.deb && \
-    dpkg -i /opt/turbovnc.deb && \
-    rm -f /opt/turbovnc.deb
+# # Install TurboVNC
+# ARG    TURBOVNC_VERSION="2.2.6"
+# RUN wget "https://sourceforge.net/projects/turbovnc/files/${TURBOVNC_VERSION}/turbovnc_${TURBOVNC_VERSION}_amd64.deb/download" -O /opt/turbovnc.deb && \
+#     dpkg -i /opt/turbovnc.deb && \
+#     rm -f /opt/turbovnc.deb
 
 # Create user account with password-less sudo abilities
 RUN useradd -s /bin/bash -g 100 -G sudo -m user && \
     /usr/bin/printf '%s\n%s\n' 'password' 'password'| passwd user && \
     echo "user ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
 
-WORKDIR /home/user/Desktop
-
+# Add entrypoint script
 COPY startup.sh /startup.sh
 RUN chmod +x /startup.sh
 
-RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
-    xrdp xorgxrdp && \
-    rm -rf /var/lib/apt/lists/*
-
+# Guacamole user configuration
 COPY user-mapping.xml /etc/guacamole/user-mapping.xml
 
+# VNC Destop Resolution
 ENV    RES "1920x1080"
+
 EXPOSE 8080
 EXPOSE 3389
 
+WORKDIR /home/user
 USER 1000:100
 
 ENTRYPOINT sudo -E /startup.sh
