@@ -64,10 +64,15 @@ WORKDIR /home/user/Desktop
 COPY startup.sh /startup.sh
 RUN chmod +x /startup.sh
 
+RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
+    xrdp xorgxrdp && \
+    rm -rf /var/lib/apt/lists/*
+
 COPY user-mapping.xml /etc/guacamole/user-mapping.xml
 
 ENV    RES "1920x1080"
 EXPOSE 8080
+EXPOSE 3389
 
 USER 1000:100
 
