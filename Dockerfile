@@ -35,7 +35,6 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install --no-instal
     libssl-dev \
     libvorbis-dev \
     libwebp-dev \
-
     # freerdp2-dev \
     # libvncserver-dev \
     # openssh-server \
@@ -75,23 +74,29 @@ RUN echo "user-mapping: /etc/guacamole/user-mapping.xml" > /etc/guacamole/guacam
     touch /etc/guacamole/user-mapping.xml
 
 # # Install dependancies
-# RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y \
-    # freerdp2-dev \
-    # libvncserver-dev \
-    # openssh-server \
-    # lxde-core \
-    # libxt6 \
-    # libvncserver-dev \
-    # xauth \
-    # xorg \
-    # xorgxrdp \
-    # && rm -rf /var/lib/apt/lists/*
+# RUN apt-get purge -y \
+#     make \
+#     && rm -rf /var/lib/apt/lists/*
 
-# # Install TurboVNC
-# ARG    TURBOVNC_VERSION="2.2.6"
-# RUN wget "https://sourceforge.net/projects/turbovnc/files/${TURBOVNC_VERSION}/turbovnc_${TURBOVNC_VERSION}_amd64.deb/download" -O /opt/turbovnc.deb && \
-#     dpkg -i /opt/turbovnc.deb && \
-#     rm -f /opt/turbovnc.deb
+
+# # # Install dependancies
+# # RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y \
+#     # freerdp2-dev \
+#     # libvncserver-dev \
+#     # openssh-server \
+#     # lxde-core \
+#     # libxt6 \
+#     # libvncserver-dev \
+#     # xauth \
+#     # xorg \
+#     # xorgxrdp \
+#     # && rm -rf /var/lib/apt/lists/*
+
+# # # Install TurboVNC
+# # ARG    TURBOVNC_VERSION="2.2.6"
+# # RUN wget "https://sourceforge.net/projects/turbovnc/files/${TURBOVNC_VERSION}/turbovnc_${TURBOVNC_VERSION}_amd64.deb/download" -O /opt/turbovnc.deb && \
+# #     dpkg -i /opt/turbovnc.deb && \
+# #     rm -f /opt/turbovnc.deb
 
 # Create user account with password-less sudo abilities
 RUN useradd -s /bin/bash -g 100 -G sudo -m user && \
@@ -102,16 +107,6 @@ RUN useradd -s /bin/bash -g 100 -G sudo -m user && \
 COPY startup.sh /startup.sh
 RUN chmod +x /startup.sh
 
-# Guacamole user configuration
-COPY user-mapping.xml /etc/guacamole/user-mapping.xml
-
-# VNC Destop Resolution
-ENV    RES "1920x1080"
-
-EXPOSE 8080
-EXPOSE 3389
-
 WORKDIR /home/user
 USER 1000:100
-
 ENTRYPOINT sudo -E /startup.sh
