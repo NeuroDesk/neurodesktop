@@ -99,34 +99,3 @@ Plugin {
     spacing=1
   }
 }
-Plugin {
-  type=cpu
-  Config {
-  }
-}
-Plugin {
-  type=tray
-  Config {
-  }
-}
-Plugin {
-  type=dclock
-  Config {
-    ClockFmt=%R
-    TooltipFmt=%A %x
-    BoldFont=0
-    IconOnly=0
-    CenterText=0
-  }
-}
-Plugin {
-  type=launchbar
-  Config {
-    Button {
-      id=lxde-screenlock.desktop
-    }
-    Button {
-      id=lxde-logout.desktop
-    }
-  }
-}
