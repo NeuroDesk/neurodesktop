@@ -44,6 +44,11 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install --no-instal
     libwebp-dev \
     && rm -rf /var/lib/apt/lists/*
 
+# Install LXDE
+RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y \
+    lxde-core \
+    && rm -rf /var/lib/apt/lists/*
+
 # Install SSH dependancies
 RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y \
     openssh-server \
@@ -51,11 +56,6 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install --no-instal
     libssh2-1-dev \
     libssl-dev \
     openssh-server \
-    && rm -rf /var/lib/apt/lists/*
-
-# Install LXDE
-RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y \
-    lxde-core \
     && rm -rf /var/lib/apt/lists/*
 
 # Install VNC dependancies
@@ -97,16 +97,32 @@ RUN apt-get purge -y \
     make \
     && rm -rf /var/lib/apt/lists/*
 
-# Install TurboVNC
-ARG    TURBOVNC_VERSION="2.2.6"
-RUN wget "https://sourceforge.net/projects/turbovnc/files/${TURBOVNC_VERSION}/turbovnc_${TURBOVNC_VERSION}_amd64.deb/download" -O /opt/turbovnc.deb && \
-    dpkg -i /opt/turbovnc.deb && \
-    rm -f /opt/turbovnc.deb
+# # Install TurboVNC
+# ARG    TURBOVNC_VERSION="2.2.6"
+# RUN wget "https://sourceforge.net/projects/turbovnc/files/${TURBOVNC_VERSION}/turbovnc_${TURBOVNC_VERSION}_amd64.deb/download" -O /opt/turbovnc.deb && \
+#     dpkg -i /opt/turbovnc.deb && \
+#     rm -f /opt/turbovnc.deb
+
+# Install TigerVNC
+RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y \
+    tigervnc-standalone-server tigervnc-common \
+    && rm -rf /var/lib/apt/lists/*
 
 # Create user account with password-less sudo abilities
 RUN useradd -s /bin/bash -g 100 -G sudo -m user && \
     /usr/bin/printf '%s\n%s\n' 'password' 'password'| passwd user && \
     echo "user ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
+
+# Set VNC password
+RUN mkdir /home/user/.vnc && \
+   chown user /home/user/.vnc && \
+   /usr/bin/printf '%s\n%s\n%s\n' 'password' 'password' 'n' | su user -c vncpasswd
+RUN  echo -n 'password\npassword\nn\n' | su user -c vncpasswd
+
+# Install basic tools
+RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y \
+    lxterminal lxrandr vim\
+    && rm -rf /var/lib/apt/lists/*
 
 # Add entrypoint script
 COPY startup.sh /startup.sh
