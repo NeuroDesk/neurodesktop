@@ -108,6 +108,14 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install --no-instal
     tigervnc-standalone-server tigervnc-common \
     && rm -rf /var/lib/apt/lists/*
 
+# Install basic tools
+RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y \
+    lxterminal lxrandr vim\
+    && rm -rf /var/lib/apt/lists/*
+
+# Add custom default lxpanel
+COPY ./config/panel /etc/skel/.config/lxpanel/LXDE/panels/panel
+
 # Create user account with password-less sudo abilities
 RUN useradd -s /bin/bash -g 100 -G sudo -m user && \
     /usr/bin/printf '%s\n%s\n' 'password' 'password'| passwd user && \
@@ -118,11 +126,6 @@ RUN mkdir /home/user/.vnc && \
    chown user /home/user/.vnc && \
    /usr/bin/printf '%s\n%s\n%s\n' 'password' 'password' 'n' | su user -c vncpasswd
 RUN  echo -n 'password\npassword\nn\n' | su user -c vncpasswd
-
-# Install basic tools
-RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y \
-    lxterminal lxrandr vim\
-    && rm -rf /var/lib/apt/lists/*
 
 # Add entrypoint script
 COPY startup.sh /startup.sh
