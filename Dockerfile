@@ -1,5 +1,8 @@
 ARG GO_VERSION="1.14.4"
 ARG SINGULARITY_VERSION="3.7.0"
+ARG TOMCAT_REL="9"
+ARG TOMCAT_VERSION="9.0.52"
+ARG GUACAMOLE_VERSION="1.3.0"
 
 # Build Singularity.
 FROM golang:${GO_VERSION}-buster as builder
@@ -46,8 +49,8 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install --no-instal
     && rm -rf /var/lib/apt/lists/*
 
 # Install Apache Tomcat
-ARG TOMCAT_REL="9"
-ARG TOMCAT_VERSION="9.0.52"
+ARG TOMCAT_REL
+ARG TOMCAT_VERSION
 RUN wget https://archive.apache.org/dist/tomcat/tomcat-${TOMCAT_REL}/v${TOMCAT_VERSION}/bin/apache-tomcat-${TOMCAT_VERSION}.tar.gz -P /tmp && \
     tar -xf /tmp/apache-tomcat-${TOMCAT_VERSION}.tar.gz -C /tmp && \
     mv /tmp/apache-tomcat-${TOMCAT_VERSION} /usr/local/tomcat && \
@@ -101,7 +104,7 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install --no-instal
     && rm -rf /var/lib/apt/lists/*
 
 # Install Apache Guacamole
-ARG GUACAMOLE_VERSION="1.3.0"
+ARG GUACAMOLE_VERSION
 WORKDIR /etc/guacamole
 RUN wget "https://www.strategylions.com.au/mirror/guacamole/${GUACAMOLE_VERSION}/binary/guacamole-1.3.0.war" -O /usr/local/tomcat/webapps/ROOT.war && \
     wget "https://www.strategylions.com.au/mirror/guacamole/${GUACAMOLE_VERSION}/source/guacamole-server-1.3.0.tar.gz" -O /etc/guacamole/guacamole-server-${GUACAMOLE_VERSION}.tar.gz && \
