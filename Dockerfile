@@ -13,20 +13,67 @@ ENV LANG en_US.UTF-8
 ENV LANGUAGE en_US:en
 ENV LC_ALL en_US.UTF-8
 
-# Install dependancies
+# Install Apache Tomcat dependancies
 RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y \
-    sudo wget openjdk-11-jdk make gcc g++ libcairo2-dev libjpeg-turbo8-dev libpng-dev libtool-bin libossp-uuid-dev libavcodec-dev libavutil-dev libswscale-dev freerdp2-dev libpango1.0-dev libssh2-1-dev libvncserver-dev libtelnet-dev libssl-dev libvorbis-dev libwebp-dev && \
-    rm -rf /var/lib/apt/lists/*
+    sudo \
+    wget \
+    ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
 
 # Install Apache Tomcat
 ARG TOMCAT_REL="9"
-ARG TOMCAT_VERSION="9.0.48"
-RUN wget https://www.strategylions.com.au/mirror/tomcat/tomcat-${TOMCAT_REL}/v${TOMCAT_VERSION}/bin/apache-tomcat-${TOMCAT_VERSION}.tar.gz -P /tmp && \
+ARG TOMCAT_VERSION="9.0.52"
+RUN wget https://archive.apache.org/dist/tomcat/tomcat-${TOMCAT_REL}/v${TOMCAT_VERSION}/bin/apache-tomcat-${TOMCAT_VERSION}.tar.gz -P /tmp && \
     tar -xf /tmp/apache-tomcat-${TOMCAT_VERSION}.tar.gz -C /tmp && \
     mv /tmp/apache-tomcat-${TOMCAT_VERSION} /usr/local/tomcat && \
     mv /usr/local/tomcat/webapps /usr/local/tomcat/webapps.dist && \
     mkdir /usr/local/tomcat/webapps && \
     sh -c 'chmod +x /usr/local/tomcat/bin/*.sh'
+
+# Install Guacamole dependancies
+RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y \
+    make \
+    gcc \
+    g++ \
+    openjdk-11-jre \
+    libpng-dev \
+    libjpeg-turbo8-dev \
+    libcairo2-dev \
+    libtool-bin \
+    libossp-uuid-dev \
+    libwebp-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install LXDE
+RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y \
+    lxde-core \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install SSH dependancies
+RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y \
+    openssh-server \
+    libpango1.0-dev \
+    libssh2-1-dev \
+    libssl-dev \
+    openssh-server \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install VNC dependancies
+RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y \
+    libvncserver-dev \
+    libxt6 \
+    xauth \
+    xorg \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install RDP dependancies
+RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y \
+    freerdp2-dev \
+    xrdp \
+    xauth \
+    xorg \
+    xorgxrdp \
+    && rm -rf /var/lib/apt/lists/*
 
 # Install Apache Guacamole
 ARG GUACAMOLE_VERSION="1.3.0"
@@ -45,30 +92,46 @@ RUN wget "https://www.strategylions.com.au/mirror/guacamole/${GUACAMOLE_VERSION}
 RUN echo "user-mapping: /etc/guacamole/user-mapping.xml" > /etc/guacamole/guacamole.properties && \
     touch /etc/guacamole/user-mapping.xml
 
-RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y \
-    lxde-core libxt6 openssh-server libvncserver-dev xauth xorg && \
-    rm -rf /var/lib/apt/lists/*
+# Install dependancies
+RUN apt-get purge -y \
+    make \
+    && rm -rf /var/lib/apt/lists/*
 
-ARG    TURBOVNC_VERSION="2.2.6"
-RUN wget "https://sourceforge.net/projects/turbovnc/files/${TURBOVNC_VERSION}/turbovnc_${TURBOVNC_VERSION}_amd64.deb/download" -O /opt/turbovnc.deb && \
-    dpkg -i /opt/turbovnc.deb && \
-    rm -f /opt/turbovnc.deb
+# # Install TurboVNC
+# ARG    TURBOVNC_VERSION="2.2.6"
+# RUN wget "https://sourceforge.net/projects/turbovnc/files/${TURBOVNC_VERSION}/turbovnc_${TURBOVNC_VERSION}_amd64.deb/download" -O /opt/turbovnc.deb && \
+#     dpkg -i /opt/turbovnc.deb && \
+#     rm -f /opt/turbovnc.deb
+
+# Install TigerVNC
+RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y \
+    tigervnc-standalone-server tigervnc-common \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install basic tools
+RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y \
+    lxterminal lxrandr vim\
+    && rm -rf /var/lib/apt/lists/*
+
+# Add custom default lxpanel
+COPY ./config/panel /etc/skel/.config/lxpanel/LXDE/panels/panel
 
 # Create user account with password-less sudo abilities
 RUN useradd -s /bin/bash -g 100 -G sudo -m user && \
     /usr/bin/printf '%s\n%s\n' 'password' 'password'| passwd user && \
     echo "user ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
 
-WORKDIR /home/user/Desktop
+# Set VNC password
+RUN mkdir /home/user/.vnc && \
+   chown user /home/user/.vnc && \
+   /usr/bin/printf '%s\n%s\n%s\n' 'password' 'password' 'n' | su user -c vncpasswd
+RUN  echo -n 'password\npassword\nn\n' | su user -c vncpasswd
 
+# Add entrypoint script
 COPY startup.sh /startup.sh
 RUN chmod +x /startup.sh
 
-COPY user-mapping.xml /etc/guacamole/user-mapping.xml
-
-ENV    RES "1920x1080"
-EXPOSE 8080
-
+WORKDIR /home/user
 USER 1000:100
-
 ENTRYPOINT sudo -E /startup.sh
+
