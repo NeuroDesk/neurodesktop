@@ -117,25 +117,14 @@ RUN wget "https://www.strategylions.com.au/mirror/guacamole/${GUACAMOLE_VERSION}
 RUN echo "user-mapping: /etc/guacamole/user-mapping.xml" > /etc/guacamole/guacamole.properties && \
     touch /etc/guacamole/user-mapping.xml
 
-# Install dependancies
+# Remove unused dependancies
 RUN apt-get purge -y \
     make \
     && rm -rf /var/lib/apt/lists/*
 
-# # Install TurboVNC
-# ARG    TURBOVNC_VERSION="2.2.6"
-# RUN wget "https://sourceforge.net/projects/turbovnc/files/${TURBOVNC_VERSION}/turbovnc_${TURBOVNC_VERSION}_amd64.deb/download" -O /opt/turbovnc.deb && \
-#     dpkg -i /opt/turbovnc.deb && \
-#     rm -f /opt/turbovnc.deb
-
 # Install TigerVNC
 RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y \
     tigervnc-standalone-server tigervnc-common \
-    && rm -rf /var/lib/apt/lists/*
-
-# Install basic tools
-RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y \
-    lxterminal lxrandr vim\
     && rm -rf /var/lib/apt/lists/*
 
 # Install singularity into the final image.
@@ -164,6 +153,8 @@ RUN apt-get update \
         nano \
         openssh-client \
         vim \
+        lxterminal \
+        lxrandr \
     && rm -rf /var/lib/apt/lists/*
 
 # add module script
