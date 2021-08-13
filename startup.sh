@@ -87,18 +87,20 @@ default () {
     rdp
 }
 
-
-
+if [ -z "$RES" ]; then
 RES="1920x1080"
+fi
+
 DEPTH="24"
 
 open_guacmole_conf
 default
 close_guacmole_conf
 
-echo "Starting tomcat server"
+echo "\
+==================================================================
+Starting tomcat server"
 /usr/local/tomcat/bin/startup.sh
-
 
 echo "\
 ==================================================================
