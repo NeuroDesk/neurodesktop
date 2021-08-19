@@ -1,0 +1,6 @@
+[Added Associations]
+application/dicom=vnm-itk-snap-3.8.0.desktop;
+application/gzip=vnm-itk-snap-3.8.0.desktop;
+
+[Default Applications]
+application/gzip=vnm-itk-snap-3.8.0.desktop

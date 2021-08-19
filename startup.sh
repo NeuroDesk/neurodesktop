@@ -30,7 +30,7 @@ echo "\
 Starting SSH server"
 service ssh start
 echo \
-"<connection name=\"SSH\">
+"<connection name=\"Command Line (SSH)\">
 <protocol>ssh</protocol>
 <param name=\"hostname\">localhost</param>
 <param name=\"username\">user</param>
@@ -69,7 +69,7 @@ echo "\
 Starting RDP server"
 service xrdp start
 echo \
-"<connection name=\"RDP\">
+"<connection name=\"Desktop (RDP)\">
 <protocol>rdp</protocol>
 <param name=\"hostname\">localhost</param>
 <param name=\"username\">user</param>
@@ -94,7 +94,8 @@ fi
 DEPTH="24"
 
 open_guacmole_conf
-default
+ssh
+rdp
 close_guacmole_conf
 
 echo "\

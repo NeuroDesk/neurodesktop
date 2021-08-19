@@ -5,5 +5,8 @@
 # Forcing UNIX LF line endings for text files added to container
 *.sh text eol=lf
 *.xml text eol=lf
-*.xml text eol=lf
+config/*.sh text eol=lf
+config/rc.xml text eol=lf
+config/.bashrc text eol=lf
 config/panel text eol=lf
+config/*.conf text eol=lf
