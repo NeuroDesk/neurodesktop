@@ -4,26 +4,26 @@ ARG TOMCAT_REL="9"
 ARG TOMCAT_VERSION="9.0.52"
 ARG GUACAMOLE_VERSION="1.3.0"
 
-# # Build Singularity.
-# FROM golang:${GO_VERSION}-buster as builder
+# Build Singularity.
+FROM golang:${GO_VERSION}-buster as builder
 
-# # Necessary to pass the arg from outside this build (it is defined before the FROM).
-# ARG SINGULARITY_VERSION
+# Necessary to pass the arg from outside this build (it is defined before the FROM).
+ARG SINGULARITY_VERSION
 
-# RUN apt-get update \
-#     && apt-get install --no-install-recommends -y \
-#         cryptsetup \
-#         libssl-dev \
-#         uuid-dev \
-#     && rm -rf /var/lib/apt/lists/*
+RUN apt-get update \
+    && apt-get install --no-install-recommends -y \
+        cryptsetup \
+        libssl-dev \
+        uuid-dev \
+    && rm -rf /var/lib/apt/lists/*
 
-# RUN curl -fsSL "https://github.com/hpcng/singularity/releases/download/v${SINGULARITY_VERSION}/singularity-${SINGULARITY_VERSION}.tar.gz" \
-#     | tar -xz \
-#     && cd singularity \
-#     && ./mconfig -p /usr/local/singularity \
-#     && cd builddir \
-#     && make \
-#     && make install
+RUN curl -fsSL "https://github.com/hpcng/singularity/releases/download/v${SINGULARITY_VERSION}/singularity-${SINGULARITY_VERSION}.tar.gz" \
+    | tar -xz \
+    && cd singularity \
+    && ./mconfig -p /usr/local/singularity \
+    && cd builddir \
+    && make \
+    && make install
 
 # Create final image.
 FROM ubuntu:20.04
@@ -141,15 +141,15 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install --no-instal
     software-properties-common \
     && rm -rf /var/lib/apt/lists/*
 
-# # Install singularity into the final image.
-# COPY --from=builder /usr/local/singularity /usr/local/singularity
+# Install singularity into the final image.
+COPY --from=builder /usr/local/singularity /usr/local/singularity
 
-# # This bundles all installs to get a faster container build:
-# # Add Visual Studio code and nextcloud client
-# RUN curl https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > microsoft.gpg \
-#     && mv microsoft.gpg /etc/apt/trusted.gpg.d/microsoft.gpg \
-#     && echo "deb [arch=amd64] http://packages.microsoft.com/repos/vscode stable main" | tee /etc/apt/sources.list.d/vs-code.list \
-#     && add-apt-repository ppa:nextcloud-devs/client
+# This bundles all installs to get a faster container build:
+# Add Visual Studio code and nextcloud client
+RUN curl https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > microsoft.gpg \
+    && mv microsoft.gpg /etc/apt/trusted.gpg.d/microsoft.gpg \
+    && echo "deb [arch=amd64] http://packages.microsoft.com/repos/vscode stable main" | tee /etc/apt/sources.list.d/vs-code.list \
+    && add-apt-repository ppa:nextcloud-devs/client
 
 # # Add CVMFS
 # RUN wget https://ecsft.cern.ch/dist/cvmfs/cvmfs-release/cvmfs-release-latest_all.deb \
@@ -180,87 +180,84 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install --no-instal
 #     && echo "CVMFS_QUOTA_LIMIT=5000" | sudo tee -a  /etc/cvmfs/default.local \
 #     && cvmfs_config setup 
 
-# # Install packages with --no-install-recommends to keep things slim
-# # 1) singularity's and lmod's runtime dependencies.
-# # 2) various tools
-# # 3) julia
-# # 4) nextcloud-client
-# RUN apt-get update \
-#     && apt-get install --no-install-recommends -y \
-#         cryptsetup \
-#         squashfs-tools \
-#         lua-bit32 \
-#         lua-filesystem \
-#         lua-json \
-#         lua-lpeg \
-#         lua-posix \
-#         lua-term \
-#         lua5.2 \
-#         lmod \
-#         git \
-#         aria2 \
-#         code \
-#         emacs \
-#         gedit \
-#         htop \
-#         imagemagick \
-#         less \
-#         nano \
-#         openssh-client \
-#         python3-pip \
-#         rsync \
-#         screen \
-#         tree \
-#         vim \
-#         gcc \
-#         python3-dev \
-#         graphviz \
-#         libzstd1 \
-#         libgfortran5 \
-#         zlib1g-dev \
-#         zip \
-#         unzip \
-#         nextcloud-client \
-#         iputils-ping \
-#         sshfs \
-#     && rm -rf /var/lib/apt/lists/* \
-#     && rm /etc/apt/sources.list.d/vs-code.list
+# Install packages with --no-install-recommends to keep things slim
+# 1) singularity's and lmod's runtime dependencies.
+# 2) various tools
+# 3) julia
+# 4) nextcloud-client
+RUN apt-get update \
+    && apt-get install --no-install-recommends -y \
+        cryptsetup \
+        squashfs-tools \
+        lua-bit32 \
+        lua-filesystem \
+        lua-json \
+        lua-lpeg \
+        lua-posix \
+        lua-term \
+        lua5.2 \
+        lmod \
+        git \
+        aria2 \
+        code \
+        emacs \
+        gedit \
+        htop \
+        imagemagick \
+        less \
+        nano \
+        openssh-client \
+        python3-pip \
+        rsync \
+        screen \
+        tree \
+        vim \
+        gcc \
+        python3-dev \
+        graphviz \
+        libzstd1 \
+        libgfortran5 \
+        zlib1g-dev \
+        zip \
+        unzip \
+        nextcloud-client \
+        iputils-ping \
+        sshfs \
+    && rm -rf /var/lib/apt/lists/* \
+    && rm /etc/apt/sources.list.d/vs-code.list
 
+# add module script
+COPY ./config/module.sh /usr/share/
 
+# install nipype
+RUN pip3 install nipype \
+    && rm -rf /root/.cache/pip \
+    && rm -rf /home/ubuntu/.cache/
 
-# # add module script
-# COPY ./config/module.sh /usr/share/
+# setup module system & singularity
+COPY ./config/.bashrc /etc/skel/.bashrc
+RUN directories=`curl https://raw.githubusercontent.com/NeuroDesk/caid/master/recipes/globalMountPointList.txt` \
+    && mounts=`echo $directories | sed 's/ /,/g'` \
+    && echo "export SINGULARITY_BINDPATH=${mounts}" >> /etc/skel/.bashrc
 
-# # install nipype
-# RUN pip3 install nipype \
-#     && rm -rf /root/.cache/pip \
-#     && rm -rf /home/ubuntu/.cache/
-
-# # setup module system & singularity
-# COPY ./config/.bashrc /tmp/.bashrc
-# RUN cat /tmp/.bashrc >> /etc/skel/.bashrc && rm /tmp/.bashrc
-# RUN directories=`curl https://raw.githubusercontent.com/NeuroDesk/caid/master/recipes/globalMountPointList.txt` \
-#     && mounts=`echo $directories | sed 's/ /,/g'` \
-#     && echo "export SINGULARITY_BINDPATH=${mounts}" >> /etc/skel/.bashrc
-
-# # Necessary to pass the args from outside this build (it is defined before the FROM).
-# ARG GO_VERSION
-# ARG SINGULARITY_VERSION
+# Necessary to pass the args from outside this build (it is defined before the FROM).
+ARG GO_VERSION
+ARG SINGULARITY_VERSION
 
 # ENV PATH="/usr/local/singularity/bin:${PATH}" \
 #     GO_VERSION=${GO_VERSION} \
 #     SINGULARITY_VERSION=${SINGULARITY_VERSION} \
 #     MODULEPATH=/opt/vnm
 
-# # configure tiling of windows SHIFT-ALT-CTR-{Left,right,top,Bottom} and other openbox desktop mods
-# COPY ./config/rc.xml /etc/xdg/openbox
+# configure tiling of windows SHIFT-ALT-CTR-{Left,right,top,Bottom} and other openbox desktop mods
+COPY ./config/rc.xml /etc/xdg/openbox
 
-# # configure ITKsnap
-# COPY ./config/.itksnap.org /etc/skel/.itksnap.org
-# COPY ./config/mimeapps.list /etc/skel/.config/mimeapps.list
+# configure ITKsnap
+COPY ./config/.itksnap.org /etc/skel/.itksnap.org
+COPY ./config/mimeapps.list /etc/skel/.config/mimeapps.list
 
-# # Use custom bottom panel configuration
-# COPY ./config/panel /etc/skel/.config/lxpanel/LXDE/panels/panel
+# Use custom bottom panel configuration
+COPY ./config/panel /etc/skel/.config/lxpanel/LXDE/panels/panel
 
 # # Allow the root user to access the sshfs mount
 # # https://github.com/NeuroDesk/neurodesk/issues/47
@@ -301,22 +298,6 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install --no-instal
 #     && ln -s /vnm /etc/skel/Desktop/ \
 #     && sed -i '/DefaultMergeDirs/ a <MergeFile>vnm-applications.menu</MergeFile>' /etc/xdg/menus/lxde-applications.menu
 
-# RUN mkdir -p `curl https://raw.githubusercontent.com/NeuroDesk/neurocontainers/master/recipes/globalMountPointList.txt`
-
-
-# Application and submenu icons
-
-# RUN git clone https://github.com/NeuroDesk/neurodesk.git /neurodesk
-# WORKDIR /neurodesk
-# RUN bash build.sh --lxde --edit \
-#     && bash install.sh \
-#     && ln -s /vnm/containers /neurodesk/local/containers \
-#     && mkdir -p /etc/skel/Desktop/ \
-#     && ln -s /vnm /etc/skel/Desktop/
-
-# # Use custom bottom panel configuration
-# COPY ./config/panel /etc/skel/.config/lxpanel/LXDE/panels/panel
-
 # # setup module system & singularitycd
 # COPY ./config/.bashrc /tmp/.bashrc
 # RUN cat /tmp/.bashrc >> /etc/skel/.bashrc && rm /tmp/.bashrc
@@ -324,6 +305,17 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install --no-instal
 #     && mounts=`echo $directories | sed 's/ /,/g'` \
 #     && echo "export SINGULARITY_BINDPATH=${mounts}" >> /etc/skel/.bashrc
 
+RUN mkdir -p `curl https://raw.githubusercontent.com/NeuroDesk/neurocontainers/master/recipes/globalMountPointList.txt`
+
+RUN git clone -b neuromachine https://github.com/NeuroDesk/neurodesk.git /neurodesk
+WORKDIR /neurodesk
+RUN bash build.sh --lxde --edit \
+    && bash install.sh \
+    && ln -s /vnm/containers /neurodesk/local/containers \
+    && mkdir -p /etc/skel/Desktop/ \
+    && ln -s /vnm /etc/skel/Desktop/
+
+# RUN echo "export GO_VERSION=${GO_VERSION}" >> /etc/skel/.bashrc
 
 # Create user account with password-less sudo abilities
 RUN useradd -s /bin/bash -g 100 -G sudo -m user && \
@@ -336,11 +328,11 @@ RUN mkdir /home/user/.vnc && \
    /usr/bin/printf '%s\n%s\n%s\n' 'password' 'password' 'n' | su user -c vncpasswd
 RUN  echo -n 'password\npassword\nn\n' | su user -c vncpasswd
 
-
 # Add entrypoint script
 COPY startup.sh /startup.sh
 RUN chmod +x /startup.sh
 
 WORKDIR /home/user
 USER 1000:100
+
 ENTRYPOINT sudo -E /startup.sh
