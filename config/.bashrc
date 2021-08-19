@@ -14,3 +14,4 @@ if [ -f '/usr/share/module.sh' ]; then
 fi
 
 export PATH="/usr/local/singularity/bin:${PATH}"
+export MODULEPATH="/opt/vnm"
