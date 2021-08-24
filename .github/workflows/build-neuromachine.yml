@@ -29,7 +29,7 @@ jobs:
       run: |
         echo ${GITHUB_REF}
         echo "${{ secrets.GITHUB_TOKEN }}" | docker login docker.pkg.github.com -u $GITHUB_ACTOR --password-stdin
-        IMAGEID=docker.pkg.github.com/$GITHUB_REPOSITORY/neuromachine
+        IMAGEID=docker.pkg.github.com/$GITHUB_REPOSITORY
         IMAGEID=$(echo $IMAGEID | tr '[A-Z]' '[a-z]')
         {
           docker pull $IMAGEID \
