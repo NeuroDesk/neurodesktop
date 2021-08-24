@@ -28,8 +28,8 @@ jobs:
     - name: Pull latest neuromachine build from GitHub packages
       run: |
         echo ${GITHUB_REF}
-        echo "${{ secrets.GITHUB_TOKEN }}" | docker login docker.pkg.github.com -u $GITHUB_ACTOR --password-stdin
-        IMAGEID=docker.pkg.github.com/$GITHUB_REPOSITORY
+        echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u $GITHUB_ACTOR --password-stdin
+        IMAGEID=ghcr.io/$GITHUB_REPOSITORY/neuromachine
         IMAGEID=$(echo $IMAGEID | tr '[A-Z]' '[a-z]')
         {
           docker pull $IMAGEID \
