@@ -47,7 +47,7 @@ jobs:
         echo "ROOTFS_NEW=$ROOTFS_NEW" >> $GITHUB_ENV
         echo "BUILDDATE=$BUILDDATE" >> $GITHUB_ENV
     - name: Push neuromachine to GitHub packages (if changes found)
-      if: env.GITHUB_REF != 'refs/heads/main' && env.ROOTFS_NEW != env.ROOTFS_CACHE
+      if: env.ROOTFS_NEW != env.ROOTFS_CACHE
       run: |
         # Push to GH Packages
         docker tag $IMAGEID:$SHORT_SHA $IMAGEID:$BUILDDATE
@@ -55,7 +55,7 @@ jobs:
         docker push $IMAGEID:latest
         docker push $IMAGEID:$BUILDDATE
     - name: Push neuromachine to Docker Hub (if enabled & changes found)
-      if: env.GITHUB_REF != 'refs/heads/main' && env.DOCKERHUB_ORG != ''
+      if: env.ROOTFS_NEW != env.ROOTFS_CACHE && env.DOCKERHUB_ORG != ''
       run: |
         echo "${{ secrets.DOCKERHUB_PASSWORD }}" | docker login -u ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin
         # Push to GH Packages
