@@ -11,7 +11,7 @@ FROM golang:${GO_VERSION}-buster as builder
 ARG SINGULARITY_VERSION
 
 RUN apt-get update \
-    && apt-get install --no-install-recommends -y \
+    && DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y \
         cryptsetup \
         libssl-dev \
         uuid-dev \
@@ -29,24 +29,50 @@ RUN curl -fsSL "https://github.com/hpcng/singularity/releases/download/v${SINGUL
 FROM ubuntu:20.04
 
 # Install locale and set
-RUN apt-get update &&            \
-    apt-get install -y           \
-    --no-install-recommends      \
-      locales &&                 \
-    apt-get clean &&             \
-    rm -rf /var/lib/apt/lists/*
+RUN apt-get update \
+    && DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y \
+        locales \
+        software-properties-common \
+        sudo \
+        wget \
+        curl \
+        git \
+        gpg \
+        ca-certificates \
+        make \
+        gcc \
+        g++ \
+        openjdk-11-jre \
+        libpng-dev \
+        libjpeg-turbo8-dev \
+        libcairo2-dev \
+        libtool-bin \
+        libossp-uuid-dev \
+        libwebp-dev \
+        lxde-core \
+        libpango1.0-dev \
+        libssh2-1-dev \
+        libssl-dev \
+        openssh-server \
+        libvncserver-dev \
+        libxt6 \
+        xauth \
+        xorg \
+        freerdp2-dev \
+        xrdp \
+        xauth \
+        xorg \
+        xorgxrdp \
+        tigervnc-standalone-server \
+        tigervnc-common \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
 RUN sed -i -e 's/# en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen && \
     locale-gen
 ENV LANG en_US.UTF-8
 ENV LANGUAGE en_US:en
 ENV LC_ALL en_US.UTF-8
-
-# Install Apache Tomcat dependancies
-RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y \
-    sudo \
-    wget \
-    ca-certificates \
-    && rm -rf /var/lib/apt/lists/*
 
 # Install Apache Tomcat
 ARG TOMCAT_REL
@@ -58,52 +84,6 @@ RUN wget https://archive.apache.org/dist/tomcat/tomcat-${TOMCAT_REL}/v${TOMCAT_V
     mkdir /usr/local/tomcat/webapps && \
     sh -c 'chmod +x /usr/local/tomcat/bin/*.sh'
 
-# Install Guacamole dependancies
-RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y \
-    make \
-    gcc \
-    g++ \
-    openjdk-11-jre \
-    libpng-dev \
-    libjpeg-turbo8-dev \
-    libcairo2-dev \
-    libtool-bin \
-    libossp-uuid-dev \
-    libwebp-dev \
-    && rm -rf /var/lib/apt/lists/*
-
-# Install LXDE
-RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y \
-    lxde \
-    # lxde-core \
-    && rm -rf /var/lib/apt/lists/*
-
-# Install SSH dependancies
-RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y \
-    openssh-server \
-    libpango1.0-dev \
-    libssh2-1-dev \
-    libssl-dev \
-    openssh-server \
-    && rm -rf /var/lib/apt/lists/*
-
-# Install VNC dependancies
-RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y \
-    libvncserver-dev \
-    libxt6 \
-    xauth \
-    xorg \
-    && rm -rf /var/lib/apt/lists/*
-
-# Install RDP dependancies
-RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y \
-    freerdp2-dev \
-    xrdp \
-    xauth \
-    xorg \
-    xorgxrdp \
-    && rm -rf /var/lib/apt/lists/*
-
 # Install Apache Guacamole
 ARG GUACAMOLE_VERSION
 WORKDIR /etc/guacamole
@@ -111,7 +91,7 @@ RUN wget "https://www.strategylions.com.au/mirror/guacamole/${GUACAMOLE_VERSION}
     wget "https://www.strategylions.com.au/mirror/guacamole/${GUACAMOLE_VERSION}/source/guacamole-server-1.3.0.tar.gz" -O /etc/guacamole/guacamole-server-${GUACAMOLE_VERSION}.tar.gz && \
     tar xvf /etc/guacamole/guacamole-server-${GUACAMOLE_VERSION}.tar.gz && \
     cd /etc/guacamole/guacamole-server-${GUACAMOLE_VERSION} && \
-   ./configure --with-init-dir=/etc/init.d &&   \
+    ./configure --with-init-dir=/etc/init.d &&   \
     make &&                            \
     make install &&                             \
     ldconfig &&                                 \
@@ -121,29 +101,6 @@ RUN wget "https://www.strategylions.com.au/mirror/guacamole/${GUACAMOLE_VERSION}
 RUN echo "user-mapping: /etc/guacamole/user-mapping.xml" > /etc/guacamole/guacamole.properties && \
     touch /etc/guacamole/user-mapping.xml
 
-# Remove unused dependancies
-RUN apt-get purge -y \
-    make \
-    && rm -rf /var/lib/apt/lists/*
-
-# Install TigerVNC
-RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y \
-    tigervnc-standalone-server tigervnc-common \
-    && rm -rf /var/lib/apt/lists/*
-
-
-# Install basic tools
-RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y \
-    lxterminal \
-    lxrandr \
-    curl \
-    gpg \
-    software-properties-common \
-    && rm -rf /var/lib/apt/lists/*
-
-# Install singularity into the final image.
-COPY --from=builder /usr/local/singularity /usr/local/singularity
-
 # This bundles all installs to get a faster container build:
 # Add Visual Studio code and nextcloud client
 RUN curl https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > microsoft.gpg \
@@ -151,42 +108,15 @@ RUN curl https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > mic
     && echo "deb [arch=amd64] http://packages.microsoft.com/repos/vscode stable main" | tee /etc/apt/sources.list.d/vs-code.list \
     && add-apt-repository ppa:nextcloud-devs/client
 
-# # Add CVMFS
-# RUN wget https://ecsft.cern.ch/dist/cvmfs/cvmfs-release/cvmfs-release-latest_all.deb \
-#     && dpkg -i cvmfs-release-latest_all.deb \
-#     && rm cvmfs-release-latest_all.deb
+# Add CVMFS
+RUN wget https://ecsft.cern.ch/dist/cvmfs/cvmfs-release/cvmfs-release-latest_all.deb \
+    && dpkg -i cvmfs-release-latest_all.deb \
+    && rm cvmfs-release-latest_all.deb
 
-# RUN apt-get update \
-#     && apt-get install -y \
-#     lsb-release \
-#     cvmfs \
-#     &&  rm -rf /var/lib/apt/lists/*
-
-# # configure CVMFS
-# RUN mkdir -p /etc/cvmfs/keys/ardc.edu.au/ \
-#     && echo "-----BEGIN PUBLIC KEY-----" | sudo tee /etc/cvmfs/keys/ardc.edu.au/neurodesk.ardc.edu.au.pub \
-#     && echo "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAwUPEmxDp217SAtZxaBep" | sudo tee -a /etc/cvmfs/keys/ardc.edu.au/neurodesk.ardc.edu.au.pub \
-#     && echo "Bi2TQcLoh5AJ//HSIz68ypjOGFjwExGlHb95Frhu1SpcH5OASbV+jJ60oEBLi3sD" | sudo tee -a /etc/cvmfs/keys/ardc.edu.au/neurodesk.ardc.edu.au.pub \
-#     && echo "qA6rGYt9kVi90lWvEjQnhBkPb0uWcp1gNqQAUocybCzHvoiG3fUzAe259CrK09qR" | sudo tee -a /etc/cvmfs/keys/ardc.edu.au/neurodesk.ardc.edu.au.pub \
-#     && echo "pX8sZhgK3eHlfx4ycyMiIQeg66AHlgVCJ2fKa6fl1vnh6adJEPULmn6vZnevvUke" | sudo tee -a /etc/cvmfs/keys/ardc.edu.au/neurodesk.ardc.edu.au.pub \
-#     && echo "I6U1VcYTKm5dPMrOlY/fGimKlyWvivzVv1laa5TAR2Dt4CfdQncOz+rkXmWjLjkD" | sudo tee -a /etc/cvmfs/keys/ardc.edu.au/neurodesk.ardc.edu.au.pub \
-#     && echo "87WMiTgtKybsmMLb2yCGSgLSArlSWhbMA0MaZSzAwE9PJKCCMvTANo5644zc8jBe" | sudo tee -a /etc/cvmfs/keys/ardc.edu.au/neurodesk.ardc.edu.au.pub \
-#     && echo "NQIDAQAB" | sudo tee -a /etc/cvmfs/keys/ardc.edu.au/neurodesk.ardc.edu.au.pub \
-#     && echo "-----END PUBLIC KEY-----" | sudo tee -a /etc/cvmfs/keys/ardc.edu.au/neurodesk.ardc.edu.au.pub \
-#     && echo "CVMFS_USE_GEOAPI=yes" | sudo tee /etc/cvmfs/config.d/neurodesk.ardc.edu.au.conf \
-#     && echo 'CVMFS_SERVER_URL="http://140.238.213.184/cvmfs/@fqrn@;http://132.145.179.103/cvmfs/@fqrn@;http://152.67.101.67/cvmfs/@fqrn@"' | sudo tee -a /etc/cvmfs/config.d/neurodesk.ardc.edu.au.conf \
-#     && echo 'CVMFS_KEYS_DIR="/etc/cvmfs/keys/ardc.edu.au/"' | sudo tee -a /etc/cvmfs/config.d/neurodesk.ardc.edu.au.conf \
-#     && echo "CVMFS_HTTP_PROXY=DIRECT" | sudo tee  /etc/cvmfs/default.local \
-#     && echo "CVMFS_QUOTA_LIMIT=5000" | sudo tee -a  /etc/cvmfs/default.local \
-#     && cvmfs_config setup 
-
-# Install packages with --no-install-recommends to keep things slim
-# 1) singularity's and lmod's runtime dependencies.
-# 2) various tools
-# 3) julia
-# 4) nextcloud-client
-RUN apt-get update \
-    && apt-get install --no-install-recommends -y \
+# Install basic tools
+RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y \
+        lxterminal \
+        lxrandr \
         cryptsetup \
         squashfs-tools \
         lua-bit32 \
@@ -197,7 +127,6 @@ RUN apt-get update \
         lua-term \
         lua5.2 \
         lmod \
-        git \
         aria2 \
         code \
         emacs \
@@ -223,31 +152,45 @@ RUN apt-get update \
         nextcloud-client \
         iputils-ping \
         sshfs \
-    && rm -rf /var/lib/apt/lists/* \
-    && rm /etc/apt/sources.list.d/vs-code.list
+        lsb-release \
+        cvmfs \
+        firefox \
+    && rm -rf /var/lib/apt/lists/*
 
-# add module script
-COPY ./config/module.sh /usr/share/
+# Install singularity into the final image.
+COPY --from=builder /usr/local/singularity /usr/local/singularity
+
+# configure CVMFS
+RUN mkdir -p /etc/cvmfs/keys/ardc.edu.au/ \
+    && echo "-----BEGIN PUBLIC KEY-----" | sudo tee /etc/cvmfs/keys/ardc.edu.au/neurodesk.ardc.edu.au.pub \
+    && echo "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAwUPEmxDp217SAtZxaBep" | sudo tee -a /etc/cvmfs/keys/ardc.edu.au/neurodesk.ardc.edu.au.pub \
+    && echo "Bi2TQcLoh5AJ//HSIz68ypjOGFjwExGlHb95Frhu1SpcH5OASbV+jJ60oEBLi3sD" | sudo tee -a /etc/cvmfs/keys/ardc.edu.au/neurodesk.ardc.edu.au.pub \
+    && echo "qA6rGYt9kVi90lWvEjQnhBkPb0uWcp1gNqQAUocybCzHvoiG3fUzAe259CrK09qR" | sudo tee -a /etc/cvmfs/keys/ardc.edu.au/neurodesk.ardc.edu.au.pub \
+    && echo "pX8sZhgK3eHlfx4ycyMiIQeg66AHlgVCJ2fKa6fl1vnh6adJEPULmn6vZnevvUke" | sudo tee -a /etc/cvmfs/keys/ardc.edu.au/neurodesk.ardc.edu.au.pub \
+    && echo "I6U1VcYTKm5dPMrOlY/fGimKlyWvivzVv1laa5TAR2Dt4CfdQncOz+rkXmWjLjkD" | sudo tee -a /etc/cvmfs/keys/ardc.edu.au/neurodesk.ardc.edu.au.pub \
+    && echo "87WMiTgtKybsmMLb2yCGSgLSArlSWhbMA0MaZSzAwE9PJKCCMvTANo5644zc8jBe" | sudo tee -a /etc/cvmfs/keys/ardc.edu.au/neurodesk.ardc.edu.au.pub \
+    && echo "NQIDAQAB" | sudo tee -a /etc/cvmfs/keys/ardc.edu.au/neurodesk.ardc.edu.au.pub \
+    && echo "-----END PUBLIC KEY-----" | sudo tee -a /etc/cvmfs/keys/ardc.edu.au/neurodesk.ardc.edu.au.pub \
+    && echo "CVMFS_USE_GEOAPI=yes" | sudo tee /etc/cvmfs/config.d/neurodesk.ardc.edu.au.conf \
+    && echo 'CVMFS_SERVER_URL="http://140.238.213.184/cvmfs/@fqrn@;http://132.145.179.103/cvmfs/@fqrn@;http://152.67.101.67/cvmfs/@fqrn@"' | sudo tee -a /etc/cvmfs/config.d/neurodesk.ardc.edu.au.conf \
+    && echo 'CVMFS_KEYS_DIR="/etc/cvmfs/keys/ardc.edu.au/"' | sudo tee -a /etc/cvmfs/config.d/neurodesk.ardc.edu.au.conf \
+    && echo "CVMFS_HTTP_PROXY=DIRECT" | sudo tee  /etc/cvmfs/default.local \
+    && echo "CVMFS_QUOTA_LIMIT=5000" | sudo tee -a  /etc/cvmfs/default.local \
+    && cvmfs_config setup 
 
 # install nipype
 RUN pip3 install nipype \
     && rm -rf /root/.cache/pip \
     && rm -rf /home/ubuntu/.cache/
 
+# add module script
+COPY ./config/module.sh /usr/share/
+
 # setup module system & singularity
 COPY ./config/.bashrc /etc/skel/.bashrc
 RUN directories=`curl https://raw.githubusercontent.com/NeuroDesk/caid/master/recipes/globalMountPointList.txt` \
     && mounts=`echo $directories | sed 's/ /,/g'` \
     && echo "export SINGULARITY_BINDPATH=${mounts}" >> /etc/skel/.bashrc
-
-# Necessary to pass the args from outside this build (it is defined before the FROM).
-ARG GO_VERSION
-ARG SINGULARITY_VERSION
-
-# ENV PATH="/usr/local/singularity/bin:${PATH}" \
-#     GO_VERSION=${GO_VERSION} \
-#     SINGULARITY_VERSION=${SINGULARITY_VERSION} \
-#     MODULEPATH=/opt/vnm
 
 # configure tiling of windows SHIFT-ALT-CTR-{Left,right,top,Bottom} and other openbox desktop mods
 COPY ./config/rc.xml /etc/xdg/openbox
@@ -259,51 +202,24 @@ COPY ./config/mimeapps.list /etc/skel/.config/mimeapps.list
 # Use custom bottom panel configuration
 COPY ./config/panel /etc/skel/.config/lxpanel/LXDE/panels/panel
 
-# # Allow the root user to access the sshfs mount
-# # https://github.com/NeuroDesk/neurodesk/issues/47
-# RUN sed -i 's/#user_allow_other/user_allow_other/g' /etc/fuse.conf
+# # Necessary to pass the args from outside this build (it is defined before the FROM).
+# ARG GO_VERSION
+# ARG SINGULARITY_VERSION
 
-# # Application and submenu icons
-# WORKDIR /
+# ENV PATH="/usr/local/singularity/bin:${PATH}" \
+#     GO_VERSION=${GO_VERSION} \
+#     SINGULARITY_VERSION=${SINGULARITY_VERSION} \
+#     MODULEPATH=/opt/vnm
+# RUN echo "export GO_VERSION=${GO_VERSION}" >> /etc/skel/.bashrc
 
-# #RUN git clone https://github.com/NeuroDesk/neurodesk.git /neurodesk
-# # COPY ./neurodesk /neurodesk
+# Allow the root user to access the sshfs mount
+# https://github.com/NeuroDesk/neurodesk/issues/47
+RUN sed -i 's/#user_allow_other/user_allow_other/g' /etc/fuse.conf
 
-# # WORKDIR /neurodesk
-# # RUN bash build.sh --lxde --edit \
-# #     && bash install.sh \
-# #     && ln -s /vnm/containers /neurodesk/local/containers \
-# #     && mkdir -p /etc/skel/Desktop/ \
-# #     && ln -s /vnm /etc/skel/Desktop/
-
-
-# # configure where new home-directories are created
-# # The homedirectory is configured on startup: https://github.com/fcwu/docker-ubuntu-vnc-desktop/blob/develop/rootfs/startup.sh
-# # COPY ./config/startup.sh /startup.sh
-
-# # try to start cvmfs via modified /etc/supervisor/supervisord.conf
-# COPY ./config/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
-# COPY ./config/state.py /usr/local/lib/web/backend/vnc/state.py
-# RUN mkdir /cvmfs/neurodesk.ardc.edu.au
-# # COPY ./config/startup.sh /startup.sh
-# # RUN chmod a+x /startup.sh
-
-# RUN git clone https://github.com/NeuroDesk/neurodesk.git
-# WORKDIR /neurodesk
-
-# RUN bash build.sh --lxde --edit \
-#     && bash install.sh \
-#     && ln -s /vnm/containers /neurodesk/local/containers \
-#     && mkdir -p /etc/skel/Desktop/ \
-#     && ln -s /vnm /etc/skel/Desktop/ \
-#     && sed -i '/DefaultMergeDirs/ a <MergeFile>vnm-applications.menu</MergeFile>' /etc/xdg/menus/lxde-applications.menu
-
-# # setup module system & singularitycd
-# COPY ./config/.bashrc /tmp/.bashrc
-# RUN cat /tmp/.bashrc >> /etc/skel/.bashrc && rm /tmp/.bashrc
-# RUN directories=`curl https://raw.githubusercontent.com/NeuroDesk/caid/master/recipes/globalMountPointList.txt` \
-#     && mounts=`echo $directories | sed 's/ /,/g'` \
-#     && echo "export SINGULARITY_BINDPATH=${mounts}" >> /etc/skel/.bashrc
+# try to start cvmfs via modified /etc/supervisor/supervisord.conf
+COPY ./config/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+COPY ./config/state.py /usr/local/lib/web/backend/vnc/state.py
+RUN mkdir /cvmfs/neurodesk.ardc.edu.au
 
 RUN mkdir -p `curl https://raw.githubusercontent.com/NeuroDesk/neurocontainers/master/recipes/globalMountPointList.txt`
 
@@ -314,8 +230,6 @@ RUN bash build.sh --lxde --edit \
     && ln -s /vnm/containers /neurodesk/local/containers \
     && mkdir -p /etc/skel/Desktop/ \
     && ln -s /vnm /etc/skel/Desktop/
-
-# RUN echo "export GO_VERSION=${GO_VERSION}" >> /etc/skel/.bashrc
 
 # Create user account with password-less sudo abilities
 RUN useradd -s /bin/bash -g 100 -G sudo -m user && \
