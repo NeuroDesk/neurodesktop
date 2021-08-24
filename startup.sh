@@ -45,9 +45,9 @@ vnc () {
 echo "\
 ==================================================================
 Starting VNC server"
-su user -c "USER=user vncserver -depth $DEPTH -geometry $RES -name \"VNC\" :1"
+su user -c "USER=user vncserver -depth 24 -geometry 1920x1080 -name \"VNC\" :1"
 echo \
-"<connection name=\"VNC\">
+"<connection name=\"Desktop (VNC)\">
 <protocol>vnc</protocol>
 <param name=\"hostname\">localhost</param>
 <param name=\"username\">user</param>
@@ -87,15 +87,8 @@ default () {
     rdp
 }
 
-if [ -z "$RES" ]; then
-RES="1920x1080"
-fi
-
-DEPTH="24"
-
 open_guacmole_conf
-ssh
-rdp
+default
 close_guacmole_conf
 
 echo "\
