@@ -1,29 +1,29 @@
-ARG GO_VERSION="1.14.4"
-ARG SINGULARITY_VERSION="3.7.0"
+ARG GO_VERSION="1.14.12"
+ARG SINGULARITY_VERSION="3.8.2"
 ARG TOMCAT_REL="9"
 ARG TOMCAT_VERSION="9.0.52"
 ARG GUACAMOLE_VERSION="1.3.0"
 
-# Build Singularity.
-FROM golang:${GO_VERSION}-buster as builder
+# # Build Singularity.
+# FROM golang:${GO_VERSION}-buster as builder
 
-# Necessary to pass the arg from outside this build (it is defined before the FROM).
-ARG SINGULARITY_VERSION
+# # Necessary to pass the arg from outside this build (it is defined before the FROM).
+# ARG SINGULARITY_VERSION
 
-RUN apt-get update \
-    && DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y \
-        cryptsetup \
-        libssl-dev \
-        uuid-dev \
-    && rm -rf /var/lib/apt/lists/*
+# RUN apt-get update \
+#     && DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y \
+#         cryptsetup \
+#         libssl-dev \
+#         uuid-dev \
+#     && rm -rf /var/lib/apt/lists/*
 
-RUN curl -fsSL "https://github.com/hpcng/singularity/releases/download/v${SINGULARITY_VERSION}/singularity-${SINGULARITY_VERSION}.tar.gz" \
-    | tar -xz \
-    && cd singularity \
-    && ./mconfig -p /usr/local/singularity \
-    && cd builddir \
-    && make \
-    && make install
+# RUN curl -fsSL "https://github.com/hpcng/singularity/releases/download/v${SINGULARITY_VERSION}/singularity-${SINGULARITY_VERSION}.tar.gz" \
+#     | tar -xz \
+#     && cd singularity \
+#     && ./mconfig -p /usr/local/singularity \
+#     && cd builddir \
+#     && make \
+#     && make install
 
 # Create final image.
 FROM ubuntu:20.04
@@ -49,7 +49,7 @@ RUN apt-get update \
         libtool-bin \
         libossp-uuid-dev \
         libwebp-dev \
-        lxde-core \
+        lxde \
         libpango1.0-dev \
         libssh2-1-dev \
         libssl-dev \
@@ -157,8 +157,8 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install --no-instal
         firefox \
     && rm -rf /var/lib/apt/lists/*
 
-# Install singularity into the final image.
-COPY --from=builder /usr/local/singularity /usr/local/singularity
+# # Install singularity into the final image.
+# COPY --from="quay.io/singularity/singularity:v3.7.0" /usr/local/singularity /usr/local/singularity
 
 # configure CVMFS
 RUN mkdir -p /etc/cvmfs/keys/ardc.edu.au/ \
@@ -213,6 +213,39 @@ COPY ./config/state.py /usr/local/lib/web/backend/vnc/state.py
 RUN mkdir /cvmfs/neurodesk.ardc.edu.au
 
 RUN mkdir -p `curl https://raw.githubusercontent.com/NeuroDesk/neurocontainers/master/recipes/globalMountPointList.txt`
+
+RUN sudo apt-get update && sudo apt-get install -y \
+    build-essential \
+    uuid-dev \
+    libgpgme-dev \
+    squashfs-tools \
+    libseccomp-dev \
+    wget \
+    pkg-config \
+    git \
+    cryptsetup-bin
+
+ARG GO_VERSION
+ARG SINGULARITY_VERSION
+
+RUN export VERSION=${GO_VERSION} OS=linux ARCH=amd64 && \
+    wget https://dl.google.com/go/go$VERSION.$OS-$ARCH.tar.gz && \
+    sudo tar -C /usr/local -xzvf go$VERSION.$OS-$ARCH.tar.gz && \
+    rm go$VERSION.$OS-$ARCH.tar.gz && \
+    export GOPATH=${HOME}/go && \
+    export PATH=/usr/local/go/bin:${PATH}:${GOPATH}/bin && \
+    mkdir -p $GOPATH/src/github.com/sylabs && \
+    cd $GOPATH/src/github.com/sylabs && \
+    wget https://github.com/sylabs/singularity/releases/download/v${SINGULARITY_VERSION}/singularity-ce-${SINGULARITY_VERSION}.tar.gz && \
+    tar -xzvf singularity-ce-${SINGULARITY_VERSION}.tar.gz && \
+    cd singularity-ce-${SINGULARITY_VERSION} && \
+    ./mconfig -p /usr/local/singularity && \
+    make -C builddir && \
+    make -C builddir install && \
+    rm -rf /usr/local/go $GOPATH 
+
+
+COPY ./config/.bashrc /etc/skel/.bashrc
 
 RUN git clone -b neuromachine https://github.com/NeuroDesk/neurodesk.git /neurodesk
 WORKDIR /neurodesk
