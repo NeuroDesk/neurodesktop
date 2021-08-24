@@ -187,7 +187,8 @@ RUN pip3 install nipype \
 COPY ./config/module.sh /usr/share/
 
 # setup module system & singularity
-COPY ./config/.bashrc /etc/skel/.bashrc
+COPY ./config/.bashrc /tmp/.bashrc
+RUN cat /tmp/.bashrc >> /etc/skel/.bashrc && rm /tmp/.bashrc
 RUN directories=`curl https://raw.githubusercontent.com/NeuroDesk/caid/master/recipes/globalMountPointList.txt` \
     && mounts=`echo $directories | sed 's/ /,/g'` \
     && echo "export SINGULARITY_BINDPATH=${mounts}" >> /etc/skel/.bashrc
@@ -201,16 +202,6 @@ COPY ./config/mimeapps.list /etc/skel/.config/mimeapps.list
 
 # Use custom bottom panel configuration
 COPY ./config/panel /etc/skel/.config/lxpanel/LXDE/panels/panel
-
-# # Necessary to pass the args from outside this build (it is defined before the FROM).
-# ARG GO_VERSION
-# ARG SINGULARITY_VERSION
-
-# ENV PATH="/usr/local/singularity/bin:${PATH}" \
-#     GO_VERSION=${GO_VERSION} \
-#     SINGULARITY_VERSION=${SINGULARITY_VERSION} \
-#     MODULEPATH=/opt/vnm
-# RUN echo "export GO_VERSION=${GO_VERSION}" >> /etc/skel/.bashrc
 
 # Allow the root user to access the sshfs mount
 # https://github.com/NeuroDesk/neurodesk/issues/47
