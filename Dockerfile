@@ -213,21 +213,6 @@ RUN pip3 install nipype \
     && rm -rf /root/.cache/pip \
     && rm -rf /home/ubuntu/.cache/
 
-# setup module system & singularity
-COPY ./config/.bashrc /etc/skel/.bashrc
-RUN directories=`curl https://raw.githubusercontent.com/NeuroDesk/caid/master/recipes/globalMountPointList.txt` \
-    && mounts=`echo $directories | sed 's/ /,/g'` \
-    && echo "export SINGULARITY_BINDPATH=${mounts}" >> /etc/skel/.bashrc
-
-# Necessary to pass the args from outside this build (it is defined before the FROM).
-ARG GO_VERSION
-ARG SINGULARITY_VERSION
-
-# ENV PATH="/usr/local/singularity/bin:${PATH}" \
-#     GO_VERSION=${GO_VERSION} \
-#     SINGULARITY_VERSION=${SINGULARITY_VERSION} \
-#     MODULEPATH=/opt/vnm
-
 # configure tiling of windows SHIFT-ALT-CTR-{Left,right,top,Bottom} and other openbox desktop mods
 COPY ./config/rc.xml /etc/xdg/openbox
 
@@ -242,40 +227,12 @@ COPY ./config/panel /etc/skel/.config/lxpanel/LXDE/panels/panel
 # # https://github.com/NeuroDesk/neurodesk/issues/47
 # RUN sed -i 's/#user_allow_other/user_allow_other/g' /etc/fuse.conf
 
-# # Application and submenu icons
-# WORKDIR /
-
-# #RUN git clone https://github.com/NeuroDesk/neurodesk.git /neurodesk
-# # COPY ./neurodesk /neurodesk
-
-# # WORKDIR /neurodesk
-# # RUN bash build.sh --lxde --edit \
-# #     && bash install.sh \
-# #     && ln -s /vnm/containers /neurodesk/local/containers \
-# #     && mkdir -p /etc/skel/Desktop/ \
-# #     && ln -s /vnm /etc/skel/Desktop/
-
-
-# # configure where new home-directories are created
-# # The homedirectory is configured on startup: https://github.com/fcwu/docker-ubuntu-vnc-desktop/blob/develop/rootfs/startup.sh
-# # COPY ./config/startup.sh /startup.sh
-
 # # try to start cvmfs via modified /etc/supervisor/supervisord.conf
 # COPY ./config/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 # COPY ./config/state.py /usr/local/lib/web/backend/vnc/state.py
 # RUN mkdir /cvmfs/neurodesk.ardc.edu.au
 # # COPY ./config/startup.sh /startup.sh
 # # RUN chmod a+x /startup.sh
-
-# RUN git clone https://github.com/NeuroDesk/neurodesk.git
-# WORKDIR /neurodesk
-
-# RUN bash build.sh --lxde --edit \
-#     && bash install.sh \
-#     && ln -s /vnm/containers /neurodesk/local/containers \
-#     && mkdir -p /etc/skel/Desktop/ \
-#     && ln -s /vnm /etc/skel/Desktop/ \
-#     && sed -i '/DefaultMergeDirs/ a <MergeFile>vnm-applications.menu</MergeFile>' /etc/xdg/menus/lxde-applications.menu
 
 # # setup module system & singularitycd
 # COPY ./config/.bashrc /tmp/.bashrc
@@ -316,6 +273,12 @@ RUN export VERSION=${GO_VERSION} OS=linux ARCH=amd64 && \
     make -C builddir install && \
     rm -rf /usr/local/go $GOPATH 
 
+# setup module system & singularitycd
+COPY ./config/.bashrc /tmp/.bashrc
+RUN cat /tmp/.bashrc >> /etc/skel/.bashrc && rm /tmp/.bashrc
+RUN directories=`curl https://raw.githubusercontent.com/NeuroDesk/caid/master/recipes/globalMountPointList.txt` \
+    && mounts=`echo $directories | sed 's/ /,/g'` \
+    && echo "export SINGULARITY_BINDPATH=${mounts}" >> /etc/skel/.bashrc
 
 RUN git clone -b neuromachine https://github.com/NeuroDesk/neurodesk.git /neurodesk
 WORKDIR /neurodesk
