@@ -1,43 +1,18 @@
-ARG GO_VERSION="1.14.4"
-ARG SINGULARITY_VERSION="3.7.0"
+ARG GO_VERSION="1.14.12"
+ARG SINGULARITY_VERSION="3.8.2"
 ARG TOMCAT_REL="9"
 ARG TOMCAT_VERSION="9.0.52"
 ARG GUACAMOLE_VERSION="1.3.0"
 
-# Build Singularity.
-FROM golang:${GO_VERSION}-buster as builder
-
-# Necessary to pass the arg from outside this build (it is defined before the FROM).
-ARG SINGULARITY_VERSION
-
-RUN apt-get update \
-    && DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y \
-        cryptsetup \
-        libssl-dev \
-        uuid-dev \
-    && rm -rf /var/lib/apt/lists/*
-
-RUN curl -fsSL "https://github.com/hpcng/singularity/releases/download/v${SINGULARITY_VERSION}/singularity-${SINGULARITY_VERSION}.tar.gz" \
-    | tar -xz \
-    && cd singularity \
-    && ./mconfig -p /usr/local/singularity \
-    && cd builddir \
-    && make \
-    && make install
-
-# Create final image.
+# Create final image
 FROM ubuntu:20.04
 
-# Install locale and set
+# Install base image dependancies
 RUN apt-get update \
     && DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y \
         locales \
-        software-properties-common \
         sudo \
         wget \
-        curl \
-        git \
-        gpg \
         ca-certificates \
         make \
         gcc \
@@ -49,7 +24,8 @@ RUN apt-get update \
         libtool-bin \
         libossp-uuid-dev \
         libwebp-dev \
-        lxde-core \
+        lxde \
+        openssh-server \
         libpango1.0-dev \
         libssh2-1-dev \
         libssl-dev \
@@ -65,11 +41,16 @@ RUN apt-get update \
         xorgxrdp \
         tigervnc-standalone-server \
         tigervnc-common \
-    && apt-get clean \
+        lxterminal \
+        lxrandr \
+        curl \
+        gpg \
+        software-properties-common \
     && rm -rf /var/lib/apt/lists/*
 
-RUN sed -i -e 's/# en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen && \
-    locale-gen
+# Set locale
+RUN sed -i -e 's/# en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen \
+    && locale-gen
 ENV LANG en_US.UTF-8
 ENV LANGUAGE en_US:en
 ENV LC_ALL en_US.UTF-8
@@ -77,31 +58,30 @@ ENV LC_ALL en_US.UTF-8
 # Install Apache Tomcat
 ARG TOMCAT_REL
 ARG TOMCAT_VERSION
-RUN wget https://archive.apache.org/dist/tomcat/tomcat-${TOMCAT_REL}/v${TOMCAT_VERSION}/bin/apache-tomcat-${TOMCAT_VERSION}.tar.gz -P /tmp && \
-    tar -xf /tmp/apache-tomcat-${TOMCAT_VERSION}.tar.gz -C /tmp && \
-    mv /tmp/apache-tomcat-${TOMCAT_VERSION} /usr/local/tomcat && \
-    mv /usr/local/tomcat/webapps /usr/local/tomcat/webapps.dist && \
-    mkdir /usr/local/tomcat/webapps && \
-    sh -c 'chmod +x /usr/local/tomcat/bin/*.sh'
+RUN wget https://archive.apache.org/dist/tomcat/tomcat-${TOMCAT_REL}/v${TOMCAT_VERSION}/bin/apache-tomcat-${TOMCAT_VERSION}.tar.gz -P /tmp \
+    && tar -xf /tmp/apache-tomcat-${TOMCAT_VERSION}.tar.gz -C /tmp \
+    && mv /tmp/apache-tomcat-${TOMCAT_VERSION} /usr/local/tomcat \
+    && mv /usr/local/tomcat/webapps /usr/local/tomcat/webapps.dist \
+    && mkdir /usr/local/tomcat/webapps \
+    && sh -c 'chmod +x /usr/local/tomcat/bin/*.sh'
 
 # Install Apache Guacamole
 ARG GUACAMOLE_VERSION
 WORKDIR /etc/guacamole
-RUN wget "https://www.strategylions.com.au/mirror/guacamole/${GUACAMOLE_VERSION}/binary/guacamole-1.3.0.war" -O /usr/local/tomcat/webapps/ROOT.war && \
-    wget "https://www.strategylions.com.au/mirror/guacamole/${GUACAMOLE_VERSION}/source/guacamole-server-1.3.0.tar.gz" -O /etc/guacamole/guacamole-server-${GUACAMOLE_VERSION}.tar.gz && \
-    tar xvf /etc/guacamole/guacamole-server-${GUACAMOLE_VERSION}.tar.gz && \
-    cd /etc/guacamole/guacamole-server-${GUACAMOLE_VERSION} && \
-    ./configure --with-init-dir=/etc/init.d &&   \
-    make &&                            \
-    make install &&                             \
-    ldconfig &&                                 \
-    rm -r /etc/guacamole/guacamole-server-${GUACAMOLE_VERSION}*
+RUN wget "https://www.strategylions.com.au/mirror/guacamole/${GUACAMOLE_VERSION}/binary/guacamole-1.3.0.war" -O /usr/local/tomcat/webapps/ROOT.war \
+    && wget "https://www.strategylions.com.au/mirror/guacamole/${GUACAMOLE_VERSION}/source/guacamole-server-1.3.0.tar.gz" -O /etc/guacamole/guacamole-server-${GUACAMOLE_VERSION}.tar.gz \
+    && tar xvf /etc/guacamole/guacamole-server-${GUACAMOLE_VERSION}.tar.gz \
+    && cd /etc/guacamole/guacamole-server-${GUACAMOLE_VERSION} \
+    && ./configure --with-init-dir=/etc/init.d \
+    && make \
+    && make install \
+    && ldconfig \
+    && rm -r /etc/guacamole/guacamole-server-${GUACAMOLE_VERSION}*
 
 # Create Guacamole configurations
-RUN echo "user-mapping: /etc/guacamole/user-mapping.xml" > /etc/guacamole/guacamole.properties && \
-    touch /etc/guacamole/user-mapping.xml
+RUN echo "user-mapping: /etc/guacamole/user-mapping.xml" > /etc/guacamole/guacamole.properties \
+    && touch /etc/guacamole/user-mapping.xml
 
-# This bundles all installs to get a faster container build:
 # Add Visual Studio code and nextcloud client
 RUN curl https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > microsoft.gpg \
     && mv microsoft.gpg /etc/apt/trusted.gpg.d/microsoft.gpg \
@@ -114,9 +94,8 @@ RUN wget https://ecsft.cern.ch/dist/cvmfs/cvmfs-release/cvmfs-release-latest_all
     && rm cvmfs-release-latest_all.deb
 
 # Install basic tools
-RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y \
-        lxterminal \
-        lxrandr \
+RUN apt-get update \
+    && apt-get install --no-install-recommends -y \
         cryptsetup \
         squashfs-tools \
         lua-bit32 \
@@ -127,6 +106,7 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install --no-instal
         lua-term \
         lua5.2 \
         lmod \
+        git \
         aria2 \
         code \
         emacs \
@@ -152,15 +132,21 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install --no-instal
         nextcloud-client \
         iputils-ping \
         sshfs \
+        build-essential \
+        uuid-dev \
+        libgpgme-dev \
+        squashfs-tools \
+        libseccomp-dev \
+        wget \
+        pkg-config \
+        git \
+        cryptsetup-bin\
         lsb-release \
         cvmfs \
-        firefox \
-    && rm -rf /var/lib/apt/lists/*
+    && rm -rf /var/lib/apt/lists/* \
+    && rm /etc/apt/sources.list.d/vs-code.list
 
-# Install singularity into the final image.
-COPY --from=builder /usr/local/singularity /usr/local/singularity
-
-# configure CVMFS
+# Configure CVMFS
 RUN mkdir -p /etc/cvmfs/keys/ardc.edu.au/ \
     && echo "-----BEGIN PUBLIC KEY-----" | sudo tee /etc/cvmfs/keys/ardc.edu.au/neurodesk.ardc.edu.au.pub \
     && echo "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAwUPEmxDp217SAtZxaBep" | sudo tee -a /etc/cvmfs/keys/ardc.edu.au/neurodesk.ardc.edu.au.pub \
@@ -178,66 +164,87 @@ RUN mkdir -p /etc/cvmfs/keys/ardc.edu.au/ \
     && echo "CVMFS_QUOTA_LIMIT=5000" | sudo tee -a  /etc/cvmfs/default.local \
     && cvmfs_config setup 
 
-# install nipype
+# Add module script
+COPY ./config/module.sh /usr/share/
+
+# Install nipype
 RUN pip3 install nipype \
     && rm -rf /root/.cache/pip \
     && rm -rf /home/ubuntu/.cache/
 
-# add module script
-COPY ./config/module.sh /usr/share/
-
-# setup module system & singularity
-COPY ./config/.bashrc /tmp/.bashrc
-RUN cat /tmp/.bashrc >> /etc/skel/.bashrc && rm /tmp/.bashrc
-RUN directories=`curl https://raw.githubusercontent.com/NeuroDesk/caid/master/recipes/globalMountPointList.txt` \
-    && mounts=`echo $directories | sed 's/ /,/g'` \
-    && echo "export SINGULARITY_BINDPATH=${mounts}" >> /etc/skel/.bashrc
-
-# configure tiling of windows SHIFT-ALT-CTR-{Left,right,top,Bottom} and other openbox desktop mods
+# Configure tiling of windows SHIFT-ALT-CTR-{Left,right,top,Bottom} and other openbox desktop mods
 COPY ./config/rc.xml /etc/xdg/openbox
 
-# configure ITKsnap
+# Configure ITKsnap
 COPY ./config/.itksnap.org /etc/skel/.itksnap.org
 COPY ./config/mimeapps.list /etc/skel/.config/mimeapps.list
 
-# Use custom bottom panel configuration
+# Apply custom bottom panel configuration
 COPY ./config/panel /etc/skel/.config/lxpanel/LXDE/panels/panel
 
 # Allow the root user to access the sshfs mount
 # https://github.com/NeuroDesk/neurodesk/issues/47
 RUN sed -i 's/#user_allow_other/user_allow_other/g' /etc/fuse.conf
 
-# try to start cvmfs via modified /etc/supervisor/supervisord.conf
+# Try to start cvmfs via modified /etc/supervisor/supervisord.conf
 COPY ./config/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 COPY ./config/state.py /usr/local/lib/web/backend/vnc/state.py
 RUN mkdir /cvmfs/neurodesk.ardc.edu.au
 
+# Fetch singularity bind mount list
 RUN mkdir -p `curl https://raw.githubusercontent.com/NeuroDesk/neurocontainers/master/recipes/globalMountPointList.txt`
 
-RUN git clone -b neuromachine https://github.com/NeuroDesk/neurodesk.git /neurodesk
-WORKDIR /neurodesk
-RUN bash build.sh --lxde --edit \
+# Install singularity
+ARG GO_VERSION
+ARG SINGULARITY_VERSION
+RUN export VERSION=${GO_VERSION} OS=linux ARCH=amd64 \
+    && wget https://dl.google.com/go/go$VERSION.$OS-$ARCH.tar.gz \
+    && sudo tar -C /usr/local -xzvf go$VERSION.$OS-$ARCH.tar.gz \
+    && rm go$VERSION.$OS-$ARCH.tar.gz \
+    && export GOPATH=${HOME}/go \
+    && export PATH=/usr/local/go/bin:${PATH}:${GOPATH}/bin \
+    && mkdir -p $GOPATH/src/github.com/sylabs \
+    && cd $GOPATH/src/github.com/sylabs \
+    && wget https://github.com/sylabs/singularity/releases/download/v${SINGULARITY_VERSION}/singularity-ce-${SINGULARITY_VERSION}.tar.gz \
+    && tar -xzvf singularity-ce-${SINGULARITY_VERSION}.tar.gz \
+    && cd singularity-ce-${SINGULARITY_VERSION} \
+    && ./mconfig -p /usr/local/singularity \
+    && make -C builddir \
+    && make -C builddir install \
+    && rm -rf /usr/local/go $GOPATH 
+
+# Setup module system & singularity
+COPY ./config/.bashrc /tmp/.bashrc
+RUN cat /tmp/.bashrc >> /etc/skel/.bashrc && rm /tmp/.bashrc \
+    && directories=`curl https://raw.githubusercontent.com/NeuroDesk/caid/master/recipes/globalMountPointList.txt` \
+    && mounts=`echo $directories | sed 's/ /,/g'` \
+    && echo "export SINGULARITY_BINDPATH=${mounts}" >> /etc/skel/.bashrc
+
+# Install neurodesk
+RUN git clone -b neuromachine https://github.com/NeuroDesk/neurodesk.git /neurodesk \
+    && cd /neurodesk \
+    && bash build.sh --lxde --edit \
     && bash install.sh \
     && ln -s /vnm/containers /neurodesk/local/containers \
     && mkdir -p /etc/skel/Desktop/ \
     && ln -s /vnm /etc/skel/Desktop/
 
-# Create user account with password-less sudo abilities
-RUN useradd -s /bin/bash -g 100 -G sudo -m user && \
-    /usr/bin/printf '%s\n%s\n' 'password' 'password'| passwd user && \
-    echo "user ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
-
-# Set VNC password
-RUN mkdir /home/user/.vnc && \
-   chown user /home/user/.vnc && \
-   /usr/bin/printf '%s\n%s\n%s\n' 'password' 'password' 'n' | su user -c vncpasswd
-RUN  echo -n 'password\npassword\nn\n' | su user -c vncpasswd
+# Create user account with password-less sudo abilities and vnc user
+RUN useradd -s /bin/bash -g 100 -G sudo -m user \
+    && /usr/bin/printf '%s\n%s\n' 'password' 'password'| passwd user \
+    && echo "user ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers \
+    && mkdir /home/user/.vnc \
+    && chown user /home/user/.vnc \
+    && /usr/bin/printf '%s\n%s\n%s\n' 'password' 'password' 'n' | su user -c vncpasswd \
+    && echo -n 'password\npassword\nn\n' | su user -c vncpasswd
 
 # Add entrypoint script
 COPY startup.sh /startup.sh
-RUN chmod +x /startup.sh
+Run chmod +x /startup.sh
 
+# Switch to user
 WORKDIR /home/user
 USER 1000:100
 
+# Enable entrypoint
 ENTRYPOINT sudo -E /startup.sh
