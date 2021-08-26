@@ -87,6 +87,13 @@ default () {
     rdp
 }
 
+# Update neurodesk
+cd /neurodesk
+sudo git pull
+sudo bash build.sh --lxde --edit \
+sudo bash install.sh
+cd /home/user
+
 open_guacmole_conf
 default
 close_guacmole_conf
