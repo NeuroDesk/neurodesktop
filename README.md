@@ -39,6 +39,8 @@ http://localhost:8080
 or open a VNC Client and connect to port 5901 (for this -p 5901:5901 has to be added to the docker call)
 
 5. neuromachine is ready to use!
+- User is `user`
+- Password is `password`
 
 ## Stopping neuromachine:
 When done processing your data it is important to stop and remove the container - otherwise the next start or container update will give an error ("... The container name "/neuromachine" is already in use...")
