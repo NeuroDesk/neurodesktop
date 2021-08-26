@@ -34,7 +34,7 @@ sudo docker run -it --privileged --name neuromachine -v ~/vnm:/vnm -v /dev/shm:/
 
 4. Once neuromachine is downloaded i.e. `guacd[77]: INFO:        Listening on host 127.0.0.1, port 4822` is displayed in terminal, open a browser and go to:
 ```
-http://localhost:8080
+http://localhost:8080/#/?username=user&password=password
 ```
 or open a VNC Client and connect to port 5901 (for this -p 5901:5901 has to be added to the docker call)
 
