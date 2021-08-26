@@ -18,17 +18,17 @@ A compact Docker container with a browser-accessible environment for reproducibl
 
 * Mac:
 ```
-docker run -it --privileged --name neuromachine -v ~/vnm:/vnm -e USER=user -p 8080:8080 vnmd/neuromachine:20210825
+docker run -it --privileged --name neuromachine -v ~/vnm:/vnm -e USER=user -p 8080:8080 vnmd/neuromachine:20210826
 ```
 (notice: There is a bug in docker 3.3.0 for Mac that makes this command not run correctly and there will be no application menu when you start the desktop. Update your docker version when you see this!)
 
 * Windows:
 ```
-docker run -it --privileged --name neuromachine -v C:/vnm:/vnm -e USER=user -p 8080:8080 vnmd/neuromachine:20210825
+docker run -it --privileged --name neuromachine -v C:/vnm:/vnm -e USER=user -p 8080:8080 vnmd/neuromachine:20210826
 ```
 * Linux:
 ```
-sudo docker run -it --privileged --name neuromachine -v ~/vnm:/vnm -v /dev/shm:/dev/shm -e USER=user -p 8080:8080 vnmd/neuromachine:20210825
+sudo docker run -it --privileged --name neuromachine -v ~/vnm:/vnm -v /dev/shm:/dev/shm -e USER=user -p 8080:8080 vnmd/neuromachine:20210826
 ```
 (notice: if you get errors in neuromachine then check if the ~/vnm directory is writable to all users, otherwise run `chmod a+rwx ~/vnm`)
 
