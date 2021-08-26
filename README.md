@@ -28,7 +28,7 @@ docker run --privileged --name neuromachine -v C:/vnm:/vnm -e USER=user -p 8080:
 ```
 * Linux:
 ```
-sudo docker run --privileged --name neuromachine -v ~/neuromachine:/neuromachine -v /dev/shm:/dev/shm -e USER=user -p 8080:8080 vnmd/neuromachine:20210825
+sudo docker run --privileged --name neuromachine -v ~/vnm:/vnm -v /dev/shm:/dev/shm -e USER=user -p 8080:8080 vnmd/neuromachine:20210825
 ```
 (notice: if you get errors in neuromachine then check if the ~/vnm directory is writable to all users, otherwise run `chmod a+rwx ~/vnm`)
 
