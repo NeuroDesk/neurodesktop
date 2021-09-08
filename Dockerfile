@@ -241,7 +241,7 @@ RUN useradd -s /bin/bash -g 100 -G sudo -m user \
 
 # Add entrypoint script
 COPY startup.sh /startup.sh
-Run chmod +x /startup.sh
+RUN chmod +x /startup.sh
 
 # Switch to user
 WORKDIR /home/user
