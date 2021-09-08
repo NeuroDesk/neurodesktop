@@ -143,6 +143,7 @@ RUN apt-get update \
         cryptsetup-bin\
         lsb-release \
         cvmfs \
+        firefox \
     && rm -rf /var/lib/apt/lists/* \
     && rm /etc/apt/sources.list.d/vs-code.list
 
