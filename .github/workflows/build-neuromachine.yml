@@ -25,22 +25,31 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
-    - name: Pull latest neuromachine build from GitHub packages
-      run: |
-        echo ${GITHUB_REF}
-        echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u $GITHUB_ACTOR --password-stdin
-        IMAGEID=ghcr.io/$GITHUB_REPOSITORY/neuromachine
-        IMAGEID=$(echo $IMAGEID | tr '[A-Z]' '[a-z]')
-        {
-          docker pull $IMAGEID \
-            && ROOTFS_CACHE=$(docker inspect --format='{{.RootFS}}' $IMAGEID) \
-            && echo "ROOTFS_CACHE=$ROOTFS_CACHE" >> $GITHUB_ENV
-        } || echo "$IMAGEID not found. Resuming build..."
-        echo "IMAGEID=$IMAGEID" >> $GITHUB_ENV
+    # - name: Pull latest neuromachine build from GitHub packages
+    #   run: |
+    #     echo ${GITHUB_REF}
+    #     echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u $GITHUB_ACTOR --password-stdin
+    #     IMAGEID=ghcr.io/$GITHUB_REPOSITORY/neuromachine
+    #     IMAGEID=$(echo $IMAGEID | tr '[A-Z]' '[a-z]')
+    #     {
+    #       docker pull $IMAGEID \
+    #         && ROOTFS_CACHE=$(docker inspect --format='{{.RootFS}}' $IMAGEID) \
+    #         && echo "ROOTFS_CACHE=$ROOTFS_CACHE" >> $GITHUB_ENV
+    #     } || echo "$IMAGEID not found. Resuming build..."
+    #     echo "IMAGEID=$IMAGEID" >> $GITHUB_ENV
+    # - name: Build new neuromachine image
+    #   run: |
+    #     SHORT_SHA=$(git rev-parse --short $GITHUB_SHA)
+    #     docker build . --file Dockerfile --tag $IMAGEID:$SHORT_SHA --cache-from $IMAGEID --label "GITHUB_REPOSITORY=$GITHUB_REPOSITORY" --label "GITHUB_SHA=$GITHUB_SHA"
+    #     ROOTFS_NEW=$(docker inspect --format='{{.RootFS}}' $IMAGEID:$SHORT_SHA)
+    #     BUILDDATE=`date +%Y%m%d`
+    #     echo "SHORT_SHA=$SHORT_SHA" >> $GITHUB_ENV
+    #     echo "ROOTFS_NEW=$ROOTFS_NEW" >> $GITHUB_ENV
+    #     echo "BUILDDATE=$BUILDDATE" >> $GITHUB_ENV
     - name: Build new neuromachine image
       run: |
         SHORT_SHA=$(git rev-parse --short $GITHUB_SHA)
-        docker build . --file Dockerfile --tag $IMAGEID:$SHORT_SHA --cache-from $IMAGEID --label "GITHUB_REPOSITORY=$GITHUB_REPOSITORY" --label "GITHUB_SHA=$GITHUB_SHA"
+        docker build . --file Dockerfile --tag $IMAGEID:$SHORT_SHA --label "GITHUB_REPOSITORY=$GITHUB_REPOSITORY" --label "GITHUB_SHA=$GITHUB_SHA"
         ROOTFS_NEW=$(docker inspect --format='{{.RootFS}}' $IMAGEID:$SHORT_SHA)
         BUILDDATE=`date +%Y%m%d`
         echo "SHORT_SHA=$SHORT_SHA" >> $GITHUB_ENV
