@@ -222,8 +222,8 @@ RUN cat /tmp/.bashrc >> /etc/skel/.bashrc && rm /tmp/.bashrc \
     && echo "export SINGULARITY_BINDPATH=${mounts}" >> /etc/skel/.bashrc
 
 # Install neurodesk
-RUN git clone https://github.com/NeuroDesk/neurodesk.git /neurodesk \
-    && cd /neurodesk \
+RUN git clone https://github.com/NeuroDesk/neurodesk.git /neurocommand \
+    && cd /neurodesk && git checkout neurocommand \
     && bash build.sh --lxde --edit \
     && bash install.sh \
     && ln -s /vnm/containers /neurodesk/local/containers \
