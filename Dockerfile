@@ -239,7 +239,7 @@ RUN git clone https://github.com/NeuroDesk/neurodesk.git /neurocommand \
     && cd /neurocommand && git checkout neurocommand \
     && bash build.sh --lxde --edit \
     && bash install.sh \
-    && ln -s /vnm/containers /neurocommand/local/containers \
+    && ln -s /neurodesktop/containers /neurocommand/local/containers \
     && mkdir -p /etc/skel/Desktop/ \
     && ln -s /vnm /etc/skel/Desktop/
 
