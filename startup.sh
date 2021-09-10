@@ -87,12 +87,20 @@ default () {
     rdp
 }
 
-# Update neurodesk
-# cd /neurodesk
-# sudo git pull
-# sudo bash build.sh --lxde --edit \
-# sudo bash install.sh
-# cd /home/user
+UID=${UID:-9001}
+GID=${GID:-9001}
+
+echo "Starting with UID:GID $UID:$GID"
+addgroup --gid "$GID" user
+useradd --shell /bin/bash -u $UID -g $GID -G sudo -o -c "" -m user
+export HOME=/home/user
+
+/usr/bin/printf '%s\n%s\n' 'password' 'password'| passwd user
+echo "user ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
+mkdir /home/user/.vnc
+chown user /home/user/.vnc
+/usr/bin/printf '%s\n%s\n%s\n' 'password' 'password' 'n' | su user -c vncpasswd
+echo -n 'password\npassword\nn\n' | su user -c vncpasswd
 
 open_guacmole_conf
 default
