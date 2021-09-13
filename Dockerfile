@@ -240,7 +240,7 @@ RUN git clone https://github.com/NeuroDesk/neurodesk.git /neurocommand \
     && ln -s /neurodesktop /etc/skel/Desktop/
 
 # Add entrypoint script
-COPY startup.sh /startup.sh
+COPY config/startup.sh /startup.sh
 RUN chmod +x /startup.sh
 
 # Enable entrypoint
