@@ -3,13 +3,13 @@
 
 # help (){
 # echo "USAGE:
-# docker run -it -p 8080:8080 neuromachine:<tag> <option>
+# docker run -it -p 8080:8080 neurodesktop:<tag> <option>
 # OPTIONS:
 # -v, --vnc  add VNC connection to Guacamole
 # -r, --rdp  add RDP connection to Guacamole
 # -s, --ssh  add SSH connection to Guacamole
 # -h, --help      print out this help
-# For more information see: https://github.com/NeuroDesk/neuromachine"
+# For more information see: https://github.com/NeuroDesk/neurodesktop"
 # }
 
 open_guacmole_conf () {
