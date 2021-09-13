@@ -47,7 +47,7 @@ echo "\
 Starting VNC server"
 su user -c "USER=user vncserver -depth 24 -geometry 1920x1080 -name \"VNC\" :1"
 echo \
-"<connection name=\"Desktop Fixed-Resolution [VNC]\">
+"<connection name=\"Desktop Fixed-Resolution (VNC)\">
 <protocol>vnc</protocol>
 <param name=\"hostname\">localhost</param>
 <param name=\"username\">user</param>
@@ -69,7 +69,7 @@ echo "\
 Starting RDP server"
 service xrdp start
 echo \
-"<connection name=\"Desktop Auto-Resolution [RDP]\">
+"<connection name=\"Desktop Auto-Resolution (RDP)\">
 <protocol>rdp</protocol>
 <param name=\"hostname\">localhost</param>
 <param name=\"username\">user</param>
@@ -126,11 +126,11 @@ echo "\
 ==================================================================
 Starting Guacamole Daemon
 ------------------------------------------------------------------
-!!! Use this link for direct Neurodesktop:                     !!!
-!!! http://localhost:8080/#/?username=user&password=password   !!!
-!!! Once connected to the session, your user info is:          !!!
-!!! Username: \"user\"                                         !!!
-!!! Password: \"password\"                                     !!!
+    Use this link for direct Neurodesktop:
+!!! http://localhost:8080/#/?username=user&password=password !!!
+    Once connected to the session, your user info is:
+    Username: \"user\"
+    Password: \"password\"
 ------------------------------------------------------------------"
 su user -c "guacd -L debug -f"
 
