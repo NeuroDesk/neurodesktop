@@ -100,13 +100,12 @@ echo "user ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
 mkdir /home/user/.vnc
 chown user /home/user/.vnc
 /usr/bin/printf '%s\n%s\n%s\n' 'password' 'password' 'n' | su user -c vncpasswd
-echo -n 'password\npassword\nn\n' | su user -c vncpasswd
+echo
 
 open_guacmole_conf
 default
 close_guacmole_conf
 
-# mount cvmfs
 echo "\
 ==================================================================
 Mounting CVMFS"
