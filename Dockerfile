@@ -221,31 +221,27 @@ RUN cat /tmp/.bashrc >> /etc/skel/.bashrc && rm /tmp/.bashrc \
     && mounts=`echo $directories | sed 's/ /,/g'` \
     && echo "export SINGULARITY_BINDPATH=${mounts}" >> /etc/skel/.bashrc
 
+# # Create user account with password-less sudo abilities and vnc user
+# RUN useradd -s /bin/bash -g 100 -G sudo -m user \
+#     && /usr/bin/printf '%s\n%s\n' 'password' 'password'| passwd user \
+#     && echo "user ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers \
+#     && mkdir /home/user/.vnc \
+#     && chown user /home/user/.vnc \
+#     && /usr/bin/printf '%s\n%s\n%s\n' 'password' 'password' 'n' | su user -c vncpasswd \
+#     && echo -n 'password\npassword\nn\n' | su user -c vncpasswd
+
 # Install neurodesk
-RUN git clone https://github.com/NeuroDesk/neurodesk.git /neurodesk \
-    && cd /neurodesk \
+RUN git clone https://github.com/NeuroDesk/neurodesk.git /neurocommand \
+    && cd /neurocommand && git checkout neurocommand \
     && bash build.sh --lxde --edit \
     && bash install.sh \
-    && ln -s /vnm/containers /neurodesk/local/containers \
+    && ln -s /neurodesktop/containers /neurocommand/local/containers \
     && mkdir -p /etc/skel/Desktop/ \
-    && ln -s /vnm /etc/skel/Desktop/
-
-# Create user account with password-less sudo abilities and vnc user
-RUN useradd -s /bin/bash -g 100 -G sudo -m user \
-    && /usr/bin/printf '%s\n%s\n' 'password' 'password'| passwd user \
-    && echo "user ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers \
-    && mkdir /home/user/.vnc \
-    && chown user /home/user/.vnc \
-    && /usr/bin/printf '%s\n%s\n%s\n' 'password' 'password' 'n' | su user -c vncpasswd \
-    && echo -n 'password\npassword\nn\n' | su user -c vncpasswd
+    && ln -s /neurodesktop /etc/skel/Desktop/
 
 # Add entrypoint script
 COPY startup.sh /startup.sh
 RUN chmod +x /startup.sh
-
-# Switch to user
-WORKDIR /home/user
-USER 1000:100
 
 # Enable entrypoint
 ENTRYPOINT sudo -E /startup.sh

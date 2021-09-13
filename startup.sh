@@ -3,13 +3,13 @@
 
 # help (){
 # echo "USAGE:
-# docker run -it -p 8080:8080 neuromachine:<tag> <option>
+# docker run -it -p 8080:8080 neurodesktop:<tag> <option>
 # OPTIONS:
 # -v, --vnc  add VNC connection to Guacamole
 # -r, --rdp  add RDP connection to Guacamole
 # -s, --ssh  add SSH connection to Guacamole
 # -h, --help      print out this help
-# For more information see: https://github.com/NeuroDesk/neuromachine"
+# For more information see: https://github.com/NeuroDesk/neurodesktop"
 # }
 
 open_guacmole_conf () {
@@ -47,7 +47,7 @@ echo "\
 Starting VNC server"
 su user -c "USER=user vncserver -depth 24 -geometry 1920x1080 -name \"VNC\" :1"
 echo \
-"<connection name=\"Desktop (VNC)\">
+"<connection name=\"Desktop Fixed-Resolution (VNC)\">
 <protocol>vnc</protocol>
 <param name=\"hostname\">localhost</param>
 <param name=\"username\">user</param>
@@ -69,7 +69,7 @@ echo "\
 Starting RDP server"
 service xrdp start
 echo \
-"<connection name=\"Desktop (RDP)\">
+"<connection name=\"Desktop Auto-Resolution (RDP)\">
 <protocol>rdp</protocol>
 <param name=\"hostname\">localhost</param>
 <param name=\"username\">user</param>
@@ -87,18 +87,25 @@ default () {
     rdp
 }
 
-# Update neurodesk
-# cd /neurodesk
-# sudo git pull
-# sudo bash build.sh --lxde --edit \
-# sudo bash install.sh
-# cd /home/user
+HOST_UID=${HOST_UID:-9001}
+HOST_GID=${HOST_GID:-9001}
+
+echo "Starting with UID:GID $HOST_UID:$HOST_GID"
+addgroup --gid "$HOST_GID" user
+useradd --shell /bin/bash -u $HOST_UID -g $HOST_GID -G sudo -o -c "" -m user
+export HOME=/home/user
+
+/usr/bin/printf '%s\n%s\n' 'password' 'password'| passwd user
+echo "user ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
+mkdir /home/user/.vnc
+chown user /home/user/.vnc
+/usr/bin/printf '%s\n%s\n%s\n' 'password' 'password' 'n' | su user -c vncpasswd
+echo
 
 open_guacmole_conf
 default
 close_guacmole_conf
 
-# mount cvmfs
 echo "\
 ==================================================================
 Mounting CVMFS"
@@ -119,11 +126,11 @@ echo "\
 ==================================================================
 Starting Guacamole Daemon
 ------------------------------------------------------------------
-  Use this link for direct NeuroDesk Desktop:
-  http://localhost:8080/#/?username=user&password=password
-  Once connected to the session, your user info is:
-      Username: \"user\"
-      Password: \"password\"
+    Use this link for direct Neurodesktop:
+!!! http://localhost:8080/#/?username=user&password=password !!!
+    Once connected to the session, your user info is:
+    Username: \"user\"
+    Password: \"password\"
 ------------------------------------------------------------------"
 su user -c "guacd -L debug -f"
 
