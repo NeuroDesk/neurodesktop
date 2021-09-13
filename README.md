@@ -18,17 +18,17 @@ A compact Docker container with a browser-accessible environment for reproducibl
 
 * Mac:
 ```
-docker run --shm-size=1gb -it --privileged --name neurodesktop -v ~/vnm:/vnm -e USER=user -p 8080:8080 vnmd/neurodesktop:20210826
+docker run --shm-size=1gb -it --privileged --name neurodesktop -v ~/neurodesktop:/neurodesktop -e USER=user -p 8080:8080 vnmd/neurodesktop:latest
 ```
 (notice: There is a bug in docker 3.3.0 for Mac that makes this command not run correctly and there will be no application menu when you start the desktop. Update your docker version when you see this!)
 
 * Windows:
 ```
-docker run --shm-size=1gb -it --privileged --name neurodesktop -v C:/vnm:/vnm -e USER=user -p 8080:8080 vnmd/neurodesktop:20210826
+docker run --shm-size=1gb -it --privileged --name neurodesktop -v C:/neurodesktop:/neurodesktop -e USER=user -p 8080:8080 vnmd/neurodesktop:latest
 ```
 * Linux:
 ```
-sudo docker run --shm-size=1gb -it --privileged --name neurodesktop -v ~/vnm:/vnm -e USER=user -p 8080:8080 vnmd/neurodesktop:20210826
+docker run --shm-size=1gb -it --privileged --name neurodesktop -v ~/neurodesktop:/neurodesktop -e USER=user -e HOST_UID="$(id -u)" -e HOST_GID="$(id -g)" -p 8080:8080 vnmd/neuromachine:latest
 ```
 (notice: if you get errors in neurodesktop then check if the ~/vnm directory is writable to all users, otherwise run `chmod a+rwx ~/vnm`)
 
