@@ -1,2 +1,2 @@
 docker stop neurodesktop
-docker rm neuromachine
+docker rm neurodesktop
