@@ -87,12 +87,12 @@ default () {
     rdp
 }
 
-UID=${UID:-9001}
-GID=${GID:-9001}
+HOST_UID=${HOST_UID:-9001}
+HOST_GID=${HOST_GID:-9001}
 
-echo "Starting with UID:GID $UID:$GID"
-addgroup --gid "$GID" user
-useradd --shell /bin/bash -u $UID -g $GID -G sudo -o -c "" -m user
+echo "Starting with UID:GID $HOST_UID:$HOST_GID"
+addgroup --gid "$HOST_GID" user
+useradd --shell /bin/bash -u $HOST_UID -g $HOST_GID -G sudo -o -c "" -m user
 export HOME=/home/user
 
 /usr/bin/printf '%s\n%s\n' 'password' 'password'| passwd user

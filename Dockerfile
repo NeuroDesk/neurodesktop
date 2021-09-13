@@ -230,11 +230,6 @@ RUN cat /tmp/.bashrc >> /etc/skel/.bashrc && rm /tmp/.bashrc \
 #     && /usr/bin/printf '%s\n%s\n%s\n' 'password' 'password' 'n' | su user -c vncpasswd \
 #     && echo -n 'password\npassword\nn\n' | su user -c vncpasswd
 
-# # Create user account with password-less sudo abilities and vnc user
-# RUN useradd -s /bin/bash -g 100 -G sudo -M neurodesk \
-#     && /usr/bin/printf '%s\n%s\n' 'password' 'password'| passwd neurodesk \
-#     && echo "neurodesk ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
-
 # Install neurodesk
 RUN git clone https://github.com/NeuroDesk/neurodesk.git /neurocommand \
     && cd /neurocommand && git checkout neurocommand \
@@ -248,11 +243,5 @@ RUN git clone https://github.com/NeuroDesk/neurodesk.git /neurocommand \
 COPY startup.sh /startup.sh
 RUN chmod +x /startup.sh
 
-# Switch to user
-# WORKDIR /home/admin
-# USER 1000:100
-# USER neurodesk
-
 # Enable entrypoint
 ENTRYPOINT sudo -E /startup.sh
-# ENTRYPOINT /startup.sh
