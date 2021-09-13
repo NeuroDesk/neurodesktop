@@ -231,11 +231,11 @@ RUN cat /tmp/.bashrc >> /etc/skel/.bashrc && rm /tmp/.bashrc \
 #     && echo -n 'password\npassword\nn\n' | su user -c vncpasswd
 
 # Install neurodesk
-RUN git clone https://github.com/NeuroDesk/neurodesk.git /neurocommand \
-    && cd /neurocommand && git checkout neurocommand \
+RUN git clone https://github.com/NeuroDesk/neurodesk.git /neurodesk \
+    && cd /neurodesk \
     && bash build.sh --lxde --edit \
     && bash install.sh \
-    && ln -s /neurodesktop/containers /neurocommand/local/containers \
+    && ln -s /neurodesktop/containers /neurodesk/local/containers \
     && mkdir -p /etc/skel/Desktop/ \
     && ln -s /neurodesktop /etc/skel/Desktop/
 
