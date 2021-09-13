@@ -126,11 +126,11 @@ echo "\
 ==================================================================
 Starting Guacamole Daemon
 ------------------------------------------------------------------
-  Use this link for direct NeuroDesk Desktop:
-  http://localhost:8080/#/?username=user&password=password
-  Once connected to the session, your user info is:
-      Username: \"user\"
-      Password: \"password\"
+!!! Use this link for direct Neurodesktop:                     !!!
+!!! http://localhost:8080/#/?username=user&password=password   !!!
+!!! Once connected to the session, your user info is:          !!!
+!!! Username: \"user\"                                         !!!
+!!! Password: \"password\"                                     !!!
 ------------------------------------------------------------------"
 su user -c "guacd -L debug -f"
 
