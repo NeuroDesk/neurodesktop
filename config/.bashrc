@@ -1,11 +1,20 @@
 #things in .bashrc get executed for every subshell
 if [ -f '/usr/share/module.sh' ]; then source /usr/share/module.sh; fi
-module use /vnm/containers/modules
 
 alias ll='ls -la'
 
+if [ -z "$CVMFS_DISABLE" ] 
+then
+        export MODULEPATH="/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules"
+        module use $MODULEPATH
+else
+        export MODULEPATH="/neurodesktop/containers/modules"              
+        module use $MODULEPATH
+fi
+
+
 if [ -f '/usr/share/module.sh' ]; then
-        if [ -d /vnm/containers/modules ]; then
+        if [ -d $MODULEPATH ]; then
                 echo 'These tools are currently installed - use "ml load <tool>" to use them in this shell:'
         module avail
         else
@@ -14,4 +23,3 @@ if [ -f '/usr/share/module.sh' ]; then
 fi
 
 export PATH="/usr/local/singularity/bin:${PATH}"
-export MODULEPATH="/opt/vnm"

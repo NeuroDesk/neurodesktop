@@ -106,16 +106,19 @@ open_guacmole_conf
 default
 close_guacmole_conf
 
-echo "\
-==================================================================
-Mounting CVMFS"
-sudo mount -t cvmfs neurodesk.ardc.edu.au /cvmfs/neurodesk.ardc.edu.au
+if [ -z "$CVMFS_DISABLE" ]; then
+    echo "\
+    ==================================================================
+    Mounting CVMFS"
+    sudo mount -t cvmfs neurodesk.ardc.edu.au /cvmfs/neurodesk.ardc.edu.au
 
-echo "\
-==================================================================
-Testing which CVMFS server is fastest for me"
-sudo cvmfs_talk -i neurodesk.ardc.edu.au host probe
-sudo cvmfs_talk -i neurodesk.ardc.edu.au host info
+    echo "\
+    ==================================================================
+    Testing which CVMFS server is fastest"
+    sudo cvmfs_talk -i neurodesk.ardc.edu.au host probe
+    sudo cvmfs_talk -i neurodesk.ardc.edu.au host info
+fi
+
 
 echo "\
 ==================================================================
