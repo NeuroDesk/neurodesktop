@@ -219,7 +219,7 @@ COPY ./config/.bashrc /tmp/.bashrc
 RUN cat /tmp/.bashrc >> /etc/skel/.bashrc && rm /tmp/.bashrc \
     && directories=`curl https://raw.githubusercontent.com/NeuroDesk/caid/master/recipes/globalMountPointList.txt` \
     && mounts=`echo $directories | sed 's/ /,/g'` \
-    && echo "export SINGULARITY_BINDPATH=${mounts}" >> /etc/skel/.bashrc
+    && echo "export SINGULARITY_BINDPATH=${mounts},/neurodesktop" >> /etc/skel/.bashrc
 
 # # Create user account with password-less sudo abilities and vnc user
 # RUN useradd -s /bin/bash -g 100 -G sudo -m user \
