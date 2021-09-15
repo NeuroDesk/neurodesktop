@@ -1,8 +1,21 @@
-name: Build neurodesktop
+name: Build neurodesktop-dev
 
 on:
-  schedule:
-    - cron:  '0 0 * * *'
+  repository_dispatch:
+  push:
+    branches: [ main ]
+    paths:
+      - .github/workflows/build-neurodesktop.yml
+      - Dockerfile
+      - startup.sh
+      - config/*
+  pull_request:
+    branches: [ main ]
+    paths:
+      - .github/workflows/build-neurodesktop.yml
+      - Dockerfile
+      - startup.sh
+      - config/*
     
 env:
   DOCKERHUB_ORG: ${{ secrets.DOCKERHUB_ORG }}
@@ -16,7 +29,7 @@ jobs:
       run: |
         echo ${GITHUB_REF}
         echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u $GITHUB_ACTOR --password-stdin
-        IMAGEID=ghcr.io/$GITHUB_REPOSITORY/neurodesktop
+        IMAGEID=ghcr.io/$GITHUB_REPOSITORY/neurodesktop-dev
         IMAGEID=$(echo $IMAGEID | tr '[A-Z]' '[a-z]')
         {
           docker pull $IMAGEID \
@@ -46,7 +59,5 @@ jobs:
       run: |
         echo "${{ secrets.DOCKERHUB_PASSWORD }}" | docker login -u ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin
         # Push to GH Packages
-        docker tag $IMAGEID:$SHORT_SHA $DOCKERHUB_ORG/neurodesktop:$BUILDDATE
-        docker tag $IMAGEID:$SHORT_SHA $DOCKERHUB_ORG/neurodesktop:latest
-        docker push $DOCKERHUB_ORG/neurodesktop:latest
-        docker push $DOCKERHUB_ORG/neurodesktop:$BUILDDATE
+        docker tag $IMAGEID:$SHORT_SHA $DOCKERHUB_ORG/neurodesktop-dev:latest
+        docker push $DOCKERHUB_ORG/neurodesktop-dev:latest
