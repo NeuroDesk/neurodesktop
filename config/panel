@@ -54,7 +54,7 @@ Plugin {
       id=lxterminal.desktop
     }
     Button {
-      id=org.gnome.gedit.desktop
+      id=code.desktop
     }
   }
 }
