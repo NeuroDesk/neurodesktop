@@ -252,6 +252,10 @@ RUN git clone https://github.com/NeuroDesk/neurocommand.git /neurocommand \
     && mkdir -p /etc/skel/Desktop/ \
     && ln -s /neurodesktop /etc/skel/Desktop/
 
+# Desktop styling
+COPY config/desktop_wallpaper.jpg /usr/share/lxde/wallpapers/desktop_wallpaper.jpg
+COPY config/pcmanfm.conf /etc/xdg/pcmanfm/LXDE/pcmanfm.conf
+
 # Add entrypoint script
 COPY config/startup.sh /startup.sh
 RUN chmod +x /startup.sh
