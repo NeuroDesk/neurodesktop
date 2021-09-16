@@ -110,6 +110,7 @@ if [ -z "$CVMFS_DISABLE" ]; then
     echo "\
     ==================================================================
     Mounting CVMFS"
+    sudo mkdir /cvmfs/neurodesk.ardc.edu.au
     sudo mount -t cvmfs neurodesk.ardc.edu.au /cvmfs/neurodesk.ardc.edu.au
 
     echo "\

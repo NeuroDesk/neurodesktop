@@ -189,11 +189,6 @@ COPY ./config/panel /etc/skel/.config/lxpanel/LXDE/panels/panel
 # https://github.com/NeuroDesk/neurodesk/issues/47
 RUN sed -i 's/#user_allow_other/user_allow_other/g' /etc/fuse.conf
 
-# Try to start cvmfs via modified /etc/supervisor/supervisord.conf
-COPY ./config/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
-COPY ./config/state.py /usr/local/lib/web/backend/vnc/state.py
-RUN mkdir /cvmfs/neurodesk.ardc.edu.au
-
 # Fetch singularity bind mount list
 RUN mkdir -p `curl https://raw.githubusercontent.com/NeuroDesk/neurocontainers/master/recipes/globalMountPointList.txt`
 
