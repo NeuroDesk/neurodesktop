@@ -255,6 +255,7 @@ RUN git clone https://github.com/NeuroDesk/neurocommand.git /neurocommand \
 # Desktop styling
 COPY config/desktop_wallpaper.jpg /usr/share/lxde/wallpapers/desktop_wallpaper.jpg
 COPY config/pcmanfm.conf /etc/xdg/pcmanfm/LXDE/pcmanfm.conf
+COPY config/lxterminal.conf /usr/share/lxterminal/lxterminal.conf
 
 # Add entrypoint script
 COPY config/startup.sh /startup.sh
