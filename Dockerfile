@@ -237,7 +237,8 @@ RUN apt-get update \
         tcllib \
     && rm -rf /var/lib/apt/lists/* \
     && wget https://downloads.globus.org/globus-connect-personal/linux/stable/globusconnectpersonal-latest.tgz \
-    && tar xzf globusconnectpersonal-latest.tgz
+    && tar xzf globusconnectpersonal-latest.tgz \
+    && rm -rf globusconnectpersonal-latest.tgz
 
 # Install neurodesk
 RUN git clone https://github.com/NeuroDesk/neurocommand.git /neurocommand \
