@@ -143,6 +143,8 @@ RUN apt-get update \
         cryptsetup-bin\
         lsb-release \
         cvmfs \
+        rclone \
+        owncloud-client \
         firefox \
     && rm -rf /var/lib/apt/lists/* \
     && rm /etc/apt/sources.list.d/vs-code.list
@@ -230,6 +232,17 @@ RUN cat /tmp/.bashrc >> /etc/skel/.bashrc && rm /tmp/.bashrc \
 #     && /usr/bin/printf '%s\n%s\n%s\n' 'password' 'password' 'n' | su user -c vncpasswd \
 #     && echo -n 'password\npassword\nn\n' | su user -c vncpasswd
 
+
+# add Globus client
+WORKDIR /opt/globusconnectpersonal
+RUN apt-get update \
+    && DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y \
+        tk \
+        tcllib \
+    && rm -rf /var/lib/apt/lists/* \
+    && wget https://downloads.globus.org/globus-connect-personal/linux/stable/globusconnectpersonal-latest.tgz \
+    && tar xzf globusconnectpersonal-latest.tgz
+
 # Install neurodesk
 RUN git clone https://github.com/NeuroDesk/neurocommand.git /neurocommand \
     && cd /neurocommand \
@@ -245,3 +258,5 @@ RUN chmod +x /startup.sh
 
 # Enable entrypoint
 ENTRYPOINT sudo -E /startup.sh
+
+WORKDIR /neurodesktop
