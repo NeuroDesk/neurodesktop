@@ -144,6 +144,7 @@ RUN apt-get update \
         lsb-release \
         cvmfs \
         rclone \
+        davfs2 \
         owncloud-client \
         firefox \
     && rm -rf /var/lib/apt/lists/* \
