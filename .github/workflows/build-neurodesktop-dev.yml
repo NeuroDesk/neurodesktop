@@ -9,13 +9,6 @@ on:
       - Dockerfile
       - startup.sh
       - config/*
-  pull_request:
-    branches: [ main ]
-    paths:
-      - .github/workflows/build-neurodesktop.yml
-      - Dockerfile
-      - startup.sh
-      - config/*
     
 env:
   DOCKERHUB_ORG: ${{ secrets.DOCKERHUB_ORG }}
