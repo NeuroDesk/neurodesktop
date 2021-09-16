@@ -95,7 +95,7 @@ RUN wget https://ecsft.cern.ch/dist/cvmfs/cvmfs-release/cvmfs-release-latest_all
 
 # Install basic tools
 RUN apt-get update \
-    && apt-get install --no-install-recommends -y \
+    && DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y \
         cryptsetup \
         squashfs-tools \
         lua-bit32 \
