@@ -1,7 +1,6 @@
 name: Build neurodesktop
 
 on:
-  branches: [ main ]
   schedule:
     - cron:  '0 0 * * *'
     
