@@ -1,18 +1,18 @@
 name: Build neurodesktop
 
-# on:
-#   schedule:
-#     - cron:  '0 0 * * *'
-
 on:
-  repository_dispatch:
-  push:
-    branches: [ main ]
-    paths:
-      - .github/workflows/build-neurodesktop.yml
-      - Dockerfile
-      - startup.sh
-      - config/*
+  schedule:
+    - cron:  '0 0 * * *'
+
+# on:
+#   repository_dispatch:
+#   push:
+#     branches: [ main ]
+#     paths:
+#       - .github/workflows/build-neurodesktop.yml
+#       - Dockerfile
+#       - startup.sh
+#       - config/*
     
 env:
   DOCKERHUB_ORG: ${{ secrets.DOCKERHUB_ORG }}
