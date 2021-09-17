@@ -219,16 +219,6 @@ RUN cat /tmp/.bashrc >> /etc/skel/.bashrc && rm /tmp/.bashrc \
     && mounts=`echo $directories | sed 's/ /,/g'` \
     && echo "export SINGULARITY_BINDPATH=${mounts},/neurodesktop-storage" >> /etc/skel/.bashrc
 
-# # Create user account with password-less sudo abilities and vnc user
-# RUN useradd -s /bin/bash -g 100 -G sudo -m user \
-#     && /usr/bin/printf '%s\n%s\n' 'password' 'password'| passwd user \
-#     && echo "user ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers \
-#     && mkdir /home/user/.vnc \
-#     && chown user /home/user/.vnc \
-#     && /usr/bin/printf '%s\n%s\n%s\n' 'password' 'password' 'n' | su user -c vncpasswd \
-#     && echo -n 'password\npassword\nn\n' | su user -c vncpasswd
-
-
 # add Globus client
 WORKDIR /opt/globusconnectpersonal
 RUN apt-get update \
@@ -254,6 +244,25 @@ RUN git clone https://github.com/NeuroDesk/neurocommand.git /neurocommand \
     && mkdir -p /etc/skel/Desktop/ \
     && ln -s /neurodesktop-storage /etc/skel/Desktop/
 
+
+# Create user account with password-less sudo abilities and vnc user
+RUN addgroup --gid 9001 user \
+    && useradd -s /bin/bash -g user -G sudo -m user \
+    && /usr/bin/printf '%s\n%s\n' 'password' 'password'| passwd user \
+    && echo "user ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers \
+    && mkdir /home/user/.vnc \
+    && chown user /home/user/.vnc \
+    && /usr/bin/printf '%s\n%s\n%s\n' 'password' 'password' 'n' | su user -c vncpasswd \
+    && echo -n 'password\npassword\nn\n' | su user -c vncpasswd
+
+USER user
+WORKDIR /home/user
+RUN wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh \
+    && bash Miniconda3-latest-Linux-x86_64.sh -b \
+    && rm Miniconda3-latest-Linux-x86_64.sh \
+    && miniconda3/bin/conda init
+
+USER root
 
 # Add entrypoint script
 COPY config/startup.sh /startup.sh
