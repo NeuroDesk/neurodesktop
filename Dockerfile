@@ -230,6 +230,11 @@ RUN apt-get update \
     && tar xzf globusconnectpersonal-latest.tgz \
     && rm -rf globusconnectpersonal-latest.tgz
 
+# Desktop styling
+COPY config/desktop_wallpaper.jpg /usr/share/lxde/wallpapers/desktop_wallpaper.jpg
+COPY config/pcmanfm.conf /etc/xdg/pcmanfm/LXDE/pcmanfm.conf
+COPY config/lxterminal.conf /usr/share/lxterminal/lxterminal.conf
+
 # Install neurodesk
 RUN git clone https://github.com/NeuroDesk/neurocommand.git /neurocommand \
     && cd /neurocommand \
@@ -239,10 +244,6 @@ RUN git clone https://github.com/NeuroDesk/neurocommand.git /neurocommand \
     && mkdir -p /etc/skel/Desktop/ \
     && ln -s /neurodesktop /etc/skel/Desktop/
 
-# Desktop styling
-COPY config/desktop_wallpaper.jpg /usr/share/lxde/wallpapers/desktop_wallpaper.jpg
-COPY config/pcmanfm.conf /etc/xdg/pcmanfm/LXDE/pcmanfm.conf
-COPY config/lxterminal.conf /usr/share/lxterminal/lxterminal.conf
 
 # Create user account with password-less sudo abilities and vnc user
 RUN addgroup --gid 9001 user \
