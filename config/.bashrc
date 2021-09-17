@@ -7,7 +7,7 @@ if [ -d /cvmfs/neurodesk.ardc.edu.au/neurodesk-modules ]; then
         # export MODULEPATH="/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules"
         module use /cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/*
 else
-        export MODULEPATH="/neurodesktop/containers/modules"              
+        export MODULEPATH="/neurodesktop-storage/containers/modules"              
         module use $MODULEPATH
         export CVMFS_DISABLE=true
 fi
