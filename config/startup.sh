@@ -89,18 +89,11 @@ default () {
 
 HOST_UID=${HOST_UID:-9001}
 HOST_GID=${HOST_GID:-9001}
-
-echo "Starting with UID:GID $HOST_UID:$HOST_GID"
-addgroup --gid "$HOST_GID" user
-useradd --shell /bin/bash -u $HOST_UID -g $HOST_GID -G sudo -o -c "" -m user
-export HOME=/home/user
-
-/usr/bin/printf '%s\n%s\n' 'password' 'password'| passwd user
-echo "user ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
-mkdir /home/user/.vnc
-chown user /home/user/.vnc
-/usr/bin/printf '%s\n%s\n%s\n' 'password' 'password' 'n' | su user -c vncpasswd
-echo
+# echo "Starting with UID:GID $HOST_UID:$HOST_GID"
+usermod -u $HOST_UID user
+groupmod -g $HOST_GID user
+cd /home/user
+chgrp -R +$HOST_GID .*
 
 open_guacmole_conf
 default
