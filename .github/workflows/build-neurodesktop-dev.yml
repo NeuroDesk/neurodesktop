@@ -16,10 +16,13 @@ env:
 jobs:
   test_cvmfs:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        cvmfs-server: [152.67.114.42, 150.136.239.221]
     steps:
     - uses: actions/checkout@v2
-    - name: Test Sydney
-      run: /bin/bash .github/workflows/test_cvmfs.sh 152.67.114.42
+    - name: check if ${{ cvmfs-server }} is online and up-to-date
+      run: /bin/bash .github/workflows/test_cvmfs.sh  ${{ cvmfs-server }}
   build:
     needs: [test_cvmfs]
     runs-on: ubuntu-latest
