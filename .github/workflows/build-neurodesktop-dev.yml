@@ -5,7 +5,7 @@ on:
   push:
     branches: [ main ]
     paths:
-      - .github/workflows/build-neurodesktop.yml
+      - .github/workflows/build-neurodesktop-dev.yml
       - Dockerfile
       - startup.sh
       - config/*
