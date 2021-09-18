@@ -18,7 +18,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        cvmfs-server: [152.67.114.42, 150.136.239.221]
+        cvmfs-server: [152.67.114.42, 150.136.239.221, 203.101.231.144, 132.145.96.34, 140.238.170.185, 130.61.74.69]
     steps:
     - uses: actions/checkout@v2
     - name: check if ${{ matrix.cvmfs-server }} is online and up-to-date
