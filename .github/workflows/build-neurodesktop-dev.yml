@@ -14,7 +14,14 @@ env:
   DOCKERHUB_ORG: ${{ secrets.DOCKERHUB_ORG }}
 
 jobs:
+  test_cvmfs:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Test Sydney
+      run: /bin/bash .github/workflows/test_cvmfs.sh 152.67.114.42
   build:
+    needs: [test_cvmfs]
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
