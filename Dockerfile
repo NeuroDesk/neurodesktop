@@ -235,6 +235,13 @@ COPY config/desktop_wallpaper.jpg /usr/share/lxde/wallpapers/desktop_wallpaper.j
 COPY config/pcmanfm.conf /etc/xdg/pcmanfm/LXDE/pcmanfm.conf
 COPY config/lxterminal.conf /usr/share/lxterminal/lxterminal.conf
 
+# Change firefox home
+RUN echo 'pref("browser.startup.homepage", "http://neurodesk.github.io", locked);' >> /etc/firefox/syspref.js \
+    && echo 'pref("browser.startup.firstrunSkipsHomepage", false, locked);' >> /etc/firefox/syspref.js \
+    && echo 'pref("trailhead.firstrun.branches", nofirstrun-empty, locked);' >> /etc/firefox/syspref.js \
+    && echo 'pref("browser.startup.homepage_override.mstone", nofirstrun-empty, locked);' >> /etc/firefox/syspref.js \
+    && echo 'pref("browser.aboutwelcome.enabled", false, locked);' >> /etc/firefox/syspref.js
+
 # Install neurodesk
 RUN git clone https://github.com/NeuroDesk/neurocommand.git /neurocommand \
     && cd /neurocommand \
@@ -243,7 +250,6 @@ RUN git clone https://github.com/NeuroDesk/neurocommand.git /neurocommand \
     && ln -s /neurodesktop-storage/containers /neurocommand/local/containers \
     && mkdir -p /etc/skel/Desktop/ \
     && ln -s /neurodesktop-storage /etc/skel/Desktop/
-
 
 # Create user account with password-less sudo abilities and vnc user
 RUN addgroup --gid 9001 user \
