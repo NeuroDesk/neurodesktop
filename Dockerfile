@@ -237,10 +237,9 @@ COPY config/lxterminal.conf /usr/share/lxterminal/lxterminal.conf
 
 # Change firefox home
 RUN echo 'pref("browser.startup.homepage", "http://neurodesk.github.io", locked);' >> /etc/firefox/syspref.js \
-    && echo 'pref("browser.startup.firstrunSkipsHomepage", false, locked);' >> /etc/firefox/syspref.js \
-    && echo 'pref("trailhead.firstrun.branches", nofirstrun-empty, locked);' >> /etc/firefox/syspref.js \
-    && echo 'pref("browser.startup.homepage_override.mstone", nofirstrun-empty, locked);' >> /etc/firefox/syspref.js \
-    && echo 'pref("browser.aboutwelcome.enabled", false, locked);' >> /etc/firefox/syspref.js
+    && echo 'pref("browser.startup.firstrunSkipsHomepage", true, locked);' >> /etc/firefox/syspref.js \
+    && echo 'pref("startup.homepage_welcome_url", "http://neurodesk.github.io", locked);' >> /etc/firefox/syspref.js \
+    && echo 'pref("browser.aboutwelcome.enabled", true, locked);' >> /etc/firefox/syspref.js
 
 # Install neurodesk
 RUN git clone https://github.com/NeuroDesk/neurocommand.git /neurocommand \
