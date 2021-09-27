@@ -95,6 +95,10 @@ groupmod -g $HOST_GID user
 cd /home/user
 chgrp -R +$HOST_GID .*
 
+# Create vscode config on persistant storage
+mkdir -p /neurodesktop-storage/.config/Code
+chown -R user:user /neurodesktop-storage/.config/Code
+
 open_guacmole_conf
 default
 close_guacmole_conf
