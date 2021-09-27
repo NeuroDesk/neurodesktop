@@ -97,7 +97,9 @@ chgrp -R +$HOST_GID .*
 
 # Create vscode config on persistant storage
 mkdir -p /neurodesktop-storage/.config/Code
-chown -R user:user /neurodesktop-storage/.config/Code
+chown -R user:user /neurodesktop-storage/.config
+mkdir -p /neurodesktop-storage/.vscode
+chown -R user:user /neurodesktop-storage/.vscode
 
 open_guacmole_conf
 default

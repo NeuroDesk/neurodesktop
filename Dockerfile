@@ -260,12 +260,14 @@ RUN addgroup --gid 9001 user \
     && /usr/bin/printf '%s\n%s\n%s\n' 'password' 'password' 'n' | su user -c vncpasswd \
     && echo -n 'password\npassword\nn\n' | su user -c vncpasswd
 
-# Link vscode config to persistant storage
-RUN mkdir -p /home/user/.config \
-        && ln -s /neurodesktop-storage/.config/Code /home/user/.config/Code
-
 USER user
 WORKDIR /home/user
+
+# Link vscode config to persistant storage
+RUN mkdir -p /home/user/.config \
+    && ln -s /neurodesktop-storage/.config/Code .config/Code \
+    && ln -s /neurodesktop-storage/.vscode .vscode
+
 RUN wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh \
     && bash Miniconda3-latest-Linux-x86_64.sh -b \
     && rm Miniconda3-latest-Linux-x86_64.sh \
