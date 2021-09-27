@@ -1,5 +1,11 @@
 name: Build neurodesktop
 
+# Scheduled production builds at 00:00 UTC every day.
+# Build manually from here: https://github.com/NeuroDesk/neurodesktop/actions/workflows/build-neurodesktop.yml
+
+# DockerHub: https://hub.docker.com/r/vnmd/neurodesktop
+# Github Packages: https://github.com/NeuroDesk/neurodesktop/pkgs/container/neurodesktop%2Fneurodesktop
+
 on:
   workflow_dispatch:
   schedule:
