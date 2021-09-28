@@ -1,6 +1,7 @@
 name: Build neurodesktop-dev
 
 on:
+  workflow_dispatch:
   repository_dispatch:
   push:
     branches: [ main ]
