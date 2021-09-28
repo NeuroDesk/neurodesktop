@@ -276,7 +276,7 @@ ENTRYPOINT sudo -E /startup.sh
 WORKDIR /neurodesktop-storage
 
 # Install neurodesk
-ADD "http://api.github.com/repos/aswinnarayanan/foo/commits/main" /tmp/skipcache
+ADD "http://api.github.com/repos/NeuroDesk/neurocommand/commits/main" /tmp/skipcache
 RUN rm /tmp/skipcache \
     && git clone https://github.com/NeuroDesk/neurocommand.git /neurocommand \
     && cd /neurocommand \
