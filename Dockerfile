@@ -241,6 +241,10 @@ RUN echo 'pref("browser.startup.homepage", "http://neurodesk.github.io", locked)
     && echo 'pref("startup.homepage_welcome_url", "http://neurodesk.github.io", locked);' >> /etc/firefox/syspref.js \
     && echo 'pref("browser.aboutwelcome.enabled", true, locked);' >> /etc/firefox/syspref.js
 
+# Create link to persistent storage on Desktop (This needs to happen before the users gets created!)
+RUN mkdir -p /etc/skel/Desktop/ \
+    && ln -s /neurodesktop-storage /etc/skel/Desktop/
+
 # Create user account with password-less sudo abilities and vnc user
 RUN addgroup --gid 9001 user \
     && useradd -s /bin/bash -g user -G sudo -m user \
@@ -282,6 +286,4 @@ RUN rm /tmp/skipcache \
     && cd /neurocommand \
     && bash build.sh --lxde --edit \
     && bash install.sh \
-    && ln -s /neurodesktop-storage/containers /neurocommand/local/containers \
-    && mkdir -p /etc/skel/Desktop/ \
-    && ln -s /neurodesktop-storage /etc/skel/Desktop/
+    && ln -s /neurodesktop-storage/containers /neurocommand/local/containers 
