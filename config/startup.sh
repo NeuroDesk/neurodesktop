@@ -93,7 +93,7 @@ HOST_GID=${HOST_GID:-9001}
 usermod -u $HOST_UID user
 groupmod -g $HOST_GID user
 cd /home/user
-# chgrp -R +$HOST_GID .*
+chgrp +$HOST_GID /home/user
 
 # Create vscode config on persistant storage
 mkdir -p /neurodesktop-storage/.config/Code
