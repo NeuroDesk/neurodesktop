@@ -28,7 +28,7 @@ ssh () {
 echo "\
 ==================================================================
 Starting SSH server"
-service ssh start
+service ssh restart
 echo \
 "<connection name=\"Command Line (SSH)\">
 <protocol>ssh</protocol>
@@ -45,6 +45,7 @@ vnc () {
 echo "\
 ==================================================================
 Starting VNC server"
+su user -c "USER=user vncserver -kill :1"
 su user -c "USER=user vncserver -depth 24 -geometry 1920x1080 -name \"VNC\" :1"
 echo \
 "<connection name=\"Desktop Fixed-Resolution (VNC)\">
@@ -67,7 +68,7 @@ rdp () {
 echo "\
 ==================================================================
 Starting RDP server"
-service xrdp start
+service xrdp restart
 echo \
 "<connection name=\"Desktop Auto-Resolution (RDP)\">
 <protocol>rdp</protocol>
