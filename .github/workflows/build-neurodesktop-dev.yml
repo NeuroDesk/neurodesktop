@@ -25,7 +25,6 @@ jobs:
     - name: check if ${{ matrix.cvmfs-server }} is online and up-to-date
       run: /bin/bash .github/workflows/test_cvmfs.sh  ${{ matrix.cvmfs-server }}
   build:
-    needs: [test_cvmfs]
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
