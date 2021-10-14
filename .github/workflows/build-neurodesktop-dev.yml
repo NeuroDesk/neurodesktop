@@ -2,14 +2,14 @@ name: Build neurodesktop-dev
 
 on:
   workflow_dispatch:
-#   repository_dispatch:
-#   push:
-#     branches: [ main ]
-#     paths:
-#       - .github/workflows/build-neurodesktop-dev.yml
-#       - Dockerfile
-#       - startup.sh
-#       - config/*
+  repository_dispatch:
+  push:
+    branches: [ main ]
+    paths:
+      - .github/workflows/build-neurodesktop-dev.yml
+      - Dockerfile
+      - startup.sh
+      - config/*
     
 env:
   DOCKERHUB_ORG: ${{ secrets.DOCKERHUB_ORG }}
