@@ -58,13 +58,12 @@ do
     echo "[DEBUG] IMAGENAME: $IMAGENAME"
     echo "[DEBUG] BUILDDATE: $BUILDDATE"
 
-    DIRECTORY=/cvmfs/neurodesk.ardc.edu.au/containers/${IMAGENAME}_${BUILDDATE}/
-    if [[ -d "$DIRECTORY" ]]
+    if [[ -f "/cvmfs/neurodesk.ardc.edu.au/containers/$IMAGENAME_BUILDDATE/commands.txt" ]]
     then
-        echo "$DIRECTORY exists on CVMFS."
+        echo "Container exists on CVMFS."
     else
         echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++++"
-        echo "[DEBUG] $DIRECTORY does not exist on CVMFS"
+        echo "[DEBUG] Container does not exist on CVMFS"
         echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++++"
         exit 2
     fi
