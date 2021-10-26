@@ -256,16 +256,19 @@ RUN addgroup --gid 9001 user \
 
 # Install Julia
 WORKDIR /opt
-ENV juliaVersion='1.6.1'
-RUN wget https://julialang-s3.julialang.org/bin/linux/x64/${juliaVersion:0:3}/julia-${juliaVersion}-linux-x86_64.tar.gz \
-    && tar zxvf julia-${juliaVersion}-linux-x86_64.tar.gz \
-    && rm -rf julia-${juliaVersion}-linux-x86_64.tar.gz
-ENV PATH=$PATH:/opt/julia-${juliaVersion}/bin
+# When changing julia version make sure to adjust version in 
+ARG juliaVersionSub='1.6.1'
+ARG juliaVersionMain='1.6'
+RUN wget https://julialang-s3.julialang.org/bin/linux/x64/${juliaVersionMain}/julia-${juliaVersionSub}-linux-x86_64.tar.gz \
+    && tar zxvf julia-${juliaVersionSub}-linux-x86_64.tar.gz \
+    && rm -rf julia-${juliaVersionSub}-linux-x86_64.tar.gz \
+    && ln -s /opt/julia-${juliaVersionSub} /opt/julia-latest
+ENV PATH=$PATH:/opt/julia-${juliaVersionSub}/bin
 
 USER user
 WORKDIR /home/user
 
-# Install vscode extensions
+# Install vscode extensions and configure vscode for miniconda and julia
 ENV DONT_PROMPT_WSL_INSTALL=1
 RUN code --install-extension julialang.language-julia \
     && code --install-extension ms-python.python \
@@ -273,6 +276,8 @@ RUN code --install-extension julialang.language-julia \
     && code --install-extension ms-toolsai.jupyter \
     && code --install-extension ms-toolsai.jupyter-keymap \
     && code --install-extension ms-toolsai.jupyter-renderers
+COPY config/vscode/settings.json /home/user/.config/Code/User/settings.json
+
 
 # This doesn't work if we install extensions - can we do this in the startup file and move the folder over once the persistent storage?
 # # Link vscode config to persistant storage
