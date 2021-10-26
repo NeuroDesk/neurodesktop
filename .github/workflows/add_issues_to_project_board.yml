@@ -1,8 +1,8 @@
 on:
   issues:
     types: [opened, labeled]
-  pull_request:
-    types: [opened, labeled]
+#  pull_request:
+#    types: [opened, labeled]
 env:
   MY_GITHUB_TOKEN: ${{ secrets.NEURODESK_GITHUB_TOKEN_ISSUE_AUTOMATION }}
 
