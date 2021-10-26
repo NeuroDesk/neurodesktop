@@ -116,13 +116,11 @@ RUN apt-get update \
         less \
         nano \
         openssh-client \
-        python3-pip \
         rsync \
         screen \
         tree \
         vim \
         gcc \
-        python3-dev \
         graphviz \
         libzstd1 \
         libgfortran5 \
@@ -171,10 +169,11 @@ RUN mkdir -p /etc/cvmfs/keys/ardc.edu.au/ \
 # Add module script
 COPY ./config/module.sh /usr/share/
 
-# Install nipype
-RUN pip3 install nipype \
-    && rm -rf /root/.cache/pip \
-    && rm -rf /home/ubuntu/.cache/
+# This should be installed in miniconda environment
+# # Install nipype
+# RUN pip3 install nipype \
+#     && rm -rf /root/.cache/pip \
+#     && rm -rf /home/ubuntu/.cache/
 
 # Configure tiling of windows SHIFT-ALT-CTR-{Left,right,top,Bottom} and other openbox desktop mods
 COPY ./config/rc.xml /etc/xdg/openbox
@@ -255,13 +254,31 @@ RUN addgroup --gid 9001 user \
     && /usr/bin/printf '%s\n%s\n%s\n' 'password' 'password' 'n' | su user -c vncpasswd \
     && echo -n 'password\npassword\nn\n' | su user -c vncpasswd
 
+# Install Julia
+WORKDIR /opt
+ENV juliaVersion='1.6.1'
+RUN wget https://julialang-s3.julialang.org/bin/linux/x64/${juliaVersion:0:3}/julia-${juliaVersion}-linux-x86_64.tar.gz \
+    && tar zxvf julia-${juliaVersion}-linux-x86_64.tar.gz \
+    && rm -rf julia-${juliaVersion}-linux-x86_64.tar.gz
+ENV PATH=$PATH:/opt/julia-${juliaVersion}/bin
+
 USER user
 WORKDIR /home/user
 
-# Link vscode config to persistant storage
-RUN mkdir -p /home/user/.config \
-    && ln -s /neurodesktop-storage/.config/Code .config/Code \
-    && ln -s /neurodesktop-storage/.vscode .vscode
+# Install vscode extensions
+ENV DONT_PROMPT_WSL_INSTALL=1
+RUN code --install-extension julialang.language-julia \
+    && code --install-extension ms-python.python \
+    && code --install-extension ms-python.vscode-pylance \
+    && code --install-extension ms-toolsai.jupyter \
+    && code --install-extension ms-toolsai.jupyter-keymap \
+    && code --install-extension ms-toolsai.jupyter-renderers
+
+# This doesn't work if we install extensions - can we do this in the startup file and move the folder over once the persistent storage?
+# # Link vscode config to persistant storage
+# RUN mkdir -p /home/user/.config \
+#     && ln -s /neurodesktop-storage/.config/Code .config/Code \
+#     && ln -s /neurodesktop-storage/.vscode .vscode
 
 RUN wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh \
     && bash Miniconda3-latest-Linux-x86_64.sh -b \
@@ -279,7 +296,7 @@ ENTRYPOINT sudo -E /startup.sh
 
 WORKDIR /neurodesktop-storage
 
-# Install neurodesk
+# Install neurocommand
 ADD "http://api.github.com/repos/NeuroDesk/neurocommand/commits/main" /tmp/skipcache
 RUN rm /tmp/skipcache \
     && git clone https://github.com/NeuroDesk/neurocommand.git /neurocommand \
