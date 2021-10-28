@@ -1,3 +1,5 @@
+set -e
+
 SERVERIP=$1
 # SERVERIP=203.101.231.144
 
@@ -38,7 +40,7 @@ ls /cvmfs/neurodesk.ardc.edu.au
 
 # sudo cvmfs_config umount
 
-# cvmfs_config stat -v neurodesk.ardc.edu.au
+cvmfs_config stat -v neurodesk.ardc.edu.au
 
 
 
@@ -47,9 +49,11 @@ wget https://raw.githubusercontent.com/NeuroDesk/neurocommand/main/cvmfs/log.txt
 echo "debug logfile:"
 cat log.txt
 
+ls /cvmfs/neurodesk.ardc.edu.au
+
 while IFS= read -r LINE
 do
-    echo "LINE: $LINE"
+    echo "[DEBUG] LINE: $LINE"
     IMAGENAME_BUILDDATE="$(cut -d' ' -f1 <<< ${LINE})"
     echo "IMAGENAME_BUILDDATE: $IMAGENAME_BUILDDATE"
 
