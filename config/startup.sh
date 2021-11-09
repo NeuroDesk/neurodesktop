@@ -84,8 +84,12 @@ echo \
 
 default () {
     ssh
-    vnc
     rdp
+}
+
+vnc_enable () {
+    ssh
+    vnc
 }
 
 HOST_UID=${HOST_UID:-9001}
@@ -103,7 +107,11 @@ mkdir -p /neurodesktop-storage/.vscode
 chown -R user:user /neurodesktop-storage/.vscode
 
 open_guacmole_conf
-default
+if [ -n "$VNC_ENABLE" ]; then
+    vnc_enable
+else
+    default
+fi
 close_guacmole_conf
 
 if [ -z "$CVMFS_DISABLE" ]; then
