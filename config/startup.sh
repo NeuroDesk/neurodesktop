@@ -92,6 +92,9 @@ vnc_enable () {
     vnc
 }
 
+export JAVA_OPTS="-Xms512M -Xmx1024M"
+export CATALINA_OPTS="-Xms512M -Xmx1024M"
+
 HOST_UID=${HOST_UID:-9001}
 HOST_GID=${HOST_GID:-9001}
 # echo "Starting with UID:GID $HOST_UID:$HOST_GID"
@@ -144,5 +147,5 @@ Starting Guacamole Daemon
     Username: \"user\"
     Password: \"password\"
 ------------------------------------------------------------------"
-su user -c "guacd -L debug -f"
-
+# su user -c "guacd -f -L debug && echo"
+su user -c "guacd -f && echo"
