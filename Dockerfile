@@ -1,5 +1,5 @@
 ARG GO_VERSION="1.14.12"
-ARG SINGULARITY_VERSION="3.8.2"
+ARG SINGULARITY_VERSION="3.8.4"
 ARG TOMCAT_REL="9"
 ARG TOMCAT_VERSION="9.0.52"
 ARG GUACAMOLE_VERSION="1.3.0"
@@ -206,7 +206,7 @@ RUN export VERSION=${GO_VERSION} OS=linux ARCH=amd64 \
     && wget https://github.com/sylabs/singularity/releases/download/v${SINGULARITY_VERSION}/singularity-ce-${SINGULARITY_VERSION}.tar.gz \
     && tar -xzvf singularity-ce-${SINGULARITY_VERSION}.tar.gz \
     && cd singularity-ce-${SINGULARITY_VERSION} \
-    && ./mconfig -p /usr/local/singularity \
+    && ./mconfig --without-suid --prefix=/usr/local/singularity \
     && make -C builddir \
     && make -C builddir install \
     && rm -rf /usr/local/go $GOPATH 
