@@ -1,8 +1,10 @@
-ARG GO_VERSION="1.14.12"
+ARG GO_VERSION="1.17.2"
 ARG SINGULARITY_VERSION="3.9.1"
 ARG TOMCAT_REL="9"
 ARG TOMCAT_VERSION="9.0.52"
 ARG GUACAMOLE_VERSION="1.3.0"
+ARG juliaVersionSub='1.6.1'
+ARG juliaVersionMain='1.6'
 
 # Create final image
 FROM ubuntu:20.04
@@ -256,9 +258,6 @@ RUN addgroup --gid 9001 user \
 
 # Install Julia
 WORKDIR /opt
-# When changing julia version make sure to adjust version in 
-ARG juliaVersionSub='1.6.1'
-ARG juliaVersionMain='1.6'
 RUN wget https://julialang-s3.julialang.org/bin/linux/x64/${juliaVersionMain}/julia-${juliaVersionSub}-linux-x86_64.tar.gz \
     && tar zxvf julia-${juliaVersionSub}-linux-x86_64.tar.gz \
     && rm -rf julia-${juliaVersionSub}-linux-x86_64.tar.gz \
