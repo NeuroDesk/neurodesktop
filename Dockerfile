@@ -3,8 +3,8 @@ ARG SINGULARITY_VERSION="3.9.1"
 ARG TOMCAT_REL="9"
 ARG TOMCAT_VERSION="9.0.52"
 ARG GUACAMOLE_VERSION="1.3.0"
-ARG juliaVersionSub='1.6.1'
-ARG juliaVersionMain='1.6'
+ARG JULIA_VERSION='1.6.1'
+ARG JULIA_MAIN_VERSION='1.6'
 
 # Create final image
 FROM ubuntu:20.04
@@ -258,11 +258,13 @@ RUN addgroup --gid 9001 user \
 
 # Install Julia
 WORKDIR /opt
-RUN wget https://julialang-s3.julialang.org/bin/linux/x64/${juliaVersionMain}/julia-${juliaVersionSub}-linux-x86_64.tar.gz \
-    && tar zxvf julia-${juliaVersionSub}-linux-x86_64.tar.gz \
-    && rm -rf julia-${juliaVersionSub}-linux-x86_64.tar.gz \
-    && ln -s /opt/julia-${juliaVersionSub} /opt/julia-latest
-ENV PATH=$PATH:/opt/julia-${juliaVersionSub}/bin
+ARG JULIA_VERSION
+ARG JULIA_MAIN_VERSION
+RUN wget https://julialang-s3.julialang.org/bin/linux/x64/${JULIA_MAIN_VERSION}/julia-${JULIA_VERSION}-linux-x86_64.tar.gz \
+    && tar zxvf julia-${JULIA_VERSION}-linux-x86_64.tar.gz \
+    && rm -rf julia-${JULIA_VERSION}-linux-x86_64.tar.gz \
+    && ln -s /opt/julia-${JULIA_VERSION} /opt/julia-latest
+ENV PATH=$PATH:/opt/julia-${JULIA_VERSION}/bin
 
 USER user
 WORKDIR /home/user
