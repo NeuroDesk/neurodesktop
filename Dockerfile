@@ -62,6 +62,7 @@ ARG TOMCAT_REL
 ARG TOMCAT_VERSION
 RUN wget https://archive.apache.org/dist/tomcat/tomcat-${TOMCAT_REL}/v${TOMCAT_VERSION}/bin/apache-tomcat-${TOMCAT_VERSION}.tar.gz -P /tmp \
     && tar -xf /tmp/apache-tomcat-${TOMCAT_VERSION}.tar.gz -C /tmp \
+    && rm -rf /tmp/apache-tomcat-${TOMCAT_VERSION}.tar.gz \
     && mv /tmp/apache-tomcat-${TOMCAT_VERSION} /usr/local/tomcat \
     && mv /usr/local/tomcat/webapps /usr/local/tomcat/webapps.dist \
     && mkdir /usr/local/tomcat/webapps \
@@ -73,6 +74,7 @@ WORKDIR /etc/guacamole
 RUN wget "https://apache.mirror.digitalpacific.com.au/guacamole/${GUACAMOLE_VERSION}/binary/guacamole-1.3.0.war" -O /usr/local/tomcat/webapps/ROOT.war \
     && wget "https://apache.mirror.digitalpacific.com.au/guacamole/${GUACAMOLE_VERSION}/source/guacamole-server-1.3.0.tar.gz" -O /etc/guacamole/guacamole-server-${GUACAMOLE_VERSION}.tar.gz \
     && tar xvf /etc/guacamole/guacamole-server-${GUACAMOLE_VERSION}.tar.gz \
+    && rm -rf /etc/guacamole/guacamole-server-${GUACAMOLE_VERSION}.tar.gz \
     && cd /etc/guacamole/guacamole-server-${GUACAMOLE_VERSION} \
     && ./configure --with-init-dir=/etc/init.d \
     && make \
@@ -211,6 +213,8 @@ RUN export VERSION=${GO_VERSION} OS=linux ARCH=amd64 \
     && ./mconfig --without-suid --prefix=/usr/local/singularity \
     && make -C builddir \
     && make -C builddir install \
+    && cd .. \
+    && rm -rf singularity-ce-${SINGULARITY_VERSION} \
     && rm -rf /usr/local/go $GOPATH 
 
 # Setup module system & singularity
