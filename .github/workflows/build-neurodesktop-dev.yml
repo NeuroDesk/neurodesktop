@@ -52,7 +52,7 @@ jobs:
     - name: Container image scan
       uses: Azure/container-scan@v0.1
       with:
-        image-name: $IMAGEID:$SHORT_SHA
+        image-name: env.IMAGEID:env.SHORT_SHA
         severity-threshold: HIGH
         run-quality-checks: true
     - name: Push neurodesktop to GitHub packages (if changes found)
