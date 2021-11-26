@@ -51,12 +51,12 @@ jobs:
         echo "ROOTFS_NEW=$ROOTFS_NEW" >> $GITHUB_ENV
         echo "BUILDDATE=$BUILDDATE" >> $GITHUB_ENV
         echo "IMAGETAG=$IMAGETAG" >> $GITHUB_ENV
-    - name: Container image scan
-      uses: Azure/container-scan@v0.1
-      with:
-        image-name: ${{ env.IMAGETAG }}
-        severity-threshold: HIGH
-        run-quality-checks: true
+#     - name: Container image scan
+#       uses: Azure/container-scan@v0.1
+#       with:
+#         image-name: ${{ env.IMAGETAG }}
+#         severity-threshold: HIGH
+#         run-quality-checks: true
     - name: Push neurodesktop to GitHub packages (if changes found)
       if: env.ROOTFS_NEW != env.ROOTFS_CACHE
       run: |
