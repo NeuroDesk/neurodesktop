@@ -43,16 +43,18 @@ jobs:
     - name: Build new neurodesktop image
       run: |
         SHORT_SHA=$(git rev-parse --short $GITHUB_SHA)
-        docker build . --file Dockerfile --tag $IMAGEID:$SHORT_SHA --cache-from $IMAGEID --label "GITHUB_REPOSITORY=$GITHUB_REPOSITORY" --label "GITHUB_SHA=$GITHUB_SHA"
+        IMAGETAG=$IMAGEID:$SHORT_SHA
+        docker build . --file Dockerfile --tag $IMAGETAG --cache-from $IMAGEID --label "GITHUB_REPOSITORY=$GITHUB_REPOSITORY" --label "GITHUB_SHA=$GITHUB_SHA"
         ROOTFS_NEW=$(docker inspect --format='{{.RootFS}}' $IMAGEID:$SHORT_SHA)
         BUILDDATE=`date +%Y%m%d`
         echo "SHORT_SHA=$SHORT_SHA" >> $GITHUB_ENV
         echo "ROOTFS_NEW=$ROOTFS_NEW" >> $GITHUB_ENV
         echo "BUILDDATE=$BUILDDATE" >> $GITHUB_ENV
+        echo "IMAGETAG=$IMAGETAG" >> $GITHUB_ENV
     - name: Container image scan
       uses: Azure/container-scan@v0.1
       with:
-        image-name: env.IMAGEID:env.SHORT_SHA
+        image-name: env.IMAGETAG
         severity-threshold: HIGH
         run-quality-checks: true
     - name: Push neurodesktop to GitHub packages (if changes found)
