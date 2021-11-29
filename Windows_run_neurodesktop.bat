@@ -4,7 +4,7 @@ if "Get-Process 'com.docker.proxy' &&  echo $? " == "False" (
  echo "--------------------------------------------------------------"
  ECHO "Please follow the instruction to download and install Docker:"
 echo "---------------------------------------------------------------"
-  start "www.hub.docker.com/editions/community/docker-ce-desktop-windows"
+  explorer "www.hub.docker.com/editions/community/docker-ce-desktop-windows"
 ) else (
 ::"I don't like to think of PowerShell as "CMD with the stupid parts removed". I like to think of it as "Bash without any of the useful bits".
 ECHO "Starting NeuroDesktop:"
