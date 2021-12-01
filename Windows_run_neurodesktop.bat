@@ -21,16 +21,12 @@ start powershell -windowstyle hidden -noexit -Command "docker run --shm-size=1gb
 :: if running it will say <!DOCTYPE html> 
 :: if not started it will say curl: (7) Failed to connect to localhost port 8080: Connection refused  
 
-:a
-if curl http://localhost:8080 | find "<!DOCTYPE html>" || goto :next
-else goto :b
-
-:b
-echo "waiting for neurodesk to start"
+:loop
+echo "waiting for Neurodesk"
 timeout /t 5 /nobreak
-goto :a
+(curl http://localhost:8080 | find "<!DOCTYPE html>") >nul 2>&1
+if errorlevel 1 goto loop
 
-:next
 echo "Docker started, opening session"
 explorer "http://localhost:8080/#/?username=user&password=password"
 
