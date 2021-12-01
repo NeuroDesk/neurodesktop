@@ -210,7 +210,7 @@ RUN export VERSION=${GO_VERSION} OS=linux ARCH=amd64 \
     && wget https://github.com/sylabs/singularity/releases/download/v${SINGULARITY_VERSION}/singularity-ce-${SINGULARITY_VERSION}.tar.gz \
     && tar -xzvf singularity-ce-${SINGULARITY_VERSION}.tar.gz \
     && cd singularity-ce-${SINGULARITY_VERSION} \
-    && ./mconfig --without-suid --prefix=/usr/local/singularity \
+    && ./mconfig --prefix=/usr/local/singularity \
     && make -C builddir \
     && make -C builddir install \
     && cd .. \
