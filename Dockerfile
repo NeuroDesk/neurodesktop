@@ -270,6 +270,14 @@ RUN wget https://julialang-s3.julialang.org/bin/linux/x64/${JULIA_MAIN_VERSION}/
     && ln -s /opt/julia-${JULIA_VERSION} /opt/julia-latest
 ENV PATH=$PATH:/opt/julia-${JULIA_VERSION}/bin
 
+# Install datalad
+RUN wget -O- http://neuro.debian.net/lists/focal.us-nh.full | sudo tee /etc/apt/sources.list.d/neurodebian.sources.list
+RUN apt-key adv --recv-keys --keyserver hkps://keyserver.ubuntu.com 0xA5D32F012649A5A9
+RUN apt-get update \
+    && DEBIAN_FRONTEND=noninteractive apt-get install -y \
+        datalad \
+    && rm -rf /var/lib/apt/lists/*
+
 USER user
 WORKDIR /home/user
 
