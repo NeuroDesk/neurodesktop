@@ -1,8 +1,6 @@
 ECHO "Checking if Docker is installed" 
 @echo off
 
-
-
 docker ps 
 if %ERRORLEVEL% GEQ 1 goto setupdocker 
 
