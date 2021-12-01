@@ -303,6 +303,11 @@ RUN wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh \
     && rm Miniconda3-latest-Linux-x86_64.sh \
     && miniconda3/bin/conda init
 
+# Setup git
+RUN git config --global user.email "user@neurodesk.github.io"
+RUN git config --global user.name "Neurodesk User"
+
+
 USER root
 
 # Add entrypoint script
