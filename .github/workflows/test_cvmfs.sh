@@ -7,7 +7,7 @@ sudo apt-get install lsb-release
 wget https://ecsft.cern.ch/dist/cvmfs/cvmfs-release/cvmfs-release-latest_all.deb
 sudo dpkg -i cvmfs-release-latest_all.deb
 sudo apt-get update --allow-unauthenticated
-sudo apt-get install cvmfs
+sudo apt-get install cvmfs --allow-unauthenticated
 
 sudo mkdir -p /etc/cvmfs/keys/ardc.edu.au/
 
