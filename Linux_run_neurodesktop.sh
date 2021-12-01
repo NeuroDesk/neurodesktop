@@ -2,8 +2,34 @@
 #Tom Shaw 20211201
 #Check for Docker, open explorer if not and open docker download page
 #start the container and wait for the website to be available. 
+#function:
+function countdown(){
+   date1=$((`date +%s` + $1)); 
+   while [ "$date1" -ge `date +%s` ]; do 
+     echo -ne "$(date -u --date @$(($date1 - `date +%s`)) +%H:%M:%S)\r";
+     sleep 0.1
+   done
+}
 
 #first install xdg-tools
+# Check Os 
+#apt-get install xdg-utils
+# Ubuntu
+#apt-get install xdg-utils
+# Alpine
+#apk add xdg-utils
+# Arch Linux
+#pacman -S xdg-utils
+# Kali Linux
+#apt-get install xdg-utils
+# CentOS
+#yum install xdg-utils
+# Fedora
+#dnf install xdg-utils
+# Raspbian
+#apt-get install xdg-utils
+# package the file into a .desktop file like so
+#https://www.maketecheasier.com/create-desktop-file-linux/ 
 REQUIRED_PKG="xdg-utils"
 PKG_OK=$(dpkg-query -W --showformat='${Status}\n' $REQUIRED_PKG|grep "install ok installed")
 echo "Checking for $REQUIRED_PKG: $PKG_OK"
@@ -25,7 +51,7 @@ if ! docker info > /dev/null 2>&1; then
         read -t 3 -n 1
         if [ $? = 0 ] ; then
             exit ;
-            else
+        else
             echo "waiting for the keypress"
         fi
     done
@@ -39,8 +65,11 @@ else
     docker rm neurodesktop
     echo "--------------------------------------------------------------"
     echo "Starting NeuroDesktop, please wait..."
+    echo "You may be asked to enter your password to run the Docker container"
     echo "--------------------------------------------------------------"
+    echo "running command: sudo docker run --shm-size=1gb -it -d --privileged --name neurodesktop -v ~/neurodesktop-storage:/neurodesktop-storage -e HOST_UID="$(id -u)" -e HOST_GID="$(id -g)" -p 8080:8080 -h neurodesktop-20211028 vnmd/neurodesktop:20211028"
     mkdir -p ~/neurodesktop-storage
+    #note this is in disconnected mode
     sudo docker run \
     --shm-size=1gb -it -d --privileged --name neurodesktop \
     -v ~/neurodesktop-storage:/neurodesktop-storage \
@@ -53,52 +82,29 @@ else
     # if running it will say <!DOCTYPE html>
     # if not started it will say curl: (7) Failed to connect to localhost port 8080: Connection refused
 
-until curl http://localhost:8080 >/dev/null 2>&1 
-do
-echo "--------------------------------------------------------------"
-echo "Waiting for Neurodesk, please wait and your browser will open shortly"
-echo "--------------------------------------------------------------"
-function countdown(){
-   date1=$((`date +%s` + $1)); 
-   while [ "$date1" -ge `date +%s` ]; do 
-     echo -ne "$(date -u --date @$(($date1 - `date +%s`)) +%H:%M:%S)\r";
-     sleep 0.1
-   done
-}
-echo "Checking every 5 seconds"
-countdown 5
-done
+    until curl http://localhost:8080 >/dev/null 2>&1 ; do
+        echo "--------------------------------------------------------------"
+        echo "Waiting for Neurodesk, please wait and your browser will open shortly"
+        echo "--------------------------------------------------------------"
+        echo "Checking every 5 seconds. "
+        echo "If this takes longer than 10 mins please try restarting Docker or check your internet connection"
+        countdown 5
+    done
 
-echo "Docker started, opening session"
-xdg-open "http://localhost:8080/#/?username=user&password=password"
-echo "NeuroDesktop is running - press ANY key to shutdown and quit NeuroDesktop!"
-while [ true ] ; do
-    read -n 1
-    if [ $? = 0 ] ; then
-    echo "The following container has been stopped:"
-    docker stop neurodesktop
-    echo "The following container has been removed:"
-    docker rm neurodesktop
-    exit 0
-    else
-    echo "Waiting for the keypress"
-    fi
-done
+    echo "Docker started, opening session"
+    xdg-open "http://localhost:8080/#/?username=user&password=password"
+    echo "NeuroDesktop is running - press ANY key to shutdown and quit NeuroDesktop!"
+    while [ true ] ; do
+        read -n 1
+        if [ $? = 0 ] ; then
+            echo "The following container has been stopped:"
+            docker stop neurodesktop
+            echo "The following container has been removed:"
+            docker rm neurodesktop
+            exit 0
+        else
+            echo "Waiting for the keypress"
+        fi
+    done
 fi
-
-
-#apt-get install xdg-utils
-# Ubuntu
-#apt-get install xdg-utils
-# Alpine
-#apk add xdg-utils
-# Arch Linux
-#pacman -S xdg-utils
-# Kali Linux
-#apt-get install xdg-utils
-# CentOS
-#yum install xdg-utils
-# Fedora
-#dnf install xdg-utils
-# Raspbian
-#apt-get install xdg-utils
+exit
