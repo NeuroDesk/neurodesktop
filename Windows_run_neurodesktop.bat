@@ -7,13 +7,15 @@ docker ps
 if %ERRORLEVEL% GEQ 1 goto setupdocker 
 
 ECHO "Starting NeuroDesktop:"
-ECHO "Remove old versions of NeuroDesktop - if none are available the daemon will throw an error which can be safely ignored:"
-ECHO "The following container has been stopped:"
+ECHO "Remove old versions of NeuroDesktop
+ECHO "If none are available the daemon will throw an error which can be safely ignored:"
+ECHO "Checking if the following container is available:"
 docker stop neurodesktop
-ECHO "The following container has been removed:"
+ECHO "Checking if the following container is available:"
 docker rm neurodesktop
-
+echo "--------------------------------------------------------------"
 ECHO "Starting NeuroDesktop, please wait..."
+echo "--------------------------------------------------------------"
 start powershell -windowstyle hidden -noexit -Command "docker run --shm-size=1gb -it --privileged --name neurodesktop -v C:/neurodesktop-storage:/neurodesktop-storage -p 8080:8080 -h neurodesktop-20211028 vnmd/neurodesktop:20211028"
 ::poll for the guac server using curl  curl http://localhost:8080
 :: possible responses while booting are curl: (52) Empty reply from server
@@ -21,7 +23,9 @@ start powershell -windowstyle hidden -noexit -Command "docker run --shm-size=1gb
 :: if not started it will say curl: (7) Failed to connect to localhost port 8080: Connection refused
 
 :loop
-echo "waiting for Neurodesk"
+echo "--------------------------------------------------------------"
+echo "Waiting for Neurodesk, please wait and your browser will open shortly"
+echo "--------------------------------------------------------------"
 timeout /t 5 /nobreak
 (curl http://localhost:8080 | find "<!DOCTYPE html>") >nul 2>&1
 if errorlevel 1 goto loop
