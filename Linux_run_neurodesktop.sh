@@ -10,67 +10,63 @@ function countdown() {
         sleep 0.1
     done
 }
-
-  YUM_CMD=$(which yum)
-  APT_GET_CMD=$(which apt-get)
-  APT_CMD=$(which apt)
-  APK_CMD=$(which apk)
-  DNF_CMD=$(which dnf)
-  PACMAN_CMD=$(which pacman)
-
-if [[ ! -z $YUM_CMD ]]; then
-    yum install $YUM_PACKAGE_NAME
-elif [[ ! -z $APT_GET_CMD ]]; then
-    apt-get $DEB_PACKAGE_NAME
-elif [[ ! -z $APT_CMD ]]; then
-elif [[ ! -z $APT_CMD ]]; then
-elif [[ ! -z $APT_CMD ]]; then
-elif [[ ! -z $APT_CMD ]]; then
-    $OTHER_CMD <proper arguments>
- else
-    echo "error can't install package $PACKAGE"
-    exit 1;
- fi
-
-#first install xdg-tools
-# Check Os
-#apt-get install xdg-utils
-# Ubuntu
-#apt-get install xdg-utils
-# Alpine
-
-#apk search pkgName  apk search -v -d 'xdg-utils'
-#apk add xdg-utils
-
-
-# Arch Linux
-#pacman -Qs xdg-utils
-#pacman -S xdg-utils
-
-
-# Kali Linux
-#apt-get install xdg-utils
-
-
-# CentOS
-#yum install xdg-utils
-#yum list installed | grep xdg-utils
-
-# Fedora
-#dnf install xdg-utils
-#dnf list installed "xdg-utils"
-
-# Raspbian
-#apt-get install xdg-utils
-# package the file into a .desktop file like so
-#https://www.maketecheasier.com/create-desktop-file-linux/
+#Check for xdg-open -  need it to open a browser. 
+YUM_CMD=$(which yum)
+APT_GET_CMD=$(which apt-get)
+APT_CMD=$(which apt)
+APK_CMD=$(which apk)
+DNF_CMD=$(which dnf)
+PACMAN_CMD=$(which pacman)
 REQUIRED_PKG="xdg-utils"
-PKG_OK=$(dpkg-query -W --showformat='${Status}\n' $REQUIRED_PKG | grep "install ok installed")
-echo "Checking for $REQUIRED_PKG: $PKG_OK"
-if [ "" = "$PKG_OK" ]; then
-    echo "No $REQUIRED_PKG. Setting up $REQUIRED_PKG."
-    sudo apt --yes install $REQUIRED_PKG
+if [[ ! -z $YUM_CMD ]]; then
+    PKG_OK=$(yum list installed | grep "xdg-utils")
+    echo "Checking for $REQUIRED_PKG: $PKG_OK"
+    if [ "" = "$PKG_OK" ]; then
+        echo "No $REQUIRED_PKG. Setting up $REQUIRED_PKG."
+        sudo yum install $REQUIRED_PKG
+    fi
+elif [[ ! -z $APT_GET_CMD ]]; then
+    PKG_OK=$(dpkg-query -W --showformat='${Status}\n' $REQUIRED_PKG | grep "install ok installed")
+    echo "Checking for $REQUIRED_PKG: $PKG_OK"
+    if [ "" = "$PKG_OK" ]; then
+        echo "No $REQUIRED_PKG. Setting up $REQUIRED_PKG."
+        sudo apt --yes install $REQUIRED_PKG
+    fi
+elif [[ ! -z $APT_CMD ]]; then
+    PKG_OK=$(apt -qq list xdg-utils)
+    echo "Checking for $REQUIRED_PKG: $PKG_OK"
+    if [ "" = "$PKG_OK" ]; then
+        echo "No $REQUIRED_PKG. Setting up $REQUIRED_PKG."
+        sudo apt install $REQUIRED_PKG
+    fi
+elif [[ ! -z $APK_CMD ]]; then
+    PKG_OK=$(apk search pkgName apk search -v -d 'xdg-utils')
+    echo "Checking for $REQUIRED_PKG: $PKG_OK"
+    if [ "" = "$PKG_OK" ]; then
+        echo "No $REQUIRED_PKG. Setting up $REQUIRED_PKG."
+        sudo apk add $REQUIRED_PKG
+    fi
+elif [[ ! -z $PACMAN_CMD ]]; then
+    PKG_OK=$(pacman -Qs xdg-utils)
+    echo "Checking for $REQUIRED_PKG: $PKG_OK"
+    if [ "" = "$PKG_OK" ]; then
+        echo "No $REQUIRED_PKG. Setting up $REQUIRED_PKG."
+        sudo pacman -S $REQUIRED_PKG
+    fi
+elif [[ ! -z $DNF_CMD ]]; then
+    PKG_OK=$(dnf list installed "xdg-utils")
+    echo "Checking for $REQUIRED_PKG: $PKG_OK"
+    if [ "" = "$PKG_OK" ]; then
+        echo "No $REQUIRED_PKG. Setting up $REQUIRED_PKG."
+        sudo dnf install $REQUIRED_PKG
+    fi
+else
+    echo "error can't install package $REQUIRED_PACKAGE because I can't find a package manager"
+    echo "please install xdg-utils using your package management system"
+    sleep 10s
 fi
+
+#Check for docker install
 
 echo "Checking if Docker is installed"
 if ! docker info >/dev/null 2>&1; then
@@ -142,3 +138,5 @@ else
     done
 fi
 exit
+# package the file into a .desktop file like so
+#https://www.maketecheasier.com/create-desktop-file-linux/
