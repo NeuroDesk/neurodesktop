@@ -5,8 +5,11 @@ SERVERIP=$1
 
 sudo apt-get install lsb-release
 wget https://ecsft.cern.ch/dist/cvmfs/cvmfs-release/cvmfs-release-latest_all.deb
+echo "[DEBUG]: adding cfms repo"
 sudo dpkg -i cvmfs-release-latest_all.deb
+echo "[DEBUG]: apt-get update"
 sudo apt-get update --allow-unauthenticated
+echo "[DEBUG]: apt-get install cvmfs"
 sudo apt-get install cvmfs --allow-unauthenticated
 
 sudo mkdir -p /etc/cvmfs/keys/ardc.edu.au/
