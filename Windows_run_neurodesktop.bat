@@ -1,8 +1,6 @@
 ECHO "Checking if Docker is installed" 
 @echo off
 
-
-
 docker ps 
 if %ERRORLEVEL% GEQ 1 goto setupdocker 
 
@@ -16,7 +14,7 @@ docker rm neurodesktop
 echo "--------------------------------------------------------------"
 ECHO "Starting NeuroDesktop, please wait..."
 echo "--------------------------------------------------------------"
-start powershell -windowstyle hidden -noexit -Command "docker run --shm-size=1gb -it --privileged --name neurodesktop -v C:/neurodesktop-storage:/neurodesktop-storage -p 8080:8080 -h neurodesktop-20211028 vnmd/neurodesktop:20211028"
+start powershell -windowstyle minimized -noexit -Command "docker run --shm-size=1gb -it --privileged --name neurodesktop -v C:/neurodesktop-storage:/neurodesktop-storage -p 8080:8080 -h neurodesktop-20211028 vnmd/neurodesktop:20211028"
 ::poll for the guac server using curl  curl http://localhost:8080
 :: possible responses while booting are curl: (52) Empty reply from server
 :: if running it will say <!DOCTYPE html>
@@ -27,6 +25,7 @@ echo "--------------------------------------------------------------"
 echo "Waiting for Neurodesk, please wait and your browser will open shortly"
 echo "--------------------------------------------------------------"
 timeout /t 5 /nobreak
+echo "If this takes longer than 10 mins please try restarting Docker or check your internet connection"
 (curl http://localhost:8080 | find "<!DOCTYPE html>") >nul 2>&1
 if errorlevel 1 goto loop
 
