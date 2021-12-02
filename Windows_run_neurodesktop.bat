@@ -14,7 +14,7 @@ docker rm neurodesktop
 echo "--------------------------------------------------------------"
 ECHO "Starting NeuroDesktop, please wait..."
 echo "--------------------------------------------------------------"
-start powershell -windowstyle hidden -noexit -Command "docker run --shm-size=1gb -it --privileged --name neurodesktop -v C:/neurodesktop-storage:/neurodesktop-storage -p 8080:8080 -h neurodesktop-20211028 vnmd/neurodesktop:20211028"
+start powershell -windowstyle minimized -noexit -Command "docker run --shm-size=1gb -it --privileged --name neurodesktop -v C:/neurodesktop-storage:/neurodesktop-storage -p 8080:8080 -h neurodesktop-20211028 vnmd/neurodesktop:20211028"
 ::poll for the guac server using curl  curl http://localhost:8080
 :: possible responses while booting are curl: (52) Empty reply from server
 :: if running it will say <!DOCTYPE html>
