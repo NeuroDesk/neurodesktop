@@ -210,7 +210,7 @@ RUN export VERSION=${GO_VERSION} OS=linux ARCH=amd64 \
     && wget https://github.com/sylabs/singularity/releases/download/v${SINGULARITY_VERSION}/singularity-ce-${SINGULARITY_VERSION}.tar.gz \
     && tar -xzvf singularity-ce-${SINGULARITY_VERSION}.tar.gz \
     && cd singularity-ce-${SINGULARITY_VERSION} \
-    && ./mconfig --without-suid --prefix=/usr/local/singularity \
+    && ./mconfig --prefix=/usr/local/singularity \
     && make -C builddir \
     && make -C builddir install \
     && cd .. \
@@ -270,6 +270,14 @@ RUN wget https://julialang-s3.julialang.org/bin/linux/x64/${JULIA_MAIN_VERSION}/
     && ln -s /opt/julia-${JULIA_VERSION} /opt/julia-latest
 ENV PATH=$PATH:/opt/julia-${JULIA_VERSION}/bin
 
+# Install datalad
+RUN wget -O- http://neuro.debian.net/lists/focal.us-nh.full | sudo tee /etc/apt/sources.list.d/neurodebian.sources.list
+RUN apt-key adv --recv-keys --keyserver hkps://keyserver.ubuntu.com 0xA5D32F012649A5A9
+RUN apt-get update \
+    && DEBIAN_FRONTEND=noninteractive apt-get install -y \
+        datalad \
+    && rm -rf /var/lib/apt/lists/*
+
 USER user
 WORKDIR /home/user
 
@@ -294,6 +302,11 @@ RUN wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh \
     && bash Miniconda3-latest-Linux-x86_64.sh -b \
     && rm Miniconda3-latest-Linux-x86_64.sh \
     && miniconda3/bin/conda init
+
+# Setup git
+RUN git config --global user.email "user@neurodesk.github.io"
+RUN git config --global user.name "Neurodesk User"
+
 
 USER root
 
