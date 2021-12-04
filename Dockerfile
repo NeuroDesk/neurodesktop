@@ -290,6 +290,7 @@ RUN code --install-extension julialang.language-julia \
     && code --install-extension ms-toolsai.jupyter-keymap \
     && code --install-extension ms-toolsai.jupyter-renderers
 COPY config/vscode/settings.json /home/user/.config/Code/User/settings.json
+RUN chmod a+rwx /home/user/.config/Code/User/settings.json
 
 
 # This doesn't work if we install extensions - can we do this in the startup file and move the folder over once the persistent storage?
