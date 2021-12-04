@@ -40,7 +40,7 @@ jobs:
         if: ${{ github.event_name == 'schedule' }}
         run: test -z $(git rev-list  --after="24 hours"  ${{ github.sha }}) && echo "::set-output name=should_run::false"
   build:
-    needs: [test_cvmfs, check_date]
+    needs: [check_date]
     if: ${{ needs.check_date.outputs.should_run != 'false' }}
     runs-on: ubuntu-latest
     steps:
