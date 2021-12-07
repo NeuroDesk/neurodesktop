@@ -97,6 +97,9 @@ else
     echo "Starting NeuroDesktop, please wait..."
     echo "You may be asked to enter your password to run the Docker container"
     echo "--------------------------------------------------------------"
+    echo "running command: sudo docker pull vnmd/neurodesktop:20211028"
+    sudo docker pull vnmd/neurodesktop:20211028
+    mkdir -p ~/neurodesktop-storage
     echo "running command: sudo docker run --shm-size=1gb -it -d --privileged --name neurodesktop -v ~/neurodesktop-storage:/neurodesktop-storage -e HOST_UID="$(id -u)" -e HOST_GID="$(id -g)" -p 8080:8080 -h neurodesktop-20211028 vnmd/neurodesktop:20211028"
     mkdir -p ~/neurodesktop-storage
     #note this is in disconnected mode
@@ -120,9 +123,24 @@ else
         echo "If this takes longer than 10 mins please try restarting Docker or check your internet connection"
         countdown 5
     done
-
+clear
     echo "Docker started, opening session"
     xdg-open "http://localhost:8080/#/?username=user&password=password"
+echo "#######################################################################################"
+echo "░██╗░░░░░░░██╗███████╗██╗░░░░░░█████╗░░█████╗░███╗░░░███╗███████╗  ████████╗░█████╗░"
+echo "░██║░░██╗░░██║██╔════╝██║░░░░░██╔══██╗██╔══██╗████╗░████║██╔════╝  ╚══██╔══╝██╔══██╗"
+echo "░╚██╗████╗██╔╝█████╗░░██║░░░░░██║░░╚═╝██║░░██║██╔████╔██║█████╗░░  ░░░██║░░░██║░░██║"
+echo "░░████╔═████║░██╔══╝░░██║░░░░░██║░░██╗██║░░██║██║╚██╔╝██║██╔══╝░░  ░░░██║░░░██║░░██║"
+echo "░░╚██╔╝░╚██╔╝░███████╗███████╗╚█████╔╝╚█████╔╝██║░╚═╝░██║███████╗  ░░░██║░░░╚█████╔╝"
+echo "░░░╚═╝░░░╚═╝░░╚══════╝╚══════╝░╚════╝░░╚════╝░╚═╝░░░░░╚═╝╚══════╝  ░░░╚═╝░░░░╚════╝░"
+echo ""
+echo "███╗░░██╗███████╗██╗░░░██╗██████╗░░█████╗░██████╗░███████╗░██████╗██╗░░██╗"
+echo "████╗░██║██╔════╝██║░░░██║██╔══██╗██╔══██╗██╔══██╗██╔════╝██╔════╝██║░██╔╝"
+echo "██╔██╗██║█████╗░░██║░░░██║██████╔╝██║░░██║██║░░██║█████╗░░╚█████╗░█████═╝░"
+echo "██║╚████║██╔══╝░░██║░░░██║██╔══██╗██║░░██║██║░░██║██╔══╝░░░╚═══██╗██╔═██╗░"
+echo "██║░╚███║███████╗╚██████╔╝██║░░██║╚█████╔╝██████╔╝███████╗██████╔╝██║░╚██╗"
+echo "╚═╝░░╚══╝╚══════╝░╚═════╝░╚═╝░░╚═╝░╚════╝░╚═════╝░╚══════╝╚═════╝░╚═╝░░╚═╝"
+echo "#######################################################################################"
     echo "NeuroDesktop is running - press ANY key to shutdown and quit NeuroDesktop!"
     while [ true ]; do
         read -n 1

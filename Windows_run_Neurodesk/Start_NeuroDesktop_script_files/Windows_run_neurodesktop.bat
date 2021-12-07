@@ -14,6 +14,7 @@ docker rm neurodesktop
 echo "--------------------------------------------------------------"
 ECHO "Starting NeuroDesktop, please wait..."
 echo "--------------------------------------------------------------"
+docker pull vnmd/neurodesktop:20211028
 start powershell -windowstyle minimized -noexit -Command "docker run --shm-size=1gb -it --privileged --name neurodesktop -v C:/neurodesktop-storage:/neurodesktop-storage -p 8080:8080 -h neurodesktop-20211028 vnmd/neurodesktop:20211028"
 ::poll for the guac server using curl  curl http://localhost:8080
 :: possible responses while booting are curl: (52) Empty reply from server
@@ -28,10 +29,15 @@ timeout /t 5 /nobreak
 echo "If this takes longer than 10 mins please try restarting Docker or check your internet connection"
 (curl http://localhost:8080 | find "<!DOCTYPE html>") >nul 2>&1
 if errorlevel 1 goto loop
-
+clear
 echo "Docker started, opening session"
 explorer "http://localhost:8080/#/?username=user&password=password"
-
+echo Welcome to NeuroDesk
+echo \   ^__^   
+echo  \  (oo)\_______ 
+echo    (__)\       )\/\ 
+echo         ||     ||    
+echo         ||----w |                                                                                                                  
 set /p=NeuroDesktop is running - press ENTER key to shutdown and quit NeuroDesktop!
 ECHO "The following container has been stopped:"
 docker stop neurodesktop
