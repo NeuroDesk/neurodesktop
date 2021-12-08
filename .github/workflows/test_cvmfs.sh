@@ -1,4 +1,4 @@
-set -e
+# set -e
 
 SERVERIP=$1
 # SERVERIP=203.101.231.144

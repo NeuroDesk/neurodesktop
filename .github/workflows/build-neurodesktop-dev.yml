@@ -48,7 +48,7 @@ jobs:
       uses: Azure/container-scan@v0.1
       with:
         image-name: ${{ env.IMAGEID }}
-        severity-threshold: HIGH
+        severity-threshold: CRITICAL
         run-quality-checks: false
     - name: Push neurodesktop to GitHub packages (if changes found)
       if: env.ROOTFS_NEW != env.ROOTFS_CACHE
