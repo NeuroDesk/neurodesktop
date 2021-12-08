@@ -2,6 +2,7 @@
 #Tom Shaw 20211201
 #Check for Docker, open explorer if not and open docker download page
 #start the container and wait for the website to be available.
+VERSION="20211207"
 #function:
 function countdown() {
     date1=$(($(date +%s) + $1))
@@ -97,18 +98,18 @@ else
     echo "Starting NeuroDesktop, please wait..."
     echo "You may be asked to enter your password to run the Docker container"
     echo "--------------------------------------------------------------"
-    echo "running command: sudo docker pull vnmd/neurodesktop:20211028"
-    sudo docker pull vnmd/neurodesktop:20211028
+    echo "running command: sudo docker pull vnmd/neurodesktop:${VERSION}"
+    sudo docker pull vnmd/neurodesktop:${VERSION}
     mkdir -p ~/neurodesktop-storage
-    echo "running command: sudo docker run --shm-size=1gb -it -d --privileged --name neurodesktop -v ~/neurodesktop-storage:/neurodesktop-storage -e HOST_UID="$(id -u)" -e HOST_GID="$(id -g)" -p 8080:8080 -h neurodesktop-20211028 vnmd/neurodesktop:20211028"
+    echo "running command: sudo docker run --shm-size=1gb -it -d --privileged --name neurodesktop -v ~/neurodesktop-storage:/neurodesktop-storage -e HOST_UID="$(id -u)" -e HOST_GID="$(id -g)" -p 8080:8080 -h neurodesktop-${VERSION} vnmd/neurodesktop:${VERSION}"
     mkdir -p ~/neurodesktop-storage
     #note this is in disconnected mode
     sudo docker run \
         --shm-size=1gb -it -d --privileged --name neurodesktop \
         -v ~/neurodesktop-storage:/neurodesktop-storage \
         -e HOST_UID="$(id -u)" -e HOST_GID="$(id -g)" \
-        -p 8080:8080 -h neurodesktop-20211028 \
-        vnmd/neurodesktop:20211028
+        -p 8080:8080 -h neurodesktop-${VERSION} \
+        vnmd/neurodesktop:${VERSION}
 
     #poll for the guac server using curl  curl http://localhost:8080
     # possible responses while booting are curl: (52) Empty reply from server
