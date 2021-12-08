@@ -1,11 +1,3 @@
-ARG GO_VERSION="1.17.2"
-ARG SINGULARITY_VERSION="3.9.1"
-ARG TOMCAT_REL="9"
-ARG TOMCAT_VERSION="9.0.52"
-ARG GUACAMOLE_VERSION="1.3.0"
-ARG JULIA_VERSION='1.6.1'
-ARG JULIA_MAIN_VERSION='1.6'
-
 # Create final image
 FROM ubuntu:20.04
 
@@ -58,8 +50,8 @@ ENV LANGUAGE en_US:en
 ENV LC_ALL en_US.UTF-8
 
 # Install Apache Tomcat
-ARG TOMCAT_REL
-ARG TOMCAT_VERSION
+ARG TOMCAT_REL="9"
+ARG TOMCAT_VERSION="9.0.52"
 RUN wget https://archive.apache.org/dist/tomcat/tomcat-${TOMCAT_REL}/v${TOMCAT_VERSION}/bin/apache-tomcat-${TOMCAT_VERSION}.tar.gz -P /tmp \
     && tar -xf /tmp/apache-tomcat-${TOMCAT_VERSION}.tar.gz -C /tmp \
     && rm -rf /tmp/apache-tomcat-${TOMCAT_VERSION}.tar.gz \
@@ -69,7 +61,7 @@ RUN wget https://archive.apache.org/dist/tomcat/tomcat-${TOMCAT_REL}/v${TOMCAT_V
     && sh -c 'chmod +x /usr/local/tomcat/bin/*.sh'
 
 # Install Apache Guacamole
-ARG GUACAMOLE_VERSION
+ARG GUACAMOLE_VERSION="1.3.0"
 WORKDIR /etc/guacamole
 RUN wget "https://apache.mirror.digitalpacific.com.au/guacamole/${GUACAMOLE_VERSION}/binary/guacamole-1.3.0.war" -O /usr/local/tomcat/webapps/ROOT.war \
     && wget "https://apache.mirror.digitalpacific.com.au/guacamole/${GUACAMOLE_VERSION}/source/guacamole-server-1.3.0.tar.gz" -O /etc/guacamole/guacamole-server-${GUACAMOLE_VERSION}.tar.gz \
@@ -197,8 +189,8 @@ RUN sed -i 's/#user_allow_other/user_allow_other/g' /etc/fuse.conf
 RUN mkdir -p `curl https://raw.githubusercontent.com/NeuroDesk/neurocontainers/master/recipes/globalMountPointList.txt`
 
 # Install singularity
-ARG GO_VERSION
-ARG SINGULARITY_VERSION
+ARG GO_VERSION="1.17.2"
+ARG SINGULARITY_VERSION="3.9.1"
 RUN export VERSION=${GO_VERSION} OS=linux ARCH=amd64 \
     && wget https://dl.google.com/go/go$VERSION.$OS-$ARCH.tar.gz \
     && sudo tar -C /usr/local -xzvf go$VERSION.$OS-$ARCH.tar.gz \
@@ -262,8 +254,8 @@ RUN addgroup --gid 9001 user \
 
 # Install Julia
 WORKDIR /opt
-ARG JULIA_VERSION
-ARG JULIA_MAIN_VERSION
+ARG JULIA_VERSION='1.6.1'
+ARG JULIA_MAIN_VERSION='1.6'
 RUN wget https://julialang-s3.julialang.org/bin/linux/x64/${JULIA_MAIN_VERSION}/julia-${JULIA_VERSION}-linux-x86_64.tar.gz \
     && tar zxvf julia-${JULIA_VERSION}-linux-x86_64.tar.gz \
     && rm -rf julia-${JULIA_VERSION}-linux-x86_64.tar.gz \
@@ -309,6 +301,10 @@ RUN git config --global user.name "Neurodesk User"
 
 
 USER root
+
+# make settings file editable 
+RUN chmod a+rwx /home/user/.config/Code/User/settings.json
+
 
 # Add entrypoint script
 COPY config/startup.sh /startup.sh
