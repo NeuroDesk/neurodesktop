@@ -1,3 +1,11 @@
+:: Windows run NeuroDesktop
+:: Thom Shaw 20211208
+::check for docker, remove old versions of neurodesktop
+:: open new version of neurodesktop
+:: wait for keypress and close
+
+SET "version=20211207"
+
 ECHO "Checking if Docker is installed" 
 @echo off
 
@@ -9,13 +17,13 @@ ECHO "Remove old versions of NeuroDesktop
 ECHO "If none are available the daemon will throw an error which can be safely ignored:"
 ECHO "Checking if the following container is available:"
 docker stop neurodesktop
-ECHO "Checking if the following container is available:"
+ECHO "Checking if the following container is available: %version%"
 docker rm neurodesktop
 echo "--------------------------------------------------------------"
 ECHO "Starting NeuroDesktop, please wait..."
 echo "--------------------------------------------------------------"
-docker pull vnmd/neurodesktop:20211028
-start powershell -windowstyle minimized -noexit -Command "docker run --shm-size=1gb -it --privileged --name neurodesktop -v C:/neurodesktop-storage:/neurodesktop-storage -p 8080:8080 -h neurodesktop-20211028 vnmd/neurodesktop:20211028"
+docker pull vnmd/neurodesktop:%version%
+docker run --shm-size=1gb -it -d --privileged --name neurodesktop -v C:/neurodesktop-storage:/neurodesktop-storage -p 8080:8080 -h neurodesktop-%version% vnmd/neurodesktop:%version%
 ::poll for the guac server using curl  curl http://localhost:8080
 :: possible responses while booting are curl: (52) Empty reply from server
 :: if running it will say <!DOCTYPE html>
@@ -29,15 +37,13 @@ timeout /t 5 /nobreak
 echo "If this takes longer than 10 mins please try restarting Docker or check your internet connection"
 (curl http://localhost:8080 | find "<!DOCTYPE html>") >nul 2>&1
 if errorlevel 1 goto loop
-clear
+cls
 echo "Docker started, opening session"
 explorer "http://localhost:8080/#/?username=user&password=password"
-echo Welcome to NeuroDesk
-echo \   ^__^   
-echo  \  (oo)\_______ 
-echo    (__)\       )\/\ 
-echo         ||     ||    
-echo         ||----w |                                                                                                                  
+echo "   _     _     _     _     _     _     _       _     _       _     _     _     _     _     _     _     _     _   " 
+echo "  / \   / \   / \   / \   / \   / \   / \     / \   / \     / \   / \   / \   / \   / \   / \   / \   / \   / \  "
+echo " ( W ) ( E ) ( L ) ( C ) ( O ) ( M ) ( E )   ( T ) ( O )   ( N ) ( E ) ( U ) ( R ) ( O ) ( D ) ( E ) ( S ) ( K ) "
+echo "  \_/   \_/   \_/   \_/   \_/   \_/   \_/     \_/   \_/     \_/   \_/   \_/   \_/   \_/   \_/   \_/   \_/   \_/  "                                                                                                           
 set /p=NeuroDesktop is running - press ENTER key to shutdown and quit NeuroDesktop!
 ECHO "The following container has been stopped:"
 docker stop neurodesktop
