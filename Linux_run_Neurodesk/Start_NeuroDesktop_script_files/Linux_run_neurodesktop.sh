@@ -157,5 +157,3 @@ echo "##########################################################################
     done
 fi
 exit
-# package the file into a .desktop file like so
-#https://www.maketecheasier.com/create-desktop-file-linux/
