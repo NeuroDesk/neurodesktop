@@ -240,7 +240,8 @@ RUN echo 'pref("browser.startup.homepage", "http://neurodesk.github.io", locked)
 
 # Create link to persistent storage on Desktop (This needs to happen before the users gets created!)
 RUN mkdir -p /etc/skel/Desktop/ \
-    && ln -s /neurodesktop-storage /etc/skel/Desktop/
+    && ln -s /neurodesktop-storage /etc/skel/Desktop/storage \
+    && ln -s /neurodesktop-storage /etc/skel/neurodesktop-storage
 
 # Create user account with password-less sudo abilities and vnc user
 RUN addgroup --gid 9001 user \
