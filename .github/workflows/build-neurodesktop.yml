@@ -83,3 +83,9 @@ jobs:
         docker tag $IMAGEID:$SHORT_SHA $DOCKERHUB_ORG/neurodesktop:latest
         docker push $DOCKERHUB_ORG/neurodesktop:latest
         docker push $DOCKERHUB_ORG/neurodesktop:$BUILDDATE
+    - name: Container image scan
+      uses: Azure/container-scan@v0.1
+      with:
+        image-name: ${{ env.IMAGEID }}
+        severity-threshold: CRITICAL
+        run-quality-checks: false
