@@ -207,7 +207,8 @@ RUN export VERSION=${GO_VERSION} OS=linux ARCH=amd64 \
     && make -C builddir install \
     && cd .. \
     && rm -rf singularity-ce-${SINGULARITY_VERSION} \
-    && rm -rf /usr/local/go $GOPATH 
+    && rm -rf /usr/local/go $GOPATH \
+    && ln -s /usr/local/singularity/bin/singularity /bin/ 
 
 # Setup module system & singularity
 COPY ./config/.bashrc /tmp/.bashrc
