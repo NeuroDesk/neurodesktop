@@ -3,13 +3,15 @@ if [ -f '/usr/share/module.sh' ]; then source /usr/share/module.sh; fi
 
 alias ll='ls -la'
 
-if [ -d /cvmfs/neurodesk.ardc.edu.au/neurodesk-modules ]; then
-        # export MODULEPATH="/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules"
-        module use /cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/*
-else
-        export MODULEPATH="/neurodesktop-storage/containers/modules"              
-        module use $MODULEPATH
-        export CVMFS_DISABLE=true
+if [ -f '/usr/share/module.sh' ]; then
+        if [ -d /cvmfs/neurodesk.ardc.edu.au/neurodesk-modules ]; then
+                # export MODULEPATH="/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules"
+                module use /cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/*
+        else
+                export MODULEPATH="/neurodesktop-storage/containers/modules"              
+                module use $MODULEPATH
+                export CVMFS_DISABLE=true
+        fi
 fi
 
 
@@ -21,5 +23,3 @@ if [ -f '/usr/share/module.sh' ]; then
                 fi
         fi
 fi
-
-export PATH="/usr/local/singularity/bin:${PATH}"
