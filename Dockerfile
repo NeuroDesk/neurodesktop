@@ -102,7 +102,6 @@ RUN apt-get update \
         lua-term \
         lua5.2 \
         lmod \
-        git \
         aria2 \
         code \
         emacs \
@@ -131,7 +130,6 @@ RUN apt-get update \
         libgpgme-dev \
         squashfs-tools \
         libseccomp-dev \
-        wget \
         pkg-config \
         git \
         cryptsetup-bin\
