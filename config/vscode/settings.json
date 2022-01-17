@@ -5,6 +5,6 @@
     "terminal.integrated.inheritEnv": true,
     "julia.symbolCacheDownload": true,
     "julia.executablePath": "/opt/julia-latest/bin/julia",
-    "julia.enableTelemetry": false
-
+    "julia.enableTelemetry": false,
+    "update.mode": "none"
 }
