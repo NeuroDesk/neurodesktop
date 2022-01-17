@@ -41,6 +41,7 @@ RUN apt-get update \
         gpg \
         software-properties-common \
         dirmngr \
+        gpg-agent \
     && rm -rf /var/lib/apt/lists/*
 
 # Set locale
