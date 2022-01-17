@@ -40,6 +40,7 @@ RUN apt-get update \
         curl \
         gpg \
         software-properties-common \
+        dirmngr \
     && rm -rf /var/lib/apt/lists/*
 
 # Set locale
