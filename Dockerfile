@@ -147,6 +147,8 @@ RUN apt-get update \
         tk \
         tcllib \
         datalad \
+        python3-pip \
+        python3 \
     && rm -rf /var/lib/apt/lists/* \
     && rm /etc/apt/sources.list.d/vs-code.list
 
