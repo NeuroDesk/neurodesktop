@@ -89,6 +89,10 @@ RUN wget https://ecsft.cern.ch/dist/cvmfs/cvmfs-release/cvmfs-release-latest_all
     && dpkg -i cvmfs-release-latest_all.deb \
     && rm cvmfs-release-latest_all.deb
 
+# Add datalad
+RUN wget -O- http://neuro.debian.net/lists/focal.us-nh.full | sudo tee /etc/apt/sources.list.d/neurodebian.sources.list
+RUN apt-key adv --recv-keys --keyserver hkps://keyserver.ubuntu.com 0xA5D32F012649A5A9
+
 # Install basic tools
 RUN apt-get update \
     && DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y \
@@ -139,6 +143,9 @@ RUN apt-get update \
         davfs2 \
         owncloud-client \
         firefox \
+        tk \
+        tcllib \
+        datalad \
     && rm -rf /var/lib/apt/lists/* \
     && rm /etc/apt/sources.list.d/vs-code.list
 
@@ -215,14 +222,9 @@ RUN cat /tmp/.bashrc >> /etc/skel/.bashrc && rm /tmp/.bashrc \
     && mounts=`echo $directories | sed 's/ /,/g'` \
     && echo "export SINGULARITY_BINDPATH=${mounts},/neurodesktop-storage" >> /etc/skel/.bashrc
 
-# add Globus client
+# add Globus client (requires tk and tcllib -> installed earlier to speed up build)
 WORKDIR /opt/globusconnectpersonal
-RUN apt-get update \
-    && DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y \
-        tk \
-        tcllib \
-    && rm -rf /var/lib/apt/lists/* \
-    && wget https://downloads.globus.org/globus-connect-personal/linux/stable/globusconnectpersonal-latest.tgz \
+RUN wget https://downloads.globus.org/globus-connect-personal/linux/stable/globusconnectpersonal-latest.tgz \
     && tar xzf globusconnectpersonal-latest.tgz \
     && rm -rf globusconnectpersonal-latest.tgz
 
@@ -261,14 +263,6 @@ RUN wget https://julialang-s3.julialang.org/bin/linux/x64/${JULIA_MAIN_VERSION}/
     && rm -rf julia-${JULIA_VERSION}-linux-x86_64.tar.gz \
     && ln -s /opt/julia-${JULIA_VERSION} /opt/julia-latest
 ENV PATH=$PATH:/opt/julia-${JULIA_VERSION}/bin
-
-# Install datalad
-RUN wget -O- http://neuro.debian.net/lists/focal.us-nh.full | sudo tee /etc/apt/sources.list.d/neurodebian.sources.list
-RUN apt-key adv --recv-keys --keyserver hkps://keyserver.ubuntu.com 0xA5D32F012649A5A9
-RUN apt-get update \
-    && DEBIAN_FRONTEND=noninteractive apt-get install -y \
-        datalad \
-    && rm -rf /var/lib/apt/lists/*
 
 USER user
 WORKDIR /home/user
