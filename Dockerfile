@@ -255,26 +255,26 @@ RUN addgroup --gid 9001 user \
     && echo -n 'password\npassword\nn\n' | su user -c vncpasswd
 
 # Install Julia
-WORKDIR /opt
-ARG JULIA_VERSION='1.6.1'
-ARG JULIA_MAIN_VERSION='1.6'
-RUN wget https://julialang-s3.julialang.org/bin/linux/x64/${JULIA_MAIN_VERSION}/julia-${JULIA_VERSION}-linux-x86_64.tar.gz \
-    && tar zxvf julia-${JULIA_VERSION}-linux-x86_64.tar.gz \
-    && rm -rf julia-${JULIA_VERSION}-linux-x86_64.tar.gz \
-    && ln -s /opt/julia-${JULIA_VERSION} /opt/julia-latest
-ENV PATH=$PATH:/opt/julia-${JULIA_VERSION}/bin
+# WORKDIR /opt
+# ARG JULIA_VERSION='1.6.1'
+# ARG JULIA_MAIN_VERSION='1.6'
+# RUN wget https://julialang-s3.julialang.org/bin/linux/x64/${JULIA_MAIN_VERSION}/julia-${JULIA_VERSION}-linux-x86_64.tar.gz \
+#     && tar zxvf julia-${JULIA_VERSION}-linux-x86_64.tar.gz \
+#     && rm -rf julia-${JULIA_VERSION}-linux-x86_64.tar.gz \
+#     && ln -s /opt/julia-${JULIA_VERSION} /opt/julia-latest
+# ENV PATH=$PATH:/opt/julia-${JULIA_VERSION}/bin
 
 USER user
 WORKDIR /home/user
 
 # Install vscode extensions and configure vscode for miniconda and julia
 ENV DONT_PROMPT_WSL_INSTALL=1
-RUN code --install-extension julialang.language-julia \
-    && code --install-extension ms-python.python \
-    && code --install-extension ms-python.vscode-pylance \
-    && code --install-extension ms-toolsai.jupyter \
-    && code --install-extension ms-toolsai.jupyter-keymap \
-    && code --install-extension ms-toolsai.jupyter-renderers
+# RUN code --install-extension julialang.language-julia \
+#     && code --install-extension ms-python.python \
+#     && code --install-extension ms-python.vscode-pylance \
+#     && code --install-extension ms-toolsai.jupyter \
+#     && code --install-extension ms-toolsai.jupyter-keymap \
+#     && code --install-extension ms-toolsai.jupyter-renderers
 COPY config/vscode/settings.json /home/user/.config/Code/User/settings.json
 
 
@@ -284,10 +284,10 @@ COPY config/vscode/settings.json /home/user/.config/Code/User/settings.json
 #     && ln -s /neurodesktop-storage/.config/Code .config/Code \
 #     && ln -s /neurodesktop-storage/.vscode .vscode
 
-RUN wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh \
-    && bash Miniconda3-latest-Linux-x86_64.sh -b \
-    && rm Miniconda3-latest-Linux-x86_64.sh \
-    && miniconda3/bin/conda init
+# RUN wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh \
+#     && bash Miniconda3-latest-Linux-x86_64.sh -b \
+#     && rm Miniconda3-latest-Linux-x86_64.sh \
+#     && miniconda3/bin/conda init
 
 # Add datalad-container to the conda environment
 RUN pip install datalad-container
