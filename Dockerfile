@@ -303,8 +303,9 @@ RUN git config --global user.name "Neurodesk User"
 
 USER root
 
-# make settings file editable 
-RUN chmod a+rwx /home/user/.config/Code/User/settings.json
+# make vs code settings editable for user 
+RUN chown user Code/ -R
+
 
 
 # Add entrypoint script

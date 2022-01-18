@@ -23,3 +23,5 @@ if [ -f '/usr/share/module.sh' ]; then
                 fi
         fi
 fi
+
+#File needs an empty line at the end because we insert things during build later:
