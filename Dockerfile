@@ -54,7 +54,7 @@ ENV LC_ALL en_US.UTF-8
 # Install Apache Tomcat
 ARG TOMCAT_REL="9"
 ARG TOMCAT_VERSION="9.0.52"
-RUN wget https://archive.apache.org/dist/tomcat/tomcat-${TOMCAT_REL}/v${TOMCAT_VERSION}/bin/apache-tomcat-${TOMCAT_VERSION}.tar.gz -P /tmp \
+RUN wget -q https://archive.apache.org/dist/tomcat/tomcat-${TOMCAT_REL}/v${TOMCAT_VERSION}/bin/apache-tomcat-${TOMCAT_VERSION}.tar.gz -P /tmp \
     && tar -xf /tmp/apache-tomcat-${TOMCAT_VERSION}.tar.gz -C /tmp \
     && rm -rf /tmp/apache-tomcat-${TOMCAT_VERSION}.tar.gz \
     && mv /tmp/apache-tomcat-${TOMCAT_VERSION} /usr/local/tomcat \
@@ -65,8 +65,8 @@ RUN wget https://archive.apache.org/dist/tomcat/tomcat-${TOMCAT_REL}/v${TOMCAT_V
 # Install Apache Guacamole
 ARG GUACAMOLE_VERSION="1.3.0"
 WORKDIR /etc/guacamole
-RUN wget "https://apache.mirror.digitalpacific.com.au/guacamole/${GUACAMOLE_VERSION}/binary/guacamole-1.3.0.war" -O /usr/local/tomcat/webapps/ROOT.war \
-    && wget "https://apache.mirror.digitalpacific.com.au/guacamole/${GUACAMOLE_VERSION}/source/guacamole-server-1.3.0.tar.gz" -O /etc/guacamole/guacamole-server-${GUACAMOLE_VERSION}.tar.gz \
+RUN wget -q "https://apache.mirror.digitalpacific.com.au/guacamole/${GUACAMOLE_VERSION}/binary/guacamole-1.3.0.war" -O /usr/local/tomcat/webapps/ROOT.war \
+    && wget -q "https://apache.mirror.digitalpacific.com.au/guacamole/${GUACAMOLE_VERSION}/source/guacamole-server-1.3.0.tar.gz" -O /etc/guacamole/guacamole-server-${GUACAMOLE_VERSION}.tar.gz \
     && tar xvf /etc/guacamole/guacamole-server-${GUACAMOLE_VERSION}.tar.gz \
     && rm -rf /etc/guacamole/guacamole-server-${GUACAMOLE_VERSION}.tar.gz \
     && cd /etc/guacamole/guacamole-server-${GUACAMOLE_VERSION} \
@@ -87,12 +87,12 @@ RUN curl https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > mic
     && add-apt-repository ppa:nextcloud-devs/client
 
 # Add CVMFS
-RUN wget https://ecsft.cern.ch/dist/cvmfs/cvmfs-release/cvmfs-release-latest_all.deb \
+RUN wget -q https://ecsft.cern.ch/dist/cvmfs/cvmfs-release/cvmfs-release-latest_all.deb \
     && dpkg -i cvmfs-release-latest_all.deb \
     && rm cvmfs-release-latest_all.deb
 
 # Add datalad
-RUN wget -O- http://neuro.debian.net/lists/focal.us-nh.full | sudo tee /etc/apt/sources.list.d/neurodebian.sources.list
+RUN wget -q -O- http://neuro.debian.net/lists/focal.us-nh.full | sudo tee /etc/apt/sources.list.d/neurodebian.sources.list
 RUN apt-key adv --recv-keys --keyserver hkps://keyserver.ubuntu.com 0xA5D32F012649A5A9
 
 # Install basic tools
@@ -201,14 +201,14 @@ RUN mkdir -p `curl https://raw.githubusercontent.com/NeuroDesk/neurocontainers/m
 ARG GO_VERSION="1.17.2"
 ARG SINGULARITY_VERSION="3.9.3"
 RUN export VERSION=${GO_VERSION} OS=linux ARCH=amd64 \
-    && wget https://dl.google.com/go/go$VERSION.$OS-$ARCH.tar.gz \
+    && wget -q https://dl.google.com/go/go$VERSION.$OS-$ARCH.tar.gz \
     && sudo tar -C /usr/local -xzvf go$VERSION.$OS-$ARCH.tar.gz \
     && rm go$VERSION.$OS-$ARCH.tar.gz \
     && export GOPATH=${HOME}/go \
     && export PATH=/usr/local/go/bin:${PATH}:${GOPATH}/bin \
     && mkdir -p $GOPATH/src/github.com/sylabs \
     && cd $GOPATH/src/github.com/sylabs \
-    && wget https://github.com/sylabs/singularity/releases/download/v${SINGULARITY_VERSION}/singularity-ce-${SINGULARITY_VERSION}.tar.gz \
+    && wget -q https://github.com/sylabs/singularity/releases/download/v${SINGULARITY_VERSION}/singularity-ce-${SINGULARITY_VERSION}.tar.gz \
     && tar -xzvf singularity-ce-${SINGULARITY_VERSION}.tar.gz \
     && cd singularity-ce-${SINGULARITY_VERSION} \
     && ./mconfig --prefix=/usr/local/singularity \
@@ -228,7 +228,7 @@ RUN cat /tmp/.bashrc >> /etc/skel/.bashrc && rm /tmp/.bashrc \
 
 # add Globus client (requires tk and tcllib -> installed earlier to speed up build)
 WORKDIR /opt/globusconnectpersonal
-RUN wget https://downloads.globus.org/globus-connect-personal/linux/stable/globusconnectpersonal-latest.tgz \
+RUN wget -q https://downloads.globus.org/globus-connect-personal/linux/stable/globusconnectpersonal-latest.tgz \
     && tar xzf globusconnectpersonal-latest.tgz \
     && rm -rf globusconnectpersonal-latest.tgz
 
