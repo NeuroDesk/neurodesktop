@@ -304,7 +304,7 @@ RUN git config --global user.name "Neurodesk User"
 USER root
 
 # make vs code settings editable for user 
-RUN chown user Code/ -R
+RUN chown user /home/user/.config/Code/ -R
 
 
 
