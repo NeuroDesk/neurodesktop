@@ -145,6 +145,8 @@ RUN apt-get update \
         davfs2 \
         owncloud-client \
         firefox \
+        gnome-keyring \
+        xdg-utils \
         libpci3 \
         tk \
         tcllib \
