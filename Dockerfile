@@ -145,6 +145,7 @@ RUN apt-get update \
         davfs2 \
         owncloud-client \
         firefox \
+        libpci3 \
         tk \
         tcllib \
         datalad \
