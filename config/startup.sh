@@ -12,84 +12,33 @@
 # For more information see: https://github.com/NeuroDesk/neurodesktop"
 # }
 
-open_guacmole_conf () {
-echo \
-"<user-mapping>
-<authorize username=\"user\" password=\"password\">"  > /etc/guacamole/user-mapping.xml
-}
-
-close_guacmole_conf () {
-echo \
-"</authorize>
-</user-mapping>" >> /etc/guacamole/user-mapping.xml
-}
-
 ssh () {
 echo "\
 ==================================================================
 Starting SSH server"
 service ssh restart
-echo \
-"<connection name=\"Command Line (SSH)\">
-<protocol>ssh</protocol>
-<param name=\"hostname\">localhost</param>
-<param name=\"username\">user</param>
-<param name=\"password\">password</param>
-<param name=\"port\">22</param>
-<param name=\"enable-sftp\">true</param>
-<param name=\"sftp-root-directory\">/home/user</param>
-</connection>" >> /etc/guacamole/user-mapping.xml
 }
 
 vnc () {
+ln -s /etc/guacamole/user-mapping-vnc.xml /etc/guacamole/user-mapping.xml 
 echo "\
 ==================================================================
 Starting VNC server"
 su user -c "USER=user vncserver -kill :1"
 su user -c "USER=user vncserver -depth 24 -geometry 1920x1080 -name \"VNC\" :1"
-echo \
-"<connection name=\"Desktop Fixed-Resolution (VNC)\">
-<protocol>vnc</protocol>
-<param name=\"hostname\">localhost</param>
-<param name=\"username\">user</param>
-<param name=\"password\">password</param>
-<param name=\"port\">5901</param>
-<param name=\"enable-sftp\">true</param>
-<param name=\"sftp-username\">user</param>
-<param name=\"sftp-password\">password</param>
-<param name=\"sftp-directory\">/home/user</param>
-<param name=\"sftp-root-directory\">/home/user</param>
-<param name=\"enable-audio\">true</param>
-<param name=\"audio-servername\">127.0.0.1</param>
-</connection>" >> /etc/guacamole/user-mapping.xml
 }
 
 rdp () {
+ln -s /etc/guacamole/user-mapping-rdp.xml /etc/guacamole/user-mapping.xml 
 echo "\
 ==================================================================
 Starting RDP server"
 service xrdp restart
-echo \
-"<connection name=\"Desktop Auto-Resolution (RDP)\">
-<protocol>rdp</protocol>
-<param name=\"hostname\">localhost</param>
-<param name=\"username\">user</param>
-<param name=\"password\">password</param>
-<param name=\"port\">3389</param>
-<param name=\"security\">any</param>
-<param name=\"ignore-cert\">true</param>
-<param name=\"resize-method\">reconnect</param>
-</connection>" >> /etc/guacamole/user-mapping.xml
 }
 
 default () {
     ssh
     rdp
-}
-
-vnc_enable () {
-    ssh
-    vnc
 }
 
 export JAVA_OPTS="-Xms512M -Xmx1024M"
@@ -112,13 +61,22 @@ chown -R user:user /neurodesktop-storage/.config
 mkdir -p /neurodesktop-storage/.vscode
 chown -R user:user /neurodesktop-storage/.vscode
 
-open_guacmole_conf
+DEFAULT_ENABLE="true"
 if [ -n "$VNC_ENABLE" ]; then
-    vnc_enable
-else
+    vnc
+    DEFAULT_ENABLE=""
+fi
+if [ -n "$RDP_ENABLE" ]; then
+    rdp
+    DEFAULT_ENABLE=""
+fi
+if [ -n "$SSH_ENABLE" ]; then
+    ssh
+    DEFAULT_ENABLE=""
+fi
+if [ -n "$DEFAULT_ENABLE" ]; then
     default
 fi
-close_guacmole_conf
 
 if [ -z "$CVMFS_DISABLE" ]; then
     echo "\
