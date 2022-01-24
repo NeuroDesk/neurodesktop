@@ -77,8 +77,7 @@ RUN wget -q "https://apache.mirror.digitalpacific.com.au/guacamole/${GUACAMOLE_V
     && rm -r /etc/guacamole/guacamole-server-${GUACAMOLE_VERSION}*
 
 # Create Guacamole configurations
-RUN echo "user-mapping: /etc/guacamole/user-mapping.xml" > /etc/guacamole/guacamole.properties \
-    && touch /etc/guacamole/user-mapping.xml
+RUN echo "user-mapping: /etc/guacamole/user-mapping.xml" > /etc/guacamole/guacamole.properties
 
 # Add Visual Studio code and nextcloud client
 RUN curl https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > microsoft.gpg \
@@ -309,16 +308,14 @@ USER root
 # make vs code settings editable for user 
 RUN chown user /home/user/.config/Code/ -R
 
-
-
 # Add entrypoint script
 COPY config/startup.sh /startup.sh
 RUN chmod +x /startup.sh
 
-# Enable entrypoint
-ENTRYPOINT sudo -E /startup.sh
-
 WORKDIR /neurodesktop-storage
+
+# Enable entrypoint
+ENTRYPOINT ["sudo", "-E", "/startup.sh"]
 
 # Install neurocommand
 ADD "http://api.github.com/repos/NeuroDesk/neurocommand/commits/main" /tmp/skipcache

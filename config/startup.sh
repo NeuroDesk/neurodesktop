@@ -12,6 +12,31 @@
 # For more information see: https://github.com/NeuroDesk/neurodesktop"
 # }
 
+args=""
+
+# Arguments
+POSITIONAL=()
+while [[ $# -gt 0 ]]
+   do
+   key="$1"
+
+   case $key in
+      --vnc)
+      vnc=true
+      shift # past argument
+      ;;
+      --rdp)
+      rdp=true
+      shift # past argument
+      ;;
+      *)    # unknown option
+      POSITIONAL+=("$1") # save it in an array for later
+      shift # past argument
+      ;;
+   esac
+done
+set -- "${POSITIONAL[@]}" # restore positional parameters
+
 open_guacmole_conf () {
 echo \
 "<user-mapping>
@@ -82,15 +107,21 @@ echo \
 </connection>" >> /etc/guacamole/user-mapping.xml
 }
 
-default () {
-    ssh
+default=true
+open_guacmole_conf
+ssh
+if [ "$rdp" = true ]; then
     rdp
-}
-
-vnc_enable () {
-    ssh
+    default=""
+fi
+if [ "$vnc" = true ]; then
     vnc
-}
+    default=""
+fi
+if [ "$default" = true ]; then
+    rdp
+fi
+close_guacmole_conf
 
 export JAVA_OPTS="-Xms512M -Xmx1024M"
 export CATALINA_OPTS="-Xms512M -Xmx1024M"
@@ -111,14 +142,6 @@ mkdir -p /neurodesktop-storage/.config/Code
 chown -R user:user /neurodesktop-storage/.config
 mkdir -p /neurodesktop-storage/.vscode
 chown -R user:user /neurodesktop-storage/.vscode
-
-open_guacmole_conf
-if [ -n "$VNC_ENABLE" ]; then
-    vnc_enable
-else
-    default
-fi
-close_guacmole_conf
 
 if [ -z "$CVMFS_DISABLE" ]; then
     echo "\
