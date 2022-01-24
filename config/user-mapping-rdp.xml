@@ -1,0 +1,23 @@
+<user-mapping>
+<authorize username="user" password="password">
+<connection name="Desktop Auto-Resolution (RDP)">
+<protocol>rdp</protocol>
+<param name="hostname">localhost</param>
+<param name="username">user</param>
+<param name="password">password</param>
+<param name="port">3389</param>
+<param name="security">any</param>
+<param name="ignore-cert">true</param>
+<param name="resize-method">reconnect</param>
+</connection>
+<connection name="Command Line (SSH)">
+<protocol>ssh</protocol>
+<param name="hostname">localhost</param>
+<param name="username">user</param>
+<param name="password">password</param>
+<param name="port">22</param>
+<param name="enable-sftp">true</param>
+<param name="sftp-root-directory">/home/user</param>
+</connection>
+</authorize>
+</user-mapping>
