@@ -308,18 +308,14 @@ USER root
 # make vs code settings editable for user 
 RUN chown user /home/user/.config/Code/ -R
 
-# Add guacamole user-mappings
-COPY config/user-mapping-rdp.xml /etc/guacamole
-COPY config/user-mapping-vnc.xml /etc/guacamole
-
 # Add entrypoint script
 COPY config/startup.sh /startup.sh
 RUN chmod +x /startup.sh
 
-# Enable entrypoint
-ENTRYPOINT sudo -E /startup.sh
-
 WORKDIR /neurodesktop-storage
+
+# Enable entrypoint
+ENTRYPOINT ["sudo", "-E", "/startup.sh"]
 
 # Install neurocommand
 ADD "http://api.github.com/repos/NeuroDesk/neurocommand/commits/main" /tmp/skipcache
