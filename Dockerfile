@@ -53,7 +53,7 @@ ENV LC_ALL en_US.UTF-8
 
 # Install Apache Tomcat
 ARG TOMCAT_REL="9"
-ARG TOMCAT_VERSION="9.0.52"
+ARG TOMCAT_VERSION="9.0.58"
 RUN wget -q https://archive.apache.org/dist/tomcat/tomcat-${TOMCAT_REL}/v${TOMCAT_VERSION}/bin/apache-tomcat-${TOMCAT_VERSION}.tar.gz -P /tmp \
     && tar -xf /tmp/apache-tomcat-${TOMCAT_VERSION}.tar.gz -C /tmp \
     && rm -rf /tmp/apache-tomcat-${TOMCAT_VERSION}.tar.gz \
@@ -63,7 +63,7 @@ RUN wget -q https://archive.apache.org/dist/tomcat/tomcat-${TOMCAT_REL}/v${TOMCA
     && sh -c 'chmod +x /usr/local/tomcat/bin/*.sh'
 
 # Install Apache Guacamole
-ARG GUACAMOLE_VERSION="1.3.0"
+ARG GUACAMOLE_VERSION="1.4.0"
 WORKDIR /etc/guacamole
 RUN wget -q "https://apache.mirror.digitalpacific.com.au/guacamole/${GUACAMOLE_VERSION}/binary/guacamole-${GUACAMOLE_VERSION}.war" -O /usr/local/tomcat/webapps/ROOT.war \
     && wget -q "https://apache.mirror.digitalpacific.com.au/guacamole/${GUACAMOLE_VERSION}/source/guacamole-server-${GUACAMOLE_VERSION}.tar.gz" -O /etc/guacamole/guacamole-server-${GUACAMOLE_VERSION}.tar.gz \
