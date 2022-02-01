@@ -2,6 +2,8 @@
 if [ -f '/usr/share/module.sh' ]; then source /usr/share/module.sh; fi
 
 alias ll='ls -la'
+alias install_miniconda='curl -o /tmp/miniconda.sh https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh; bash /tmp/miniconda.sh -b; miniconda3/bin/conda init'
+
 
 if [ -f '/usr/share/module.sh' ]; then
         if [ -d /cvmfs/neurodesk.ardc.edu.au/neurodesk-modules ]; then
@@ -23,5 +25,6 @@ if [ -f '/usr/share/module.sh' ]; then
                 fi
         fi
 fi
+
 
 #File needs an empty line at the end because we insert things during build later:
