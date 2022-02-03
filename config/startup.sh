@@ -104,6 +104,8 @@ echo \
 <param name=\"security\">any</param>
 <param name=\"ignore-cert\">true</param>
 <param name=\"resize-method\">reconnect</param>
+<param name=\"enable-drive\">true</param>
+<param name=\"drive-path\">/neurodesktop-storage/</param>
 </connection>" >> /etc/guacamole/user-mapping.xml
 }
 

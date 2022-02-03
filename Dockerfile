@@ -76,7 +76,7 @@ RUN wget -q "https://apache.mirror.digitalpacific.com.au/guacamole/${GUACAMOLE_V
     && ldconfig \
     && rm -r /etc/guacamole/guacamole-server-${GUACAMOLE_VERSION}*
 
-# Create Guacamole configurations
+# Create Guacamole configurations (user-mapping.xml gets filled in the startup.sh script)
 RUN echo "user-mapping: /etc/guacamole/user-mapping.xml" > /etc/guacamole/guacamole.properties
 
 # Add Visual Studio code and nextcloud client
