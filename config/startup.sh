@@ -62,7 +62,7 @@ echo \
 <param name=\"password\">password</param>
 <param name=\"port\">22</param>
 <param name=\"enable-sftp\">true</param>
-<param name=\"sftp-root-directory\">/home/user</param>
+<param name=\"sftp-root-directory\">/home/user/Desktop</param>
 </connection>" >> /etc/guacamole/user-mapping.xml
 }
 
@@ -82,8 +82,8 @@ echo \
 <param name=\"enable-sftp\">true</param>
 <param name=\"sftp-username\">user</param>
 <param name=\"sftp-password\">password</param>
-<param name=\"sftp-directory\">/home/user</param>
-<param name=\"sftp-root-directory\">/home/user</param>
+<param name=\"sftp-directory\">/home/user/Desktop</param>
+<param name=\"sftp-root-directory\">/home/user/Desktop</param>
 <param name=\"enable-audio\">true</param>
 <param name=\"audio-servername\">127.0.0.1</param>
 </connection>" >> /etc/guacamole/user-mapping.xml
@@ -105,7 +105,7 @@ echo \
 <param name=\"ignore-cert\">true</param>
 <param name=\"resize-method\">reconnect</param>
 <param name=\"enable-drive\">true</param>
-<param name=\"drive-path\">/neurodesktop-storage/</param>
+<param name=\"drive-path\">/home/user/Desktop</param>
 </connection>" >> /etc/guacamole/user-mapping.xml
 }
 
