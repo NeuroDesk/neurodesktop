@@ -152,6 +152,7 @@ RUN apt-get update \
         datalad \
         python3-pip \
         python3 \
+        lxtask \
     && rm -rf /var/lib/apt/lists/* \
     && rm /etc/apt/sources.list.d/vs-code.list
 
@@ -182,7 +183,7 @@ COPY ./config/module.sh /usr/share/
 #     && rm -rf /root/.cache/pip \
 #     && rm -rf /home/ubuntu/.cache/
 
-# Configure tiling of windows SHIFT-ALT-CTR-{Left,right,top,Bottom} and other openbox desktop mods
+# Configure shortcuts for tiling of windows and other openbox desktop mods
 COPY ./config/rc.xml /etc/xdg/openbox
 
 # Configure ITKsnap

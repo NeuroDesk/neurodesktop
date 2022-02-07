@@ -89,6 +89,15 @@ Plugin {
   }
 }
 Plugin {
+  type=monitors
+  Config {
+    DisplayCPU=1
+    DisplayRAM=1
+    CPUColor=#0000FF
+    RAMColor=#FF0000
+  }
+}
+Plugin {
   type=taskbar
   expand=1
   Config {
