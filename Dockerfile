@@ -251,6 +251,11 @@ RUN mkdir -p /etc/skel/Desktop/ \
     && ln -s /neurodesktop-storage /etc/skel/Desktop/storage \
     && ln -s /neurodesktop-storage /etc/skel/neurodesktop-storage
 
+# Add checkversion script
+COPY ./config/checkversion.sh /usr/share/
+# Add CheckVersion script
+COPY ./config/CheckVersion.desktop /etc/skel/Desktop
+
 # Create user account with password-less sudo abilities and vnc user
 RUN addgroup --gid 9001 user \
     && useradd -s /bin/bash -g user -G sudo -m user \
