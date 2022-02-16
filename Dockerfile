@@ -311,7 +311,6 @@ RUN pip install datalad-container
 RUN git config --global user.email "user@neurodesk.github.io"
 RUN git config --global user.name "Neurodesk User"
 
-
 USER root
 
 # make vs code settings editable for user 
