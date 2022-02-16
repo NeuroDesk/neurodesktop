@@ -289,6 +289,9 @@ ENV DONT_PROMPT_WSL_INSTALL=1
 #     && code --install-extension ms-toolsai.jupyter-renderers
 COPY config/vscode/settings.json /home/user/.config/Code/User/settings.json
 
+# Add libfm script
+RUN mkdir -p /home/user/.config/libfm
+COPY ./config/libfm.conf /home/user/.config/libfm
 
 # This doesn't work if we install extensions - can we do this in the startup file and move the folder over once the persistent storage?
 # # Link vscode config to persistant storage
