@@ -36,6 +36,10 @@ echo "--------------------------------------------------------------"
 timeout /t 5 /nobreak
 echo "If this takes longer than 10 mins please try restarting Docker or check your internet connection"
 (curl http://localhost:8080 | find "<!DOCTYPE html>") >nul 2>&1
+SET browse=
+FOR /F "tokens=* USEBACKQ" %G IN (`reg QUERY HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\Shell\Associations\UrlAssociations\http\UserChoice ^| findstr /r /c:"ChromeHTML" /c:"MSEdgeHTM"`) DO (SET browse=%G)
+echo %browse%
+if not defined browse echo Google Chrome or Microsoft Edge Browser is recommended for use with Neurodesktop. Other browsers may work. Please try Chrome or Edge if running into issues.
 if errorlevel 1 goto loop
 cls
 echo "Docker started, opening session"
