@@ -251,6 +251,9 @@ RUN mkdir -p /etc/skel/Desktop/ \
     && ln -s /neurodesktop-storage /etc/skel/Desktop/storage \
     && ln -s /neurodesktop-storage /etc/skel/neurodesktop-storage
 
+# Create shorter link to persistent storage /neurodesktop-storage
+RUN ln -s /neurodesktop-storage /storage
+
 # Create user account with password-less sudo abilities and vnc user
 RUN addgroup --gid 9001 user \
     && useradd -s /bin/bash -g user -G sudo -m user \
