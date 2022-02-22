@@ -40,6 +40,7 @@ else
     echo "Starting NeuroDesktop, please wait..."
     echo "--------------------------------------------------------------"
     #note this is in disconnected mode
+    docker pull vnmd/neurodesktop:latest
     docker run -d --shm-size=1gb -it --privileged --name neurodesktop \
     -v ~/neurodesktop-storage:/neurodesktop-storage \
     -p 8080:8080 -h neurodesktop-latest vnmd/neurodesktop:latest
