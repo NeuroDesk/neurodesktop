@@ -36,6 +36,8 @@ echo "--------------------------------------------------------------"
 timeout /t 5 /nobreak
 echo "If this takes longer than 10 mins please try restarting Docker or check your internet connection"
 (curl http://localhost:8080 | find "<!DOCTYPE html>") >nul 2>&1
+SET browse=
+FOR /F "tokens=* USEBACKQ" %%G IN (`reg QUERY HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\Shell\Associations\UrlAssociations\http\UserChoice ^| findstr /r /c:"ChromeHTML" /c:"MSEdgeHTM"`) DO (SET browse=%%G)
 if errorlevel 1 goto loop
 cls
 echo "Docker started, opening session"
@@ -43,7 +45,9 @@ explorer "http://localhost:8080/#/?username=user&password=password"
 echo "   _     _     _     _     _     _     _       _     _       _     _     _     _     _     _     _     _     _   " 
 echo "  / \   / \   / \   / \   / \   / \   / \     / \   / \     / \   / \   / \   / \   / \   / \   / \   / \   / \  "
 echo " ( W ) ( E ) ( L ) ( C ) ( O ) ( M ) ( E )   ( T ) ( O )   ( N ) ( E ) ( U ) ( R ) ( O ) ( D ) ( E ) ( S ) ( K ) "
-echo "  \_/   \_/   \_/   \_/   \_/   \_/   \_/     \_/   \_/     \_/   \_/   \_/   \_/   \_/   \_/   \_/   \_/   \_/  "                                                                                                           
+echo "  \_/   \_/   \_/   \_/   \_/   \_/   \_/     \_/   \_/     \_/   \_/   \_/   \_/   \_/   \_/   \_/   \_/   \_/  "  
+echo.
+if not defined browse echo Google Chrome or Microsoft Edge Browser is recommended for use with Neurodesktop. Other browsers may work. Please try Chrome or Edge if running into issues.                                                                                   
 set /p=NeuroDesktop is running - press ENTER key to shutdown and quit NeuroDesktop!
 ECHO "The following container has been stopped:"
 docker stop neurodesktop
