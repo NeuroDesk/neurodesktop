@@ -29,6 +29,9 @@ docker run --shm-size=1gb -it -d --privileged --name neurodesktop -v C:/neurodes
 :: if running it will say <!DOCTYPE html>
 :: if not started it will say curl: (7) Failed to connect to localhost port 8080: Connection refused
 
+SET browse=
+FOR /F "tokens=* USEBACKQ" %%G IN (`reg QUERY HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\Shell\Associations\UrlAssociations\http\UserChoice ^| findstr /r /c:"ChromeHTML" /c:"MSEdgeHTM"`) DO (SET browse=%%G)
+
 :loop
 echo "--------------------------------------------------------------"
 echo "Waiting for Neurodesk, please wait and your browser will open shortly"
@@ -36,8 +39,7 @@ echo "--------------------------------------------------------------"
 timeout /t 5 /nobreak
 echo "If this takes longer than 10 mins please try restarting Docker or check your internet connection"
 (curl http://localhost:8080 | find "<!DOCTYPE html>") >nul 2>&1
-SET browse=
-FOR /F "tokens=* USEBACKQ" %%G IN (`reg QUERY HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\Shell\Associations\UrlAssociations\http\UserChoice ^| findstr /r /c:"ChromeHTML" /c:"MSEdgeHTM"`) DO (SET browse=%%G)
+
 if errorlevel 1 goto loop
 cls
 echo "Docker started, opening session"
