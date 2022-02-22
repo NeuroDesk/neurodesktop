@@ -5,7 +5,7 @@
 ``` 
 git clone https://github.com/megastep/makeself.git ;
 cd makeself && git submodule update --init --recursive ;
-make 
+make #make sure to set Linebreaks correctly in shell scripts!
 ```
 
 3)
