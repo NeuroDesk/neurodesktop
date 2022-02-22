@@ -4,7 +4,7 @@
 :: open new version of neurodesktop
 :: wait for keypress and close
 
-SET "version=20211207"
+SET "version=latest"
 
 ECHO "Checking if Docker is installed" 
 @echo off
