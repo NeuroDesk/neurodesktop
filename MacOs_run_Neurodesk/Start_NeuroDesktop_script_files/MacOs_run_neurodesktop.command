@@ -42,7 +42,7 @@ else
     #note this is in disconnected mode
     docker run -d --shm-size=1gb -it --privileged --name neurodesktop \
     -v ~/neurodesktop-storage:/neurodesktop-storage \
-    -p 8080:8080 -h neurodesktop-20211028 vnmd/neurodesktop:20211028
+    -p 8080:8080 -h neurodesktop-latest vnmd/neurodesktop:latest
 
     #poll for the guac server using curl  curl http://localhost:8080
     # possible responses while booting are curl: (52) Empty reply from server

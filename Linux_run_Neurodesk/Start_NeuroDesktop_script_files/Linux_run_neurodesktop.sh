@@ -2,7 +2,7 @@
 #Tom Shaw 20211201
 #Check for Docker, open explorer if not and open docker download page
 #start the container and wait for the website to be available.
-VERSION="20211207"
+VERSION="latest"
 #function:
 function countdown() {
     date1=$(($(date +%s) + $1))
