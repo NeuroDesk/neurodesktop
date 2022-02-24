@@ -14,7 +14,11 @@ echo
 if [ "$retainw" == "$retainu" ]; then
     echo "Your version is up to date."
 else
-    echo "There is a newer version available. Please refer to website https://neurodesk.github.io"
+    if [ "$retainu" == "latest" ]; then
+        echo "Your version is up to date."
+    else
+        echo "There is a newer version available. Please refer to website https://neurodesk.github.io"
+    fi
 fi
 
 echo
