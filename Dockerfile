@@ -153,6 +153,7 @@ RUN apt-get update \
         python3-pip \
         python3 \
         lxtask \
+        qdirstat \
     && rm -rf /var/lib/apt/lists/* \
     && rm /etc/apt/sources.list.d/vs-code.list
 
