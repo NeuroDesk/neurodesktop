@@ -176,4 +176,4 @@ Starting Guacamole Daemon
     Password: \"password\"
 ------------------------------------------------------------------"
 # su user -c "guacd -f -L debug && echo"
-su user -c "guacd -f && echo"
+su user -c "guacd -f -b 127.0.0.1 && echo"
