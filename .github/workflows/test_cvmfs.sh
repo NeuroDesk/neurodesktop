@@ -4,7 +4,9 @@ SERVERIP=$1
 # SERVERIP=203.101.231.144
 
 sudo apt-get install lsb-release
-wget https://ecsft.cern.ch/dist/cvmfs/cvmfs-release/cvmfs-release-latest_all.deb
+# wget https://ecsft.cern.ch/dist/cvmfs/cvmfs-release/cvmfs-release-latest_all.deb
+wget https://objectstorage.us-ashburn-1.oraclecloud.com/n/sd63xuke79z3/b/neurodesk/o/cvmfs-release-latest_all.deb
+
 echo "[DEBUG]: adding cfms repo"
 sudo dpkg -i cvmfs-release-latest_all.deb
 echo "[DEBUG]: apt-get update"
