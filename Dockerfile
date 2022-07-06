@@ -86,9 +86,9 @@ RUN curl https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > mic
     && add-apt-repository ppa:nextcloud-devs/client
 
 # Add CVMFS
-RUN wget -q https://ecsft.cern.ch/dist/cvmfs/cvmfs-release/cvmfs-release_4.0-1_all.deb \
-    && dpkg -i cvmfs-release-latest_all.deb \
-    && rm cvmfs-release-latest_all.deb
+RUN wget -q https://ecsft.cern.ch/dist/cvmfs/cvmfs-release/cvmfs-release_4.0-1_all.deb -O /tmp/cvmfs-release-latest_all.deb \
+    && dpkg -i /tmp/cvmfs-release-latest_all.deb \
+    && rm /tmp/cvmfs-release-latest_all.deb
 
 # Add datalad
 RUN wget -q -O- http://neuro.debian.net/lists/focal.us-nh.full | sudo tee /etc/apt/sources.list.d/neurodebian.sources.list
