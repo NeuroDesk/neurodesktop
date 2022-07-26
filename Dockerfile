@@ -42,6 +42,8 @@ RUN apt-get update \
         software-properties-common \
         dirmngr \
         gpg-agent \
+        ltrace \
+        strace \
     && rm -rf /var/lib/apt/lists/*
 
 # Set locale
