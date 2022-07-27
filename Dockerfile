@@ -261,8 +261,9 @@ COPY ./config/checkversion.sh /usr/share/
 COPY ./config/CheckVersion.desktop /etc/skel/Desktop
 
 # Create user account with password-less sudo abilities and vnc user
+# OC: use uid 1002 instead of the default 1000 otherwise clashes with matlab user 1000 within the matlab Singularity container
 RUN addgroup --gid 9001 user \
-    && useradd -s /bin/bash -g user -G sudo -m user \
+    && useradd -u 1002 -s /bin/bash -g user -G sudo -m user \
     && /usr/bin/printf '%s\n%s\n' 'password' 'password'| passwd user \
     && echo "user ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers \
     && mkdir /home/user/.vnc \
