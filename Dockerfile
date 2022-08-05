@@ -270,7 +270,7 @@ RUN addgroup --gid 9001 user \
     && /usr/bin/printf '%s\n%s\n%s\n' 'password' 'password' 'n' | su user -c vncpasswd \
     && echo -n 'password\npassword\nn\n' | su user -c vncpasswd
 
-COPY --chown=user:9001 .config/xstartup /home/user/.vnc
+COPY --chown=user:9001 config/xstartup /home/user/.vnc
 
 # Install Julia
 # WORKDIR /opt
