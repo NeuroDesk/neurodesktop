@@ -19,7 +19,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        cvmfs-server: [cvmfs-brisbane.neurodesk.org, cvmfs-sydney.neurodesk.org, cvmfs-frankfurt.neurodesk.org, 	cvmfs-zurich.neurodesk.org, cvmfs-toronto.neurodesk.org, cvmfs-ashburn.neurodesk.org, cvmfs.neurodesk.org]
+        cvmfs-server: [	cvmfs-perth.neurodesk.org, cvmfs-brisbane.neurodesk.org, cvmfs-sydney.neurodesk.org, cvmfs-frankfurt.neurodesk.org, 	cvmfs-zurich.neurodesk.org, cvmfs-toronto.neurodesk.org, cvmfs-ashburn.neurodesk.org, cvmfs.neurodesk.org]
     steps:
     - uses: actions/checkout@v2
     - name: check if ${{ matrix.cvmfs-server }} is online and up-to-date
