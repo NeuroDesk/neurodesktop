@@ -169,12 +169,14 @@ RUN apt-get update \
 # http://cvmfs-sydney.neurodesk.org/cvmfs/@fqrn@;
 # http://cvmfs-brisbane.neurodesk.org/cvmfs/@fqrn@;
 # http://cvmfs-perth.neurodesk.org/cvmfs/@fqrn@;
+# http://cvmfs-phoenix.neurodesk.org/cvmfs/@fqrn@;
 # This is the list of "unique" servers accounting for dns geo location steering:
 # http://cvmfs.neurodesk.org/cvmfs/@fqrn@;
 # http://cvmfs-ashburn.neurodesk.org/cvmfs/@fqrn@;
 # http://cvmfs-zurich.neurodesk.org/cvmfs/@fqrn@;
 # http://cvmfs-sydney.neurodesk.org/cvmfs/@fqrn@;
 # http://cvmfs-perth.neurodesk.org/cvmfs/@fqrn@;
+# http://cvmfs-phoenix.neurodesk.org/cvmfs/@fqrn@;
 RUN mkdir -p /etc/cvmfs/keys/ardc.edu.au/ \
     && echo "-----BEGIN PUBLIC KEY-----" | sudo tee /etc/cvmfs/keys/ardc.edu.au/neurodesk.ardc.edu.au.pub \
     && echo "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAwUPEmxDp217SAtZxaBep" | sudo tee -a /etc/cvmfs/keys/ardc.edu.au/neurodesk.ardc.edu.au.pub \
@@ -186,7 +188,7 @@ RUN mkdir -p /etc/cvmfs/keys/ardc.edu.au/ \
     && echo "NQIDAQAB" | sudo tee -a /etc/cvmfs/keys/ardc.edu.au/neurodesk.ardc.edu.au.pub \
     && echo "-----END PUBLIC KEY-----" | sudo tee -a /etc/cvmfs/keys/ardc.edu.au/neurodesk.ardc.edu.au.pub \
     && echo "CVMFS_USE_GEOAPI=yes" | sudo tee /etc/cvmfs/config.d/neurodesk.ardc.edu.au.conf \
-    && echo 'CVMFS_SERVER_URL="http://cvmfs.neurodesk.org/cvmfs/@fqrn@;http://cvmfs-perth.neurodesk.org/cvmfs/@fqrn@;http://cvmfs-ashburn.neurodesk.org/cvmfs/@fqrn@;http://cvmfs-zurich.neurodesk.org/cvmfs/@fqrn@;http://cvmfs-sydney.neurodesk.org/cvmfs/@fqrn@"' | sudo tee -a /etc/cvmfs/config.d/neurodesk.ardc.edu.au.conf \
+    && echo 'CVMFS_SERVER_URL="http://cvmfs.neurodesk.org/cvmfs/@fqrn@;http://cvmfs-phoenix.neurodesk.org/cvmfs/@fqrn@;http://cvmfs-perth.neurodesk.org/cvmfs/@fqrn@;http://cvmfs-ashburn.neurodesk.org/cvmfs/@fqrn@;http://cvmfs-zurich.neurodesk.org/cvmfs/@fqrn@;http://cvmfs-sydney.neurodesk.org/cvmfs/@fqrn@"' | sudo tee -a /etc/cvmfs/config.d/neurodesk.ardc.edu.au.conf \
     && echo 'CVMFS_KEYS_DIR="/etc/cvmfs/keys/ardc.edu.au/"' | sudo tee -a /etc/cvmfs/config.d/neurodesk.ardc.edu.au.conf \
     && echo "CVMFS_HTTP_PROXY=DIRECT" | sudo tee  /etc/cvmfs/default.local \
     && echo "CVMFS_QUOTA_LIMIT=5000" | sudo tee -a  /etc/cvmfs/default.local \
