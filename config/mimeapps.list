@@ -1,6 +1,11 @@
 [Added Associations]
-application/dicom=vnm-itk-snap-3.8.0.desktop;
-application/gzip=vnm-itk-snap-3.8.0.desktop;
+application/dicom=neurodesk-mricroglgui-mricrogl-1_2_20211006.desktop;
+application/gzip=neurodesk-mricroglgui-mricrogl-1_2_20211006.desktop;
+text/plain=org.gnome.gedit.desktop;
+application/octet-stream=neurodesk-mricroglgui-mricrogl-1_2_20211006.desktop;
+
+
 
 [Default Applications]
-application/gzip=vnm-itk-snap-3.8.0.desktop
+application/gzip=neurodesk-mricroglgui-mricrogl-1_2_20211006.desktop
+application/octet-stream=neurodesk-mricroglgui-mricrogl-1_2_20211006.desktop
