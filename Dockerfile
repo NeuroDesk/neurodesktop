@@ -170,6 +170,7 @@ RUN apt-get update \
 # http://cvmfs-brisbane.neurodesk.org/cvmfs/@fqrn@;
 # http://cvmfs-perth.neurodesk.org/cvmfs/@fqrn@;
 # http://cvmfs-phoenix.neurodesk.org/cvmfs/@fqrn@;
+# http://cvmfs-tokyo.neurodesk.org/cvmfs/@fqrn@;
 # This is the list of "unique" servers accounting for dns geo location steering:
 # http://cvmfs.neurodesk.org/cvmfs/@fqrn@;
 # http://cvmfs-ashburn.neurodesk.org/cvmfs/@fqrn@;
