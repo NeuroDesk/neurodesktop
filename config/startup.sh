@@ -166,14 +166,26 @@ Starting tomcat server"
 /usr/local/tomcat/bin/startup.sh
 
 echo "\
-==================================================================
-Starting Guacamole Daemon
+==================================================================\
+
+Starting Neurodesktop
 ------------------------------------------------------------------
-    Use this link for direct Neurodesktop:
+
+    Use this link for accessing Neurodesktop in your Browser:
 !!! http://localhost:8080/#/?username=user&password=password !!!
+    
+------------------------------------------------------------------
+
     Once connected to the session, your user info is:
     Username: \"user\"
     Password: \"password\"
-------------------------------------------------------------------"
+
+    If you want to stop Neurodesktop:
+    1) Hit CTRL-C
+    2) Type: docker stop neurodesktop
+    3) Hit Enter
+    4) Type: docker rm neurodesktop
+    5) Hit Enter
+=================================================================="
 # su user -c "guacd -f -L debug && echo"
 su user -c "guacd -f -b 127.0.0.1 && echo"
