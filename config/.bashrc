@@ -26,5 +26,10 @@ if [ -f '/usr/share/module.sh' ]; then
         fi
 fi
 
+# this line add --nv to the singularity calls -> but only if a GPU is present and setup with nvidia-smi (otherwise there are errors)
+if [ `which nvidia-smi` ]
+then
+        export neurodesk_singularity_opts="--nv"
+fi
 
 #File needs an empty line at the end because we insert things during build later:
