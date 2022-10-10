@@ -42,6 +42,7 @@ RUN apt-get update \
         software-properties-common \
         dirmngr \
         gpg-agent \
+        pciutils \
     && rm -rf /var/lib/apt/lists/*
 
 # Set locale
@@ -241,7 +242,8 @@ RUN export VERSION=${GO_VERSION} OS=linux ARCH=amd64 \
     && cd .. \
     && rm -rf singularity-ce-${SINGULARITY_VERSION} \
     && rm -rf /usr/local/go $GOPATH \
-    && ln -s /usr/local/singularity/bin/singularity /bin/ 
+    && ln -s /usr/local/singularity/bin/singularity /bin/ \ 
+    && rm -rf /root/.cache
 
 # Setup module system & singularity
 COPY ./config/.bashrc /tmp/.bashrc
@@ -307,12 +309,12 @@ WORKDIR /home/user
 
 # Install vscode extensions and configure vscode for miniconda and julia
 ENV DONT_PROMPT_WSL_INSTALL=1
-# RUN code --install-extension julialang.language-julia \
-#     && code --install-extension ms-python.python \
-#     && code --install-extension ms-python.vscode-pylance \
-#     && code --install-extension ms-toolsai.jupyter \
-#     && code --install-extension ms-toolsai.jupyter-keymap \
-#     && code --install-extension ms-toolsai.jupyter-renderers
+RUN code --install-extension julialang.language-julia \
+    && code --install-extension ms-python.python \
+    && code --install-extension ms-python.vscode-pylance \
+    && code --install-extension ms-toolsai.jupyter \
+    && code --install-extension ms-toolsai.jupyter-keymap \
+    && code --install-extension ms-toolsai.jupyter-renderers
 COPY config/vscode/settings.json /home/user/.config/Code/User/settings.json
 
 # Add libfm script
@@ -327,10 +329,10 @@ RUN touch /home/user/.sudo_as_admin_successful
 #     && ln -s /neurodesktop-storage/.config/Code .config/Code \
 #     && ln -s /neurodesktop-storage/.vscode .vscode
 
-# RUN wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh \
-#     && bash Miniconda3-latest-Linux-x86_64.sh -b \
-#     && rm Miniconda3-latest-Linux-x86_64.sh \
-#     && miniconda3/bin/conda init
+RUN wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh \
+    && bash Miniconda3-latest-Linux-x86_64.sh -b \
+    && rm Miniconda3-latest-Linux-x86_64.sh \
+    && miniconda3/bin/conda init
 
 # Add datalad-container to the conda environment
 RUN pip install datalad-container

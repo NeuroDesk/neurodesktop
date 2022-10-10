@@ -26,10 +26,13 @@ if [ -f '/usr/share/module.sh' ]; then
         fi
 fi
 
-# this line add --nv to the singularity calls -> but only if a GPU is present and setup with nvidia-smi (otherwise there are errors)
-if [ `which nvidia-smi` ]
+# this mounts the homedirecotry to the matlab license directories so that the activation via the GUI works
+export neurodesk_singularity_opts="${neurodesk_singularity_opts} --bind /home/user:/home/matlab/.matlab/R2022a_licenses,/home/user:/opt/matlab/R2022a/licenses "
+
+# this adds --nv to the singularity calls -> but only if a GPU is present
+if [ "`lspci | grep -i nvidia`" ]
 then
-        export neurodesk_singularity_opts="--nv"
+        export neurodesk_singularity_opts="${neurodesk_singularity_opts} --nv "
 fi
 
 #File needs an empty line at the end because we insert things during build later:
