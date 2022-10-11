@@ -45,12 +45,17 @@ RUN apt-get update \
         pciutils \
     && rm -rf /var/lib/apt/lists/*
 
-# Set locale
+# # Set locale - This seems to cause https://github.com/NeuroDesk/neurodesktop/issues/100
 RUN sed -i -e 's/# en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen \
     && locale-gen
 ENV LANG en_US.UTF-8
 ENV LANGUAGE en_US:en
 ENV LC_ALL en_US.UTF-8
+# Hypothesis: The singularity containers set their own locale (or not) and therefore setting this in the main container causes this error?
+# Workaround: setting variables empty, so the containers can overwrite them
+ENV LANG ""
+ENV LANGUAGE ""
+ENV LC_ALL ""
 
 # Install Apache Tomcat
 ARG TOMCAT_REL="9"
