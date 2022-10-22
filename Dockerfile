@@ -228,8 +228,8 @@ RUN sed -i 's/#user_allow_other/user_allow_other/g' /etc/fuse.conf
 RUN mkdir -p `curl https://raw.githubusercontent.com/NeuroDesk/neurocontainers/master/recipes/globalMountPointList.txt`
 
 # Install singularity
-ARG GO_VERSION="1.17.2"
-ARG SINGULARITY_VERSION="3.9.3"
+ARG GO_VERSION="1.19"
+ARG SINGULARITY_VERSION="3.10.2"
 RUN export VERSION=${GO_VERSION} OS=linux ARCH=amd64 \
     && wget -q https://dl.google.com/go/go$VERSION.$OS-$ARCH.tar.gz \
     && sudo tar -C /usr/local -xzvf go$VERSION.$OS-$ARCH.tar.gz \
