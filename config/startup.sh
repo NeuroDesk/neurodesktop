@@ -71,7 +71,7 @@ echo "\
 ==================================================================
 Starting VNC server"
 su user -c "USER=user vncserver -kill :1"
-su user -c "USER=user vncserver -depth 24 -geometry 1920x1080 -name \"VNC\" :1"
+su user -c "USER=user vncserver -depth 24 -geometry 1920x1080 -name \"VNC\" -localhost :1"
 echo \
 "<connection name=\"Desktop Fixed-Resolution (VNC)\">
 <protocol>vnc</protocol>
