@@ -351,9 +351,6 @@ USER root
 # make vs code settings editable for user 
 RUN chown user /home/user/.config/Code/ -R
 
-# Add AltGR key on European keyboards
-COPY config/keyboard /etc/default/keyboard
-
 # Add entrypoint script
 COPY config/startup.sh /startup.sh
 RUN chmod +x /startup.sh
