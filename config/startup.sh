@@ -122,6 +122,7 @@ if [ "$vnc" = true ]; then
 fi
 if [ "$default" = true ]; then
     rdp
+    vnc
 fi
 close_guacmole_conf
 
