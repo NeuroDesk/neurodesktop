@@ -70,7 +70,7 @@ fi
 #Check for docker install
 
 echo "Checking if Docker is installed"
-if ! docker info >/dev/null 2>&1; then
+if ! cat /var/run/docker.pid >/dev/null 2>&1; then
     echo "This script uses docker, and it isn't running - please start docker and try again!"
     echo "--------------------------------------------------------------"
     echo "Or if, you haven't installed docker:"
