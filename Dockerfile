@@ -9,6 +9,7 @@ RUN apt-get update \
         wget \
         ca-certificates \
         make \
+        debootstrap \
         gcc \
         g++ \
         openjdk-11-jre \
