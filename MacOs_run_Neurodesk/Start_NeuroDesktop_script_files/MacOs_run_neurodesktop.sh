@@ -12,7 +12,7 @@ function countdown(){
 }
 
 echo "Checking if Docker is installed" 
-if ! docker info > /dev/null 2>&1; then
+if ! docker ps > /dev/null 2>&1; then
     echo "This script uses docker, and it isn't running - please start docker and try again!"
     echo "--------------------------------------------------------------"
     echo "Or if, you haven't installed docker:"
