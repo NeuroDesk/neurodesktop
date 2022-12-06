@@ -3,12 +3,15 @@
 #Check for Docker, open explorer if not and open docker download page
 #start the container and wait for the website to be available. 
 
-function countdown(){
-   date1=$(($(date +%s) + $1)); 
-   while [ "$date1" -ge $(date +%s) ]; do 
-     echo -ne "$(date -u --date @$(($date1 - $(date +%s))) +%H:%M:%S)\r";
-     sleep 0.1
-   done
+function countdown(){  
+    local now=$(date +%s)
+    local end=$((now + $1))
+    while (( now < end )); do   
+        printf "%s\r" "$(date -u -d @$((end - now)) +%T)"  
+        sleep 0.25  
+        now=$(date +%s)
+    done  
+    echo
 }
 
 echo "Checking if Docker is installed" 
@@ -42,7 +45,7 @@ else
     #note this is in disconnected mode
     docker pull vnmd/neurodesktop:latest
     docker run -d --shm-size=1gb -it --privileged --name neurodesktop \
-    -v ~/neurodesktop-storage:/neurodesktop-storage \
+    -v ~/Desktop/neurodesktop-storage:/neurodesktop-storage \
     -p 8080:8080 -h neurodesktop-latest vnmd/neurodesktop:latest
 
     #poll for the guac server using curl  curl http://localhost:8080
