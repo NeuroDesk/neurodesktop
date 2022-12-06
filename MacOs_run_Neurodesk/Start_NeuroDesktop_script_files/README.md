@@ -1,5 +1,12 @@
-# I think we want something like this https://apple.stackexchange.com/questions/343258/how-to-deploy-automator-workflow-to-clients 
-# https://techtalkbook.com/create-mac-app-from-a-shell-script/
+## Startup app scripts
+### App is an automator app turned into a DMG. 
 
+1) Creates a folder neurodesktop-storage in the Desktop
 
-## or for dmg build we want https://dmgbuild.readthedocs.io/en/latest/settings.html#disk-image-settings 
+2) Downloads Git if necessary
+
+3) clones the neurodesktop git repo to neurodesktop-storage
+
+4) runs a bash script in the foreground using an apple script
+
+5) downloads neurodesktop same as windows and linux and opens it in safari
