@@ -45,7 +45,7 @@ else
     #note this is in disconnected mode
     docker pull vnmd/neurodesktop:latest
     docker run -d --shm-size=1gb -it --privileged --name neurodesktop \
-    -v ~/neurodesktop-storage:/neurodesktop-storage \
+    -v ~/Desktop/neurodesktop-storage:/neurodesktop-storage \
     -p 8080:8080 -h neurodesktop-latest vnmd/neurodesktop:latest
 
     #poll for the guac server using curl  curl http://localhost:8080
