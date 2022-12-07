@@ -1,0 +1,12 @@
+name: on-opening-issue
+
+on:
+  issues:
+    types: [opened, reopened]
+
+jobs:
+  add-issue-to-project:
+    uses: NeuroDesk/neurodesk.github.io/.github/workflows/add-issue-to-project.yml@main
+    secrets:
+      PAT: ${{ secrets.NEURODESK_GITHUB_TOKEN_ISSUE_AUTOMATION }}
+    
