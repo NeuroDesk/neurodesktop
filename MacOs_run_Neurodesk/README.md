@@ -1,9 +1,9 @@
 ## Startup app scripts
-### App is an automator app turned into a DMG. 
+### DMG is an automator task that user can download and run. 
 
 1) Creates a folder neurodesktop-storage in the Desktop
 
-2) Downloads Git if necessary
+2) Downloads Git if necessary and xCode
 
 3) clones the neurodesktop git repo to neurodesktop-storage
 
