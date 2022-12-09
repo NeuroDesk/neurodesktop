@@ -64,7 +64,7 @@ countdown 5
 done
 clear
 echo "Docker started, opening session"
-open "http://localhost:8080/#/?username=user&password=password"
+open -a Safari "http://localhost:8080/#/?username=user&password=password"
 echo "#######################################################################################"
 echo "░██╗░░░░░░░██╗███████╗██╗░░░░░░█████╗░░█████╗░███╗░░░███╗███████╗  ████████╗░█████╗░"
 echo "░██║░░██╗░░██║██╔════╝██║░░░░░██╔══██╗██╔══██╗████╗░████║██╔════╝  ╚══██╔══╝██╔══██╗"
