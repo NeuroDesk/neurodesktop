@@ -347,8 +347,8 @@ RUN touch /home/user/.sudo_as_admin_successful
 #     && rm Miniconda3-latest-Linux-x86_64.sh \
 #     && miniconda3/bin/conda init
 
-# Add datalad-container to the conda environment
-RUN pip install datalad-container
+# Add datalad-container datalad-osf and osfclient to the conda environment
+RUN pip install datalad-container datalad-osf osfclient
 
 # Setup git
 RUN git config --global user.email "user@neurodesk.github.io"
