@@ -263,6 +263,14 @@ RUN wget -q https://downloads.globus.org/globus-connect-personal/linux/stable/gl
     && tar xzf globusconnectpersonal-latest.tgz \
     && rm -rf globusconnectpersonal-latest.tgz
 
+# add rclone
+WORKDIR /opt
+RUN wget https://downloads.rclone.org/v1.60.1/rclone-v1.60.1-linux-amd64.zip \
+    && unzip rclone-v1.60.1-linux-amd64.zip \
+    && rm rclone-v1.60.1-linux-amd64.zip \
+    && ln -s /opt/rclone-v1.60.1-linux-amd64/rclone /usr/bin/rclone
+COPY --chown=user:users config/rclone.conf /home/user/.config/rclone/rclone.conf
+
 # Desktop styling
 COPY config/desktop_wallpaper.jpg /usr/share/lxde/wallpapers/desktop_wallpaper.jpg
 COPY config/pcmanfm.conf /etc/xdg/pcmanfm/LXDE/pcmanfm.conf
@@ -299,13 +307,7 @@ RUN addgroup --gid 9001 user \
 
 COPY --chown=user:9001 config/xstartup /home/user/.vnc
 
-# add rclone
-WORKDIR /opt
-RUN wget https://downloads.rclone.org/v1.60.1/rclone-v1.60.1-linux-amd64.zip \
-    && unzip rclone-v1.60.1-linux-amd64.zip \
-    && rm rclone-v1.60.1-linux-amd64.zip \
-    && ln -s /opt/rclone-v1.60.1-linux-amd64/rclone /usr/bin/rclone
-COPY --chown=jovyan:users config/rclone.conf /home/user/.config/rclone/rclone.conf
+
 
 # Install Julia
 # WORKDIR /opt
@@ -349,6 +351,9 @@ RUN touch /home/user/.sudo_as_admin_successful
 
 # Add datalad-container datalad-osf and osfclient to the conda environment
 RUN pip install datalad-container datalad-osf osfclient
+ENV PATH=$PATH:/home/user/.local/bin
+
+
 
 # Setup git
 RUN git config --global user.email "user@neurodesk.github.io"
