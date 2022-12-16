@@ -269,7 +269,6 @@ RUN wget https://downloads.rclone.org/v1.60.1/rclone-v1.60.1-linux-amd64.zip \
     && unzip rclone-v1.60.1-linux-amd64.zip \
     && rm rclone-v1.60.1-linux-amd64.zip \
     && ln -s /opt/rclone-v1.60.1-linux-amd64/rclone /usr/bin/rclone
-COPY --chown=user:users config/rclone.conf /home/user/.config/rclone/rclone.conf
 
 # Desktop styling
 COPY config/desktop_wallpaper.jpg /usr/share/lxde/wallpapers/desktop_wallpaper.jpg
@@ -305,6 +304,7 @@ RUN addgroup --gid 9001 user \
     && /usr/bin/printf '%s\n%s\n%s\n' 'password' 'password' 'n' | su user -c vncpasswd \
     && echo -n 'password\npassword\nn\n' | su user -c vncpasswd
 
+COPY --chown=user:users config/rclone.conf /home/user/.config/rclone/rclone.conf
 COPY --chown=user:9001 config/xstartup /home/user/.vnc
 
 
