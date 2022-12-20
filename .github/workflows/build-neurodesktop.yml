@@ -97,8 +97,9 @@ jobs:
         docker push $DOCKERHUB_ORG/neurodesktop:latest
         docker push $DOCKERHUB_ORG/neurodesktop:$BUILDDATE
     - name: Container image scan
-      uses: Azure/container-scan@v0.1
+      uses: aquasecurity/trivy-action@0.8.0
       with:
-        image-name: ${{ env.IMAGEID }}
-        severity-threshold: CRITICAL
-        run-quality-checks: false
+        image-ref: ${{ env.IMAGEID }}
+        format: github
+        exit-code: '1'
+        severity: CRITICAL
