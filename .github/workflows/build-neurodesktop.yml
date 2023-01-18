@@ -103,4 +103,5 @@ jobs:
         format: table
         exit-code: '1'
         severity: CRITICAL
+        timeout: 15m0s
         skip-files: /opt/rclone-v1.60.1-linux-amd64/README.txt, /opt/rclone-v1.60.1-linux-amd64/README.html, /opt/rclone-v1.60.1-linux-amd64/rclone.1
