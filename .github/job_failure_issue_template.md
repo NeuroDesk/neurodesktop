@@ -1,5 +1,5 @@
 ---
-title: Job failure
+title: {{ env.GITHUB_WORKFLOW }} job failure
 assignees: aswinnarayanan
 labels: bug
 ---
