@@ -76,6 +76,7 @@ jobs:
       uses: JasonEtco/create-an-issue@v2
       env: 
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GITHUB_ACTION: ${{ env.GITHUB_ACTION }}
       with:
         filename: .github/job_failure_issue_template.md
         update_existing: true
