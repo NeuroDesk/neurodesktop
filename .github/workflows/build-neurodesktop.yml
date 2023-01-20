@@ -77,6 +77,7 @@ jobs:
       env: 
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         GITHUB_WORKFLOW: ${{ env.GITHUB_WORKFLOW }}
+        GITHUB_RUN_URL: $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID
       with:
         filename: .github/job_failure_issue_template.md
         update_existing: true
