@@ -78,3 +78,5 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         filename: .github/job_failure_issue_template.md
+        update_existing: true
+        search_existing: open
