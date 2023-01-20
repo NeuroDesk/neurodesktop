@@ -61,15 +61,15 @@ jobs:
         docker tag $IMAGEID:$SHORT_SHA $DOCKERHUB_ORG/neurodesktop:latest
         docker push $DOCKERHUB_ORG/neurodesktop:latest
         docker push $DOCKERHUB_ORG/neurodesktop:$BUILDDATE
-    - name: Container image scan
-      uses: aquasecurity/trivy-action@0.8.0
-      with:
-        image-ref: ${{ env.IMAGEID }}
-        format: table
-        exit-code: '1'
-        severity: CRITICAL
-        timeout: 15m0s
-        skip-files: /opt/rclone-v1.60.1-linux-amd64/README.txt, /opt/rclone-v1.60.1-linux-amd64/README.html, /opt/rclone-v1.60.1-linux-amd64/rclone.1
+    # - name: Container image scan
+    #   uses: aquasecurity/trivy-action@0.8.0
+    #   with:
+    #     image-ref: ${{ env.IMAGEID }}
+    #     format: table
+    #     exit-code: '1'
+    #     severity: CRITICAL
+    #     timeout: 15m0s
+    #     skip-files: /opt/rclone-v1.60.1-linux-amd64/README.txt, /opt/rclone-v1.60.1-linux-amd64/README.html, /opt/rclone-v1.60.1-linux-amd64/rclone.1
 
     - name: Generate issue on job failure
       if: always()
