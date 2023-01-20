@@ -21,8 +21,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
-    - name: Trigger job fail
-      run: exit 1
+    # - name: Trigger job fail
+    #   run: exit 1
     - name: Pull latest neurodesktop build from GitHub packages
       run: |
         echo ${GITHUB_REF}
