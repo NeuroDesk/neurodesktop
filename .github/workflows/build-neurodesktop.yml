@@ -15,43 +15,6 @@ env:
   DOCKERHUB_ORG: ${{ secrets.DOCKERHUB_ORG }}
 
 jobs:
-  test_cvmfs:
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        cvmfs-server: [	cvmfs-tokyo.neurodesk.org, cvmfs-phoenix.neurodesk.org, cvmfs-perth.neurodesk.org, cvmfs-brisbane.neurodesk.org, cvmfs-sydney.neurodesk.org, cvmfs-frankfurt.neurodesk.org, 	cvmfs-zurich.neurodesk.org, cvmfs-toronto.neurodesk.org, cvmfs-ashburn.neurodesk.org, cvmfs.neurodesk.org]
-    steps:
-    - uses: actions/checkout@v3
-    - name: check if ${{ matrix.cvmfs-server }} is online and up-to-date
-      run: /bin/bash .github/workflows/test_cvmfs.sh  ${{ matrix.cvmfs-server }}
-  # check_commits_neurodesktop:
-  #   runs-on: ubuntu-latest
-  #   outputs:
-  #     should_run: ${{ steps.should_run.outputs.should_run }}
-  #   steps:
-  #     - uses: actions/checkout@v3
-  #     - name: print latest_commit
-  #       run: echo ${{ github.sha }}
-  #     - id: should_run
-  #       continue-on-error: true
-  #       name: check latest commit is less than a day
-  #       if: ${{ github.event_name == 'schedule' }}
-  #       run: test -z $(git rev-list  --after="24 hours"  ${{ github.sha }}) && echo "::set-output name=should_run::false"
-  # check_commits_neurocommand:
-  #   runs-on: ubuntu-latest
-  #   outputs:
-  #     should_run: ${{ steps.should_run.outputs.should_run }}
-  #   steps:
-  #     - uses: actions/checkout@v3
-  #       with: 
-  #         repository: NeuroDesk/neurocommand
-  #     - name: print latest_commit
-  #       run: echo ${{ github.sha }}
-  #     - id: should_run
-  #       continue-on-error: true
-  #       name: check latest commit is less than a day
-  #       if: ${{ github.event_name == 'schedule' }}
-  #       run: test -z $(git rev-list  --after="24 hours"  ${{ github.sha }}) && echo "::set-output name=should_run::false"
   build_neurodesktop:
     # needs: [check_commits_neurodesktop, check_commits_neurocommand]
     # if: ${{ needs.check_date.outputs.should_run != 'false' }}
