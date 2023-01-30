@@ -76,3 +76,7 @@ do
         exit 2
     fi
 done < log.txt
+
+
+## test if files can be accessed ok:
+cp /cvmfs/neurodesk.ardc.edu.au/containers/fsl_6.0.5.1_20221016/fsl_6.0.5.1_20221016.simg/opt/fsl-6.0.5.1/data/standard/LowerCingulum_1mm.nii.gz ~/LowerCingulum_1mm.nii.gz
