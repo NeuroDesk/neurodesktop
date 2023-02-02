@@ -9,4 +9,5 @@ application/x-hdf=neurodesk-registergui-minc-1_9_17.desktop;
 application/gzip=neurodesk-mricroglgui-mricrogl-1_2_20211006.desktop
 application/octet-stream=neurodesk-freeviewgui-freesurfer-7_3_2.desktop
 text/plain=org.gnome.gedit.desktop;
+text/html=firefox.desktop;
 application/x-hdf=neurodesk-registergui-minc-1_9_17.desktop;
