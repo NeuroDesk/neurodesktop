@@ -15,7 +15,7 @@ env:
 
 jobs:
   test_cvmfs:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     strategy:
       matrix:
         cvmfs-server: [	cvmfs-tokyo.neurodesk.org, cvmfs-phoenix.neurodesk.org, cvmfs-perth.neurodesk.org, cvmfs-brisbane.neurodesk.org, cvmfs-sydney.neurodesk.org, cvmfs-frankfurt.neurodesk.org, 	cvmfs-zurich.neurodesk.org, cvmfs-toronto.neurodesk.org, cvmfs-ashburn.neurodesk.org, cvmfs.neurodesk.org]
@@ -24,7 +24,7 @@ jobs:
     - name: check if ${{ matrix.cvmfs-server }} is online and up-to-date
       run: /bin/bash .github/workflows/test_cvmfs.sh  ${{ matrix.cvmfs-server }}
   # check_commits_neurodesktop:
-  #   runs-on: ubuntu-latest
+  #   runs-on: ubuntu-22.04
   #   outputs:
   #     should_run: ${{ steps.should_run.outputs.should_run }}
   #   steps:
@@ -37,7 +37,7 @@ jobs:
   #       if: ${{ github.event_name == 'schedule' }}
   #       run: test -z $(git rev-list  --after="24 hours"  ${{ github.sha }}) && echo "::set-output name=should_run::false"
   # check_commits_neurocommand:
-  #   runs-on: ubuntu-latest
+  #   runs-on: ubuntu-22.04
   #   outputs:
   #     should_run: ${{ steps.should_run.outputs.should_run }}
   #   steps:

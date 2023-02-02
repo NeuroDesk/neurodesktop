@@ -18,7 +18,7 @@ jobs:
   build_neurodesktop:
     # needs: [check_commits_neurodesktop, check_commits_neurocommand]
     # if: ${{ needs.check_date.outputs.should_run != 'false' }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
     - uses: actions/checkout@v3
     - name: Pull latest neurodesktop build from GitHub packages
