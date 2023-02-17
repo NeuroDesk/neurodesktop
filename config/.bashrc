@@ -35,6 +35,7 @@ then
         export neurodesk_singularity_opts="${neurodesk_singularity_opts} --nv "
 fi
 
+export SINGULARITYENV_SUBJECTS_DIR=~/freesurfer-subjects-dir
 export PATH=$PATH:~/.local/bin
 
 #File needs an empty line at the end because we insert things during build later:
