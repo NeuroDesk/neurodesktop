@@ -1,9 +1,4 @@
 name: Test cvmfs
-# Scheduled production builds at 17:00 UTC every day.
-# Build manually from here: https://github.com/NeuroDesk/neurodesktop/actions/workflows/build-neurodesktop.yml
-
-# DockerHub: https://hub.docker.com/r/vnmd/neurodesktop
-# Github Packages: https://github.com/NeuroDesk/neurodesktop/pkgs/container/neurodesktop%2Fneurodesktop
 
 on:
   workflow_dispatch:
@@ -23,31 +18,3 @@ jobs:
     - uses: actions/checkout@v3
     - name: check if ${{ matrix.cvmfs-server }} is online and up-to-date
       run: /bin/bash .github/workflows/test_cvmfs.sh  ${{ matrix.cvmfs-server }}
-  # check_commits_neurodesktop:
-  #   runs-on: ubuntu-22.04
-  #   outputs:
-  #     should_run: ${{ steps.should_run.outputs.should_run }}
-  #   steps:
-  #     - uses: actions/checkout@v3
-  #     - name: print latest_commit
-  #       run: echo ${{ github.sha }}
-  #     - id: should_run
-  #       continue-on-error: true
-  #       name: check latest commit is less than a day
-  #       if: ${{ github.event_name == 'schedule' }}
-  #       run: test -z $(git rev-list  --after="24 hours"  ${{ github.sha }}) && echo "::set-output name=should_run::false"
-  # check_commits_neurocommand:
-  #   runs-on: ubuntu-22.04
-  #   outputs:
-  #     should_run: ${{ steps.should_run.outputs.should_run }}
-  #   steps:
-  #     - uses: actions/checkout@v3
-  #       with: 
-  #         repository: NeuroDesk/neurocommand
-  #     - name: print latest_commit
-  #       run: echo ${{ github.sha }}
-  #     - id: should_run
-  #       continue-on-error: true
-  #       name: check latest commit is less than a day
-  #       if: ${{ github.event_name == 'schedule' }}
-  #       run: test -z $(git rev-list  --after="24 hours"  ${{ github.sha }}) && echo "::set-output name=should_run::false"
