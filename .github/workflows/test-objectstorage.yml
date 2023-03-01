@@ -3,8 +3,8 @@ name: Test Objectstorage
 on:
   workflow_dispatch:
   schedule:
-    - cron:  '0 17 * * *'
-    
+    - cron: '0 17 * * *'
+
 env:
   DOCKERHUB_ORG: ${{ secrets.DOCKERHUB_ORG }}
 
@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-22.04
     strategy:
       matrix:
-        server: [	https://objectstorage.us-ashburn-1.oraclecloud.com/n/sd63xuke79z3/b/neurodesk/o/, https://objectstorage.eu-frankfurt-1.oraclecloud.com/n/sd63xuke79z3/b/neurodesk/o/, https://objectstorage.ap-sydney-1.oraclecloud.com/n/sd63xuke79z3/b/neurodesk/o/, https://swift.rc.nectar.org.au/v1/AUTH_dead991e1fa847e3afcca2d3a7041f5d/neurodesk/]
+        server: [https://objectstorage.us-ashburn-1.oraclecloud.com/n/sd63xuke79z3/b/neurodesk/o/, https://objectstorage.eu-frankfurt-1.oraclecloud.com/n/sd63xuke79z3/b/neurodesk/o/, https://objectstorage.ap-sydney-1.oraclecloud.com/n/sd63xuke79z3/b/neurodesk/o/, https://swift.rc.nectar.org.au/v1/AUTH_dead991e1fa847e3afcca2d3a7041f5d/neurodesk/]
     steps:
     - uses: actions/checkout@v3
     - name: check if ${{ matrix.server }} is online and up-to-date
