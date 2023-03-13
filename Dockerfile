@@ -18,7 +18,6 @@ RUN apt-get update \
         gcc \
         g++ \
         gpg-agent \
-        openjdk-11-jre \
         libpng-dev \
         libjpeg-turbo8-dev \
         libcairo2-dev \
@@ -26,11 +25,7 @@ RUN apt-get update \
         libossp-uuid-dev \
         libwebp-dev \
         lxde \
-        openssh-server \
-        libpango1.0-dev \
-        libssh2-1-dev \
         libssl-dev \
-        openssh-server \
         libvncserver-dev \
         libxt6 \
         xauth \
@@ -50,12 +45,25 @@ RUN apt-get update \
         dbus-x11 \
         man-db \
         pciutils \
+        openjdk-19-jre \
     && rm -rf /var/lib/apt/lists/* \
     && rm -rf /home/jovyan/.cache
 
 RUN apt-get update \
     && DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y \
-        openjdk-19-jre
+        build-essential \
+        libseccomp-dev \
+        libglib2.0-dev \
+        pkg-config \
+        squashfs-tools \
+        cryptsetup \
+        runc
+
+# openjdk-11-jre \
+# openssh-server \
+# libpango1.0-dev \
+# libssh2-1-dev \
+# openssh-server \
 
 ARG GO_VERSION="1.20.2"
 ARG SINGULARITY_VERSION="3.11.0"
@@ -68,19 +76,69 @@ ENV LANG ""
 ENV LANGUAGE ""
 ENV LC_ALL ""
 
-ARG GUACAMOLE_VERSION
+# Install singularity
+RUN export VERSION=${GO_VERSION} OS=linux ARCH=amd64 \
+    && wget https://go.dev/dl/go${VERSION}.${OS}-${ARCH}.tar.gz \
+    && sudo tar -C /usr/local -xzvf go$VERSION.$OS-$ARCH.tar.gz \
+    && rm go$VERSION.$OS-$ARCH.tar.gz \
+    && export GOPATH=${HOME}/go \
+    && export PATH=/usr/local/go/bin:${PATH}:${GOPATH}/bin \
+    && mkdir -p $GOPATH/src/github.com/sylabs \
+    && cd $GOPATH/src/github.com/sylabs \
+    && wget https://github.com/sylabs/singularity/releases/download/v${SINGULARITY_VERSION}/singularity-ce-${SINGULARITY_VERSION}.tar.gz \
+    && tar -xzvf singularity-ce-${SINGULARITY_VERSION}.tar.gz \
+    && cd singularity-ce-${SINGULARITY_VERSION} \
+    && ./mconfig --without-suid --prefix=/usr/local/singularity \
+    && make -C builddir \
+    && make -C builddir install
+
+# Install Apache Tomcat
+RUN wget -q https://archive.apache.org/dist/tomcat/tomcat-${TOMCAT_REL}/v${TOMCAT_VERSION}/bin/apache-tomcat-${TOMCAT_VERSION}.tar.gz -P /tmp \
+    && tar -xf /tmp/apache-tomcat-${TOMCAT_VERSION}.tar.gz -C /tmp \
+    && rm -rf /tmp/apache-tomcat-${TOMCAT_VERSION}.tar.gz \
+    && mv /tmp/apache-tomcat-${TOMCAT_VERSION} /usr/local/tomcat \
+    && mv /usr/local/tomcat/webapps /usr/local/tomcat/webapps.dist \
+    && mkdir /usr/local/tomcat/webapps \
+    && sh -c 'chmod +x /usr/local/tomcat/bin/*.sh'
+
+# Install Apache Guacamole
 WORKDIR /etc/guacamole
-RUN wget "https://archive.apache.org/dist/guacamole/${GUACAMOLE_VERSION}/source/guacamole-server-${GUACAMOLE_VERSION}.tar.gz" -O /etc/guacamole/guacamole-server-${GUACAMOLE_VERSION}.tar.gz \
+RUN wget -q "https://dlcdn.apache.org/guacamole/${GUACAMOLE_VERSION}/binary/guacamole-${GUACAMOLE_VERSION}.war" -O /usr/local/tomcat/webapps/ROOT.war \
+    && wget -q "https://dlcdn.apache.org/guacamole/${GUACAMOLE_VERSION}/source/guacamole-server-${GUACAMOLE_VERSION}.tar.gz" -O /etc/guacamole/guacamole-server-${GUACAMOLE_VERSION}.tar.gz \
     && tar xvf /etc/guacamole/guacamole-server-${GUACAMOLE_VERSION}.tar.gz \
+    && rm -rf /etc/guacamole/guacamole-server-${GUACAMOLE_VERSION}.tar.gz \
     && cd /etc/guacamole/guacamole-server-${GUACAMOLE_VERSION} \
     && ./configure --with-init-dir=/etc/init.d \
     && make \
     && make install \
     && ldconfig \
-    && rm -r /etc/guacamole/guacamole-server-${GUACAMOLE_VERSION}* \
+    && rm -r /etc/guacamole/guacamole-server-${GUACAMOLE_VERSION}*
+
+# Create Guacamole configurations (user-mapping.xml gets filled in the startup.sh script)
+RUN echo -e "user-mapping: /etc/guacamole/user-mapping.xml\nguacd-hostname: 127.0.0.1" > /etc/guacamole/guacamole.properties
+RUN echo -e "[server]\nbind_host = 127.0.0.1\nbind_port = 4822" > /etc/guacamole/guacd.conf
+
+RUN apt-get update \
+    && DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y \
+        git
+
+# Install neurocommand
+ADD "http://api.github.com/repos/NeuroDesk/neurocommand/commits/main" /tmp/skipcache
+RUN rm /tmp/skipcache \
+    && git clone https://github.com/NeuroDesk/neurocommand.git /opt/neurocommand \
+    && cd /opt/neurocommand \
+    && bash build.sh --lxde --edit \
+    && bash install.sh \
+    && ln -s /neurodesktop-storage/containers /opt/neurocommand/local/containers 
+
+COPY --chown=jovyan:users config/startup.sh /opt/neurodesktop/startup.sh
+COPY --chown=jovyan:users config/jupyter_notebook_config.py /home/jovyan/.jupyter/jupyter_notebook_config.py
+RUN chmod +x /opt/neurodesktop/startup.sh /home/jovyan/.jupyter/jupyter_notebook_config.py
+
+# Install plugins and pip packages
+RUN pip install jupyter-server-proxy jupyterlmod \
     && rm -rf /home/jovyan/.cache
 
-# Create Guacamole configurations
-COPY --chown=root:root config/user-mapping.xml /etc/guacamole/user-mapping.xml
-COPY --chown=root:root config/guacamole.properties /etc/guacamole/guacamole.properties
-COPY --chown=root:root config/guacd.conf /etc/guacamole/guacd.conf
+COPY config/neurodesk_brain_logo.svg /opt/neurodesk_brain_logo.svg
+
+WORKDIR /home/jovyan
