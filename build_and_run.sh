@@ -3,6 +3,13 @@ set -e
 if docker ps --all | grep neurodesktop; then
     bash stop_and_clean.sh
 fi
-docker build -t neurodesktop:latest .
-docker run --shm-size=1gb -it --privileged --name neurodesktop -v ~/neurodesktop-storage:/neurodesktop-storage -e HOST_UID="$(id -u)" -e HOST_GID="$(id -g)" -p 8080:8080 neurodesktop:latest
+# docker build -t neurodesktop:latest .
+# docker run --shm-size=1gb -it --privileged --name neurodesktop -v ~/neurodesktop-storage:/neurodesktop-storage -e HOST_UID="$(id -u)" -e HOST_GID="$(id -g)" -p 8080:8080 neurodesktop:latest
 # -e CVMFS_DISABLE=true # will disable CVMFS for testing purposes
+
+
+docker build . -t neurodesktop:latest
+# docker run --shm-size=1gb -it --privileged --name neurodesktop -p 8888:8888 vnmd/jupyter-remote-desktop-proxy:$timestamp
+# docker run --shm-size=1gb -it --cap-add SYS_ADMIN --security-opt apparmor:unconfined --device=/dev/fuse --name neurodesktop -v /cvmfs:/cvmfs -p 8888:8888 neurodesktop:latest
+
+docker run --shm-size=1gb -it --cap-add SYS_ADMIN --security-opt apparmor:unconfined --device=/dev/fuse --name neurodesktop -v /cvmfs:/cvmfs -p 8888:8888 -e GRANT_SUDO=yes neurodesktop:latest
