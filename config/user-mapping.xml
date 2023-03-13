@@ -1,0 +1,24 @@
+<user-mapping>
+<authorize username="jovyan" password="password">
+<connection name="Desktop Dynamic-Resolution (RDP)">
+<protocol>rdp</protocol>
+<param name="hostname">localhost</param>
+<param name="username">jovyan</param>
+<param name="password">password</param>
+<param name="port">3389</param>
+<param name="security\">any</param>
+<param name="ignore-cert\">true</param>
+<param name="resize-method\">reconnect</param>
+<param name="enable-drive">false</param>
+</connection>
+<connection name="Desktop Fixed-Resolution (VNC)">
+<protocol>vnc</protocol>
+<param name="hostname">localhost</param>
+<param name="username">jovyan</param>
+<param name="password">password</param>
+<param name="port">5901</param>
+<param name="enable-sftp">false</param>
+<param name="enable-audio">false</param>
+</connection>
+</authorize>
+</user-mapping>
