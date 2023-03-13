@@ -120,7 +120,8 @@ RUN echo -e "[server]\nbind_host = 127.0.0.1\nbind_port = 4822" > /etc/guacamole
 
 RUN apt-get update \
     && DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y \
-        git
+        git \
+        tigervnc-tools
 
 # Install neurocommand
 ADD "http://api.github.com/repos/NeuroDesk/neurocommand/commits/main" /tmp/skipcache
@@ -133,12 +134,26 @@ RUN rm /tmp/skipcache \
 
 COPY --chown=jovyan:users config/startup.sh /opt/neurodesktop/startup.sh
 COPY --chown=jovyan:users config/jupyter_notebook_config.py /home/jovyan/.jupyter/jupyter_notebook_config.py
-RUN chmod +x /opt/neurodesktop/startup.sh /home/jovyan/.jupyter/jupyter_notebook_config.py
+
+COPY --chown=jovyan:root config/user-mapping.xml /etc/guacamole/user-mapping.xml
+# RUN touch /etc/guacamole/user-mapping.xml \
+#     && chown jovyan:root /etc/guacamole/user-mapping.xml \
+#     && chmod 750 /etc/guacamole/user-mapping.xml
 
 # Install plugins and pip packages
-RUN pip install jupyter-server-proxy jupyterlmod \
+RUN pip install jupyter-server-proxy \
     && rm -rf /home/jovyan/.cache
 
 COPY config/neurodesk_brain_logo.svg /opt/neurodesk_brain_logo.svg
+
+RUN mkdir /home/jovyan/.vnc \
+    && chown jovyan /home/jovyan/.vnc \
+    && /usr/bin/printf '%s\n%s\n%s\n' 'password' 'password' 'n' | su jovyan -c vncpasswd \
+    && /usr/bin/printf '%s\n%s\n' 'password' 'password'| passwd jovyan
+COPY --chown=jovyan:users config/xstartup /home/jovyan/.vnc
+
+RUN chmod +x /opt/neurodesktop/startup.sh \
+    /home/jovyan/.jupyter/jupyter_notebook_config.py \
+    /home/jovyan/.vnc/xstartup
 
 WORKDIR /home/jovyan
