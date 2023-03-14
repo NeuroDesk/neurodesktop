@@ -99,7 +99,12 @@ RUN wget -q https://archive.apache.org/dist/tomcat/tomcat-${TOMCAT_REL}/v${TOMCA
     && mv /tmp/apache-tomcat-${TOMCAT_VERSION} /usr/local/tomcat \
     && mv /usr/local/tomcat/webapps /usr/local/tomcat/webapps.dist \
     && mkdir /usr/local/tomcat/webapps \
-    && sh -c 'chmod +x /usr/local/tomcat/bin/*.sh'
+    && chmod +x /usr/local/tomcat/bin/*.sh
+
+    # && useradd -r -m -U -d /usr/local/tomcat -s /bin/false tomcat \
+    # && usermod -aG tomcat jovyan \
+    # && chown -R tomcat: /usr/local/tomcat/* \
+    # && chmod 770 /usr/local/tomcat/logs
 
 # Install Apache Guacamole
 WORKDIR /etc/guacamole
@@ -130,15 +135,7 @@ RUN rm /tmp/skipcache \
     && cd /opt/neurocommand \
     && bash build.sh --lxde --edit \
     && bash install.sh \
-    && ln -s /neurodesktop-storage/containers /opt/neurocommand/local/containers 
-
-COPY --chown=jovyan:users config/startup.sh /opt/neurodesktop/startup.sh
-COPY --chown=jovyan:users config/jupyter_notebook_config.py /home/jovyan/.jupyter/jupyter_notebook_config.py
-
-COPY --chown=jovyan:root config/user-mapping.xml /etc/guacamole/user-mapping.xml
-# RUN touch /etc/guacamole/user-mapping.xml \
-#     && chown jovyan:root /etc/guacamole/user-mapping.xml \
-#     && chmod 750 /etc/guacamole/user-mapping.xml
+    && ln -s /neurodesktop-storage/containers /opt/neurocommand/local/containers
 
 # Install plugins and pip packages
 RUN pip install jupyter-server-proxy \
@@ -151,6 +148,10 @@ RUN mkdir /home/jovyan/.vnc \
     && /usr/bin/printf '%s\n%s\n%s\n' 'password' 'password' 'n' | su jovyan -c vncpasswd \
     && /usr/bin/printf '%s\n%s\n' 'password' 'password'| passwd jovyan
 COPY --chown=jovyan:users config/xstartup /home/jovyan/.vnc
+
+COPY --chown=jovyan:users config/startup.sh /opt/neurodesktop/startup.sh
+COPY --chown=jovyan:users config/jupyter_notebook_config.py /home/jovyan/.jupyter/jupyter_notebook_config.py
+COPY --chown=jovyan:root config/user-mapping.xml /etc/guacamole/user-mapping.xml
 
 RUN chmod +x /opt/neurodesktop/startup.sh \
     /home/jovyan/.jupyter/jupyter_notebook_config.py \

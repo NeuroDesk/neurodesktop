@@ -1,7 +1,7 @@
 
 c.ServerProxy.servers = {
   'neurodesktop': {
-    'command': ['sudo','/opt/neurodesktop/startup.sh'],
+    'command': ['/opt/neurodesktop/startup.sh'],
     'port': 8080,
     'timeout': 60,
       'request_headers_override': {
