@@ -2,8 +2,6 @@
 FROM jupyter/base-notebook:python-3.10.9
 # FROM jupyter/base-notebook:notebook-6.5.3
 
-# FROM jupyter/base-notebook:python-3.10.4
-
 # Parent image source
 # https://github.com/jupyter/docker-stacks/blob/86d42cadf4695b8e6fc3b3ead58e1f71067b765b/docker-stacks-foundation/Dockerfile
 # https://github.com/jupyter/docker-stacks/blob/86d42cadf4695b8e6fc3b3ead58e1f71067b765b/base-notebook/Dockerfile
@@ -125,7 +123,44 @@ RUN echo -e "[server]\nbind_host = 127.0.0.1\nbind_port = 4822" > /etc/guacamole
 RUN apt-get update \
     && DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y \
         git \
-        tigervnc-tools
+        tigervnc-tools \
+        lmod
+
+# Install jupyter-server-proxy and disable announcements
+RUN rm -rf /home/jovyan/.cache \
+    && su jovyan -c "/opt/conda/bin/pip install jupyter-server-proxy" \
+    && su jovyan -c "/opt/conda/bin/jupyter labextension disable @jupyterlab/apputils-extension:announcements"
+
+# # Install plugins and pip packages
+# RUN su jovyan -c "/opt/conda/bin/pip install jupyter-server-proxy" \
+#     su jovyan -c "/opt/conda/bin/jupyter labextension disable @jupyterlab/apputils-extension:announcements" \
+#     && rm -rf /home/jovyan/.cache
+
+# Customise logo, wallpaper, terminal, panel
+COPY config/neurodesk_brain_logo.svg /opt/neurodesk_brain_logo.svg
+COPY config/background.png /usr/share/lxde/wallpapers/desktop_wallpaper.png
+COPY config/pcmanfm.conf /etc/xdg/pcmanfm/LXDE/pcmanfm.conf
+COPY config/lxterminal.conf /usr/share/lxterminal/lxterminal.conf
+COPY config/panel /home/jovyan/.config/lxpanel/LXDE/panels/panel
+
+# Add startup and config files for neurodesktop, jupyter, guacamole, vnc
+RUN mkdir /home/jovyan/.vnc \
+    && chown jovyan /home/jovyan/.vnc \
+    && /usr/bin/printf '%s\n%s\n%s\n' 'password' 'password' 'n' | su jovyan -c vncpasswd
+COPY --chown=jovyan:users config/xstartup /home/jovyan/.vnc
+COPY --chown=jovyan:users config/startup.sh /opt/neurodesktop/startup.sh
+COPY --chown=jovyan:users config/jupyter_notebook_config.py /home/jovyan/.jupyter/jupyter_notebook_config.py
+COPY --chown=jovyan:root config/user-mapping.xml /etc/guacamole/user-mapping.xml
+RUN chmod +x /opt/neurodesktop/startup.sh \
+    /home/jovyan/.jupyter/jupyter_notebook_config.py \
+    /home/jovyan/.vnc/xstartup
+    
+# Add notebook startup scripts
+# https://jupyter-docker-stacks.readthedocs.io/en/latest/using/common.html
+RUN mkdir -p /usr/local/bin/start-notebook.d/ \
+    && mkdir -p /usr/local/bin/before-notebook.d/
+COPY config/before-start.sh /usr/local/bin/start-notebook.d/
+COPY config/after-start.sh /usr/local/bin/before-notebook.d/
 
 # Install neurocommand
 ADD "http://api.github.com/repos/NeuroDesk/neurocommand/commits/main" /tmp/skipcache
@@ -136,45 +171,5 @@ RUN rm /tmp/skipcache \
     && bash install.sh \
     && ln -s /neurodesktop-storage/containers /opt/neurocommand/local/containers
 
-COPY config/neurodesk_brain_logo.svg /opt/neurodesk_brain_logo.svg
-
-RUN mkdir /home/jovyan/.vnc \
-    && chown jovyan /home/jovyan/.vnc \
-    && /usr/bin/printf '%s\n%s\n%s\n' 'password' 'password' 'n' | su jovyan -c vncpasswd
-
-COPY --chown=jovyan:users config/xstartup /home/jovyan/.vnc
-
-COPY --chown=jovyan:users config/startup.sh /opt/neurodesktop/startup.sh
-COPY --chown=jovyan:users config/jupyter_notebook_config.py /home/jovyan/.jupyter/jupyter_notebook_config.py
-COPY --chown=jovyan:root config/user-mapping.xml /etc/guacamole/user-mapping.xml
-
-RUN chmod +x /opt/neurodesktop/startup.sh \
-    /home/jovyan/.jupyter/jupyter_notebook_config.py \
-    /home/jovyan/.vnc/xstartup
-
-RUN rm -rf /home/jovyan/.cache \
-    && su jovyan -c "/opt/conda/bin/pip install jupyter-server-proxy" \
-    && su jovyan -c "/opt/conda/bin/jupyter labextension disable @jupyterlab/apputils-extension:announcements"
-
-# RUN /usr/bin/printf '%s\n%s\n' 'password' 'password'| passwd user
-# RUN echo "jovyan ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers.d/notebook
-
-# # Install plugins and pip packages
-# RUN su jovyan -c "/opt/conda/bin/pip install jupyter-server-proxy" \
-#     su jovyan -c "/opt/conda/bin/jupyter labextension disable @jupyterlab/apputils-extension:announcements" \
-#     && rm -rf /home/jovyan/.cache
-
-# COPY config/background.svg /usr/share/lxde/wallpapers/desktop_wallpaper.svg
-# COPY config/pcmanfm.conf /etc/xdg/pcmanfm/LXDE/pcmanfm.conf
-# COPY config/lxterminal.conf /usr/share/lxterminal/lxterminal.conf
-
-# https://jupyter-docker-stacks.readthedocs.io/en/latest/using/common.html
-RUN mkdir -p /usr/local/bin/start-notebook.d/ \
-    && mkdir -p /usr/local/bin/before-notebook.d/
-
-COPY config/before-start.sh /usr/local/bin/start-notebook.d/
-COPY config/after-start.sh /usr/local/bin/before-notebook.d/
-
-USER root
 WORKDIR /home/jovyan
 
