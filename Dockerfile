@@ -81,7 +81,7 @@ RUN export VERSION=${GO_VERSION} OS=linux ARCH=amd64 \
     && wget https://go.dev/dl/go${VERSION}.${OS}-${ARCH}.tar.gz \
     && sudo tar -C /usr/local -xzvf go$VERSION.$OS-$ARCH.tar.gz \
     && rm go$VERSION.$OS-$ARCH.tar.gz \
-    && export GOPATH=${HOME}/go \
+    && export GOPATH=/opt/go \
     && export PATH=/usr/local/go/bin:${PATH}:${GOPATH}/bin \
     && mkdir -p $GOPATH/src/github.com/sylabs \
     && cd $GOPATH/src/github.com/sylabs \
@@ -90,7 +90,11 @@ RUN export VERSION=${GO_VERSION} OS=linux ARCH=amd64 \
     && cd singularity-ce-${SINGULARITY_VERSION} \
     && ./mconfig --without-suid --prefix=/usr/local/singularity \
     && make -C builddir \
-    && make -C builddir install
+    && make -C builddir install \
+    && rm -rf singularity-ce-${SINGULARITY_VERSION} \
+    && rm -rf /usr/local/go $GOPATH \
+    && ln -s /usr/local/singularity/bin/singularity /bin/ \ 
+    && rm -rf /root/.cache
 
 # Install Apache Tomcat
 RUN wget -q https://archive.apache.org/dist/tomcat/tomcat-${TOMCAT_REL}/v${TOMCAT_VERSION}/bin/apache-tomcat-${TOMCAT_VERSION}.tar.gz -P /tmp \
@@ -100,11 +104,6 @@ RUN wget -q https://archive.apache.org/dist/tomcat/tomcat-${TOMCAT_REL}/v${TOMCA
     && mv /usr/local/tomcat/webapps /usr/local/tomcat/webapps.dist \
     && mkdir /usr/local/tomcat/webapps \
     && chmod +x /usr/local/tomcat/bin/*.sh
-
-    # && useradd -r -m -U -d /usr/local/tomcat -s /bin/false tomcat \
-    # && usermod -aG tomcat jovyan \
-    # && chown -R tomcat: /usr/local/tomcat/* \
-    # && chmod 770 /usr/local/tomcat/logs
 
 # Install Apache Guacamole
 WORKDIR /etc/guacamole
@@ -137,13 +136,12 @@ RUN rm /tmp/skipcache \
     && bash install.sh \
     && ln -s /neurodesktop-storage/containers /opt/neurocommand/local/containers
 
-
 COPY config/neurodesk_brain_logo.svg /opt/neurodesk_brain_logo.svg
 
 RUN mkdir /home/jovyan/.vnc \
     && chown jovyan /home/jovyan/.vnc \
-    && /usr/bin/printf '%s\n%s\n%s\n' 'password' 'password' 'n' | su jovyan -c vncpasswd \
-    && /usr/bin/printf '%s\n%s\n' 'password' 'password'| passwd jovyan
+    && /usr/bin/printf '%s\n%s\n%s\n' 'password' 'password' 'n' | su jovyan -c vncpasswd
+
 COPY --chown=jovyan:users config/xstartup /home/jovyan/.vnc
 
 COPY --chown=jovyan:users config/startup.sh /opt/neurodesktop/startup.sh
@@ -154,10 +152,29 @@ RUN chmod +x /opt/neurodesktop/startup.sh \
     /home/jovyan/.jupyter/jupyter_notebook_config.py \
     /home/jovyan/.vnc/xstartup
 
-# Install plugins and pip packages
-RUN su jovyan -c "/opt/conda/bin/pip install jupyter-server-proxy" \
-    su jovyan -c "/opt/conda/bin/jupyter labextension disable @jupyterlab/apputils-extension:announcements" \
-    && rm -rf /home/jovyan/.cache
+RUN rm -rf /home/jovyan/.cache \
+    && su jovyan -c "/opt/conda/bin/pip install jupyter-server-proxy" \
+    && su jovyan -c "/opt/conda/bin/jupyter labextension disable @jupyterlab/apputils-extension:announcements"
 
+# RUN /usr/bin/printf '%s\n%s\n' 'password' 'password'| passwd user
+# RUN echo "jovyan ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers.d/notebook
+
+# # Install plugins and pip packages
+# RUN su jovyan -c "/opt/conda/bin/pip install jupyter-server-proxy" \
+#     su jovyan -c "/opt/conda/bin/jupyter labextension disable @jupyterlab/apputils-extension:announcements" \
+#     && rm -rf /home/jovyan/.cache
+
+# COPY config/background.svg /usr/share/lxde/wallpapers/desktop_wallpaper.svg
+# COPY config/pcmanfm.conf /etc/xdg/pcmanfm/LXDE/pcmanfm.conf
+# COPY config/lxterminal.conf /usr/share/lxterminal/lxterminal.conf
+
+# https://jupyter-docker-stacks.readthedocs.io/en/latest/using/common.html
+RUN mkdir -p /usr/local/bin/start-notebook.d/ \
+    && mkdir -p /usr/local/bin/before-notebook.d/
+
+COPY config/before-start.sh /usr/local/bin/start-notebook.d/
+COPY config/after-start.sh /usr/local/bin/before-notebook.d/
+
+USER root
 WORKDIR /home/jovyan
 
