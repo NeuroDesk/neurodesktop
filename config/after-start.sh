@@ -33,6 +33,21 @@ fi
 # ssh-keygen -t rsa -f /home/jovyan/.ssh/ssh_host_rsa_key -N '' <<< n
 # cat /home/jovyan/.ssh/id_rsa.pub >> /home/jovyan/.ssh/authorized_keys
 
+if [ -z "$CVMFS_DISABLE" ]; then
+    echo "\
+    ==================================================================
+    Mounting CVMFS"
+    mkdir /cvmfs/neurodesk.ardc.edu.au
+    mount -t cvmfs neurodesk.ardc.edu.au /cvmfs/neurodesk.ardc.edu.au
+
+    echo "\
+    ==================================================================
+    Testing which CVMFS server is fastest"
+    cvmfs_talk -i neurodesk.ardc.edu.au host probe
+    cvmfs_talk -i neurodesk.ardc.edu.au host info
+fi
+
+
 # export JAVA_OPTS="-Xms512M -Xmx1024M"
 # export CATALINA_OPTS="-Xms512M -Xmx1024M"
 # service guacd restart
