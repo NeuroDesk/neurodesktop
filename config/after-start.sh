@@ -37,7 +37,7 @@ if [ -z "$CVMFS_DISABLE" ]; then
     echo "\
     ==================================================================
     Mounting CVMFS"
-    mkdir /cvmfs/neurodesk.ardc.edu.au
+    mkdir -p /cvmfs/neurodesk.ardc.edu.au
     mount -t cvmfs neurodesk.ardc.edu.au /cvmfs/neurodesk.ardc.edu.au
 
     echo "\
