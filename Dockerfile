@@ -162,14 +162,31 @@ RUN mkdir -p /usr/local/bin/start-notebook.d/ \
 COPY config/before-start.sh /usr/local/bin/start-notebook.d/
 COPY config/after-start.sh /usr/local/bin/before-notebook.d/
 
+COPY config/module.sh /usr/share/
+COPY config/.bashrc /home/jovyan/tmp_bashrc
+RUN cat /home/jovyan/tmp_bashrc >> /home/jovyan/.bashrc && rm /home/jovyan/tmp_bashrc
+
+RUN rm -rf /home/jovyan/.cache \
+    && su jovyan -c "/opt/conda/bin/pip install jupyterlmod"
+
+# Create link to persistent storage on Desktop (This needs to happen before the users gets created!)
+RUN mkdir -p /home/jovyan/neurodesktop-storage/containers \
+    && mkdir -p /home/jovyan/Desktop/ /data \
+    && chown -R jovyan:users /home/jovyan/Desktop/ \
+    && chown -R jovyan:users /home/jovyan/neurodesktop-storage/ \
+    && ln -s /home/jovyan/neurodesktop-storage/ /neurodesktop-storage
+
+ENV SINGULARITY_BINDPATH /data
+ENV LMOD_CMD /usr/share/lmod/lmod/libexec/lmod
+
 # Install neurocommand
 ADD "http://api.github.com/repos/NeuroDesk/neurocommand/commits/main" /tmp/skipcache
 RUN rm /tmp/skipcache \
-    && git clone https://github.com/NeuroDesk/neurocommand.git /opt/neurocommand \
-    && cd /opt/neurocommand \
+    && git clone https://github.com/NeuroDesk/neurocommand.git /neurocommand \
+    && cd /neurocommand \
     && bash build.sh --lxde --edit \
     && bash install.sh \
-    && ln -s /neurodesktop-storage/containers /opt/neurocommand/local/containers
+    && ln -s /neurodesktop-storage/containers /neurocommand/local/containers
 
 WORKDIR /home/jovyan
 
