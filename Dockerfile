@@ -153,6 +153,8 @@ COPY --chown=jovyan:users config/startup.sh /opt/neurodesktop/startup.sh
 COPY --chown=jovyan:users config/jupyter_notebook_config.py /home/jovyan/.jupyter/jupyter_notebook_config.py
 COPY --chown=jovyan:root config/user-mapping.xml /etc/guacamole/user-mapping.xml
 
+RUN jupyter labextension disable "@jupyterlab/apputils-extension:announcements"
+
 RUN chmod +x /opt/neurodesktop/startup.sh \
     /home/jovyan/.jupyter/jupyter_notebook_config.py \
     /home/jovyan/.vnc/xstartup
