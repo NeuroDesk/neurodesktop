@@ -31,14 +31,14 @@ fi
 # ssh-keygen -t rsa -f /home/jovyan/.ssh/ssh_host_rsa_key -N '' <<< n
 # cat /home/jovyan/.ssh/id_rsa.pub >> /home/jovyan/.ssh/authorized_keys
 
-xset -display :1 s off
-su jovyan -c "vncserver -kill :1"
-su jovyan -c "vncserver -depth 24 -geometry 1920x1080 -name \"VNC\" :1"
-service xrdp restart
-
 export JAVA_OPTS="-Xms512M -Xmx1024M"
 export CATALINA_OPTS="-Xms512M -Xmx1024M"
+sudo /usr/local/tomcat/bin/startup.sh
+sudo service guacd restart
 
-/usr/local/tomcat/bin/startup.sh
-guacd -b 127.0.0.1
+sudo service xrdp restart
+vncserver -kill :1
+vncserver -depth 24 -geometry 1920x1080 -name \"VNC\" :1
+xset -display :1 s off
+
 echo "===========================================================" 
