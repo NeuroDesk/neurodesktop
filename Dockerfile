@@ -137,9 +137,6 @@ RUN rm /tmp/skipcache \
     && bash install.sh \
     && ln -s /neurodesktop-storage/containers /opt/neurocommand/local/containers
 
-# Install plugins and pip packages
-RUN pip install jupyter-server-proxy \
-    && rm -rf /home/jovyan/.cache
 
 COPY config/neurodesk_brain_logo.svg /opt/neurodesk_brain_logo.svg
 
@@ -153,10 +150,14 @@ COPY --chown=jovyan:users config/startup.sh /opt/neurodesktop/startup.sh
 COPY --chown=jovyan:users config/jupyter_notebook_config.py /home/jovyan/.jupyter/jupyter_notebook_config.py
 COPY --chown=jovyan:root config/user-mapping.xml /etc/guacamole/user-mapping.xml
 
-RUN jupyter labextension disable "@jupyterlab/apputils-extension:announcements"
-
 RUN chmod +x /opt/neurodesktop/startup.sh \
     /home/jovyan/.jupyter/jupyter_notebook_config.py \
     /home/jovyan/.vnc/xstartup
 
+# Install plugins and pip packages
+RUN su jovyan -c "/opt/conda/bin/pip install jupyter-server-proxy" \
+    su jovyan -c "/opt/conda/bin/jupyter labextension disable @jupyterlab/apputils-extension:announcements" \
+    && rm -rf /home/jovyan/.cache
+
 WORKDIR /home/jovyan
+
