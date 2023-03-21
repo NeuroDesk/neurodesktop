@@ -1,6 +1,8 @@
 # FROM jupyter/base-notebook:2023-02-28
-FROM jupyter/base-notebook:python-3.10.9
-# FROM jupyter/base-notebook:notebook-6.5.3
+# FROM jupyter/base-notebook:python-3.10.9
+FROM jupyter/base-notebook:notebook-6.5.3
+
+# FROM jupyter/base-notebook:python-3.10.4
 
 # Parent image source
 # https://github.com/jupyter/docker-stacks/blob/86d42cadf4695b8e6fc3b3ead58e1f71067b765b/docker-stacks-foundation/Dockerfile
@@ -143,18 +145,6 @@ COPY config/pcmanfm.conf /etc/xdg/pcmanfm/LXDE/pcmanfm.conf
 COPY config/lxterminal.conf /usr/share/lxterminal/lxterminal.conf
 COPY config/panel /home/jovyan/.config/lxpanel/LXDE/panels/panel
 
-# Add startup and config files for neurodesktop, jupyter, guacamole, vnc
-RUN mkdir /home/jovyan/.vnc \
-    && chown jovyan /home/jovyan/.vnc \
-    && /usr/bin/printf '%s\n%s\n%s\n' 'password' 'password' 'n' | su jovyan -c vncpasswd
-COPY --chown=jovyan:users config/xstartup /home/jovyan/.vnc
-COPY --chown=jovyan:users config/startup.sh /opt/neurodesktop/startup.sh
-COPY --chown=jovyan:users config/jupyter_notebook_config.py /home/jovyan/.jupyter/jupyter_notebook_config.py
-COPY --chown=jovyan:root config/user-mapping.xml /etc/guacamole/user-mapping.xml
-RUN chmod +x /opt/neurodesktop/startup.sh \
-    /home/jovyan/.jupyter/jupyter_notebook_config.py \
-    /home/jovyan/.vnc/xstartup
-
 COPY config/module.sh /usr/share/
 COPY config/.bashrc /home/jovyan/tmp_bashrc
 RUN cat /home/jovyan/tmp_bashrc >> /home/jovyan/.bashrc && rm /home/jovyan/tmp_bashrc
@@ -200,6 +190,18 @@ RUN mkdir -p /usr/local/bin/start-notebook.d/ \
 COPY config/before-start.sh /usr/local/bin/start-notebook.d/
 COPY config/after-start.sh /usr/local/bin/before-notebook.d/
 
+# Add startup and config files for neurodesktop, jupyter, guacamole, vnc
+RUN mkdir /home/jovyan/.vnc \
+    && chown jovyan /home/jovyan/.vnc \
+    && /usr/bin/printf '%s\n%s\n%s\n' 'password' 'password' 'n' | su jovyan -c vncpasswd
+COPY --chown=jovyan:users config/xstartup /home/jovyan/.vnc
+COPY --chown=jovyan:users config/startup.sh /opt/neurodesktop/startup.sh
+COPY --chown=jovyan:users config/jupyter_notebook_config.py /home/jovyan/.jupyter/jupyter_notebook_config.py
+COPY --chown=jovyan:root config/user-mapping.xml /etc/guacamole/user-mapping.xml
+RUN chmod +x /opt/neurodesktop/startup.sh \
+    /home/jovyan/.jupyter/jupyter_notebook_config.py \
+    /home/jovyan/.vnc/xstartup
+
 ENV SINGULARITY_BINDPATH /data
 ENV LMOD_CMD /usr/share/lmod/lmod/libexec/lmod
 ENV MODULEPATH /cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/molecular_biology:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/workflows:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/visualization:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/structural_imaging:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/statistics:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/spine:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/spectroscopy:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/shape_analysis:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/segmentation:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/rodent_imaging:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/quantitative_imaging:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/quality_control:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/programming:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/phase_processing:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/machine_learning:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/image_segmentation:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/image_registration:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/image_reconstruction:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/hippocampus:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/functional_imaging:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/electrophysiology:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/diffusion_imaging:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/data_organisation:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/body
@@ -213,5 +215,10 @@ RUN rm /tmp/skipcache \
     && bash install.sh \
     && ln -s /neurodesktop-storage/containers /neurocommand/local/containers
 
-WORKDIR /home/jovyan
+RUN echo "jovyan ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers.d/notebook
 
+RUN /usr/bin/printf '%s\n%s\n' 'password' 'password' | sudo passwd jovyan
+
+USER ${NB_UID}
+
+WORKDIR "${HOME}"
