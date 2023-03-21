@@ -1,2 +1,5 @@
 /.vscode
 .DS_Store
+secret.sh
+build_and_push.sh
+binder
