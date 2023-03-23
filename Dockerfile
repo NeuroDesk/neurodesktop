@@ -227,6 +227,7 @@ RUN rm -rf /home/jovyan/.cache \
 
 # Customise logo, wallpaper, terminal, panel
 COPY config/neurodesk_brain_logo.svg /opt/neurodesk_brain_logo.svg
+COPY config/neurodesk_brain_icon.svg /opt/neurodesk_brain_icon.svg
 COPY config/background.png /usr/share/lxde/wallpapers/desktop_wallpaper.png
 COPY config/pcmanfm.conf /etc/xdg/pcmanfm/LXDE/pcmanfm.conf
 COPY config/lxterminal.conf /usr/share/lxterminal/lxterminal.conf
@@ -261,8 +262,9 @@ RUN wget -O "/usr/share/keyrings/xpra.asc" https://xpra.org/gpg.asc
 RUN cd /etc/apt/sources.list.d;wget https://raw.githubusercontent.com/Xpra-org/xpra/master/packaging/repos/jammy/xpra.sources
 RUN apt-get update \
       && DEBIAN_FRONTEND=noninteractive apt-get install -y \
-      xpra
-      
+      xpra \
+      tigervnc-tools
+
 # Add startup and config files for neurodesktop, jupyter, guacamole, vnc
 RUN mkdir /home/jovyan/.vnc \
     && chown jovyan /home/jovyan/.vnc \
@@ -288,6 +290,18 @@ RUN rm /tmp/skipcache \
     && bash build.sh --lxde --edit \
     && bash install.sh \
     && ln -s /neurodesktop-storage/containers /neurocommand/local/containers
+
+COPY config/fsl.desktop /usr/share/applications/
+
+# Temporary fix. Pushing select apps onto XNeurodesk menu
+RUN find /usr/share/applications/neurodesk/ -type f -name 'fsl*.desktop' -exec sed -i 's/Terminal=true/Terminal=false/g' {} \; \
+    && find /usr/share/applications/neurodesk/ -type f -name 'fsl*.desktop' -exec sed -i 's/Exec=\(.*\)/Exec=lxterminal --command="\1"/g' {} \; \
+    && find /usr/share/applications/neurodesk/ -type f -name 'freesurfer*.desktop' -exec sed -i 's/Terminal=true/Terminal=false/g' {} \; \
+    && find /usr/share/applications/neurodesk/ -type f -name 'freesurfer*.desktop' -exec sed -i 's/Exec=\(.*\)/Exec=lxterminal --command="\1"/g' {} \; \
+    && find /usr/share/applications/neurodesk/ -type f -name '3dslicer*.desktop' -exec sed -i 's/Terminal=true/Terminal=false/g' {} \; \
+    && find /usr/share/applications/neurodesk/ -type f -name '3dslicer*.desktop' -exec sed -i 's/Exec=\(.*\)/Exec=lxterminal --command="\1"/g' {} \; \
+    && find /usr/share/applications/neurodesk/ -type f -name 'itksnap*.desktop' -exec sed -i 's/Terminal=true/Terminal=false/g' {} \; \
+    && find /usr/share/applications/neurodesk/ -type f -name 'itksnap*.desktop' -exec sed -i 's/Exec=\(.*\)/Exec=lxterminal --command="\1"/g' {} \;
 
 RUN echo "jovyan ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers.d/notebook
 
