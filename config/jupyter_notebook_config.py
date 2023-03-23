@@ -1,6 +1,6 @@
 
 c.ServerProxy.servers = {
-  'guacamole': {
+  'neurodesktop': {
     'command': ['/opt/neurodesktop/guacamole.sh'],
     'port': 8080,
     'timeout': 60,
@@ -8,12 +8,12 @@ c.ServerProxy.servers = {
           'Authorization': 'Basic am92eWFuOnBhc3N3b3Jk',
       },
       'launcher_entry': {
-        'path_info' : 'guacamole',
-        'title': 'Guacamole',
-        # 'icon_path': '/opt/neurodesk_brain_logo.svg'
+        'path_info' : 'neurodesktop',
+        'title': 'Neurodesktop',
+        'icon_path': '/opt/neurodesk_brain_logo.svg'
       }
     },
-  'xpra': {
+  'xneurodesk': {
     'command': ['/opt/neurodesktop/xpra.sh'],
     'port': 9090,
     'timeout': 60,
@@ -21,9 +21,9 @@ c.ServerProxy.servers = {
           'Authorization': 'Basic am92eWFuOnBhc3N3b3Jk',
       },
       'launcher_entry': {
-        'path_info' : 'xpra',
-        'title': 'Xpra',
-        # 'icon_path': '/opt/neurodesk_brain_logo.svg'
+        'path_info' : 'xneurodesk',
+        'title': 'XNeurodesk',
+        'icon_path': '/opt/neurodesk_brain_icon.svg'
       }
     }
 }
