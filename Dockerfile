@@ -190,15 +190,23 @@ RUN mkdir -p /usr/local/bin/start-notebook.d/ \
 COPY config/before-start.sh /usr/local/bin/start-notebook.d/
 COPY config/after-start.sh /usr/local/bin/before-notebook.d/
 
+# Install xpra
+RUN wget -O "/usr/share/keyrings/xpra.asc" https://xpra.org/gpg.asc
+RUN cd /etc/apt/sources.list.d;wget https://raw.githubusercontent.com/Xpra-org/xpra/master/packaging/repos/jammy/xpra.sources
+RUN apt-get update \
+      && DEBIAN_FRONTEND=noninteractive apt-get install -y \
+      xpra
+      
 # Add startup and config files for neurodesktop, jupyter, guacamole, vnc
 RUN mkdir /home/jovyan/.vnc \
     && chown jovyan /home/jovyan/.vnc \
     && /usr/bin/printf '%s\n%s\n%s\n' 'password' 'password' 'n' | su jovyan -c vncpasswd
 COPY --chown=jovyan:users config/xstartup /home/jovyan/.vnc
-COPY --chown=jovyan:users config/startup.sh /opt/neurodesktop/startup.sh
+COPY --chown=jovyan:users config/guacamole.sh /opt/neurodesktop/guacamole.sh
+COPY --chown=jovyan:users config/xpra.sh /opt/neurodesktop/xpra.sh
 COPY --chown=jovyan:users config/jupyter_notebook_config.py /home/jovyan/.jupyter/jupyter_notebook_config.py
 COPY --chown=jovyan:root config/user-mapping.xml /etc/guacamole/user-mapping.xml
-RUN chmod +x /opt/neurodesktop/startup.sh \
+RUN chmod +x /opt/neurodesktop/guacamole.sh /opt/neurodesktop/xpra.sh \
     /home/jovyan/.jupyter/jupyter_notebook_config.py \
     /home/jovyan/.vnc/xstartup
 
