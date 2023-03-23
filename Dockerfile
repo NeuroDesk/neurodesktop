@@ -291,8 +291,6 @@ RUN rm /tmp/skipcache \
     && bash install.sh \
     && ln -s /neurodesktop-storage/containers /neurocommand/local/containers
 
-COPY config/fsl.desktop /usr/share/applications/
-
 # Temporary fix. Pushing select apps onto XNeurodesk menu
 RUN find /usr/share/applications/neurodesk/ -type f -name 'fsl*.desktop' -exec sed -i 's/Terminal=true/Terminal=false/g' {} \; \
     && find /usr/share/applications/neurodesk/ -type f -name 'fsl*.desktop' -exec sed -i 's/Exec=\(.*\)/Exec=lxterminal --command="\1"/g' {} \; \
