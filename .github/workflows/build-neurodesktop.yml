@@ -21,6 +21,9 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
     - uses: actions/checkout@v3
+    - name: Fetch pre-run rate limits
+      run: |
+        curl -H "Accept: application/vnd.github.v3+json" https://api.github.com/rate_limit
     - name: Pull latest neurodesktop build from GitHub packages
       run: |
         echo ${GITHUB_REF}
@@ -82,3 +85,8 @@ jobs:
         filename: .github/job_failure_issue_template.md
         update_existing: true
         search_existing: open
+
+    - name: Fetch post-run rate limits
+      if: always()
+      run: |
+        curl -H "Accept: application/vnd.github.v3+json" https://api.github.com/rate_limit
