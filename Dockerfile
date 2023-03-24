@@ -220,11 +220,6 @@ RUN rm -rf /home/jovyan/.cache \
     && su jovyan -c "/opt/conda/bin/pip install jupyter-server-proxy" \
     && su jovyan -c "/opt/conda/bin/jupyter labextension disable @jupyterlab/apputils-extension:announcements"
 
-# # Install plugins and pip packages
-# RUN su jovyan -c "/opt/conda/bin/pip install jupyter-server-proxy" \
-#     su jovyan -c "/opt/conda/bin/jupyter labextension disable @jupyterlab/apputils-extension:announcements" \
-#     && rm -rf /home/jovyan/.cache
-
 # Customise logo, wallpaper, terminal, panel
 COPY config/neurodesk_brain_logo.svg /opt/neurodesk_brain_logo.svg
 COPY config/neurodesk_brain_icon.svg /opt/neurodesk_brain_icon.svg
@@ -246,9 +241,6 @@ RUN mkdir -p /home/jovyan/neurodesktop-storage/containers \
     && chown -R jovyan:users /home/jovyan/Desktop/ \
     && chown -R jovyan:users /home/jovyan/neurodesktop-storage/ \
     && ln -s /home/jovyan/neurodesktop-storage/ /neurodesktop-storage
-
-
-# RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y cvmfs
     
 # Add notebook startup scripts
 # https://jupyter-docker-stacks.readthedocs.io/en/latest/using/common.html
@@ -265,18 +257,127 @@ RUN apt-get update \
       xpra \
       tigervnc-tools
 
-# Add startup and config files for neurodesktop, jupyter, guacamole, vnc
-RUN mkdir /home/jovyan/.vnc \
-    && chown jovyan /home/jovyan/.vnc \
-    && /usr/bin/printf '%s\n%s\n%s\n' 'password' 'password' 'n' | su jovyan -c vncpasswd
-COPY --chown=jovyan:users config/xstartup /home/jovyan/.vnc
-COPY --chown=jovyan:users config/guacamole.sh /opt/neurodesktop/guacamole.sh
-COPY --chown=jovyan:users config/xpra.sh /opt/neurodesktop/xpra.sh
-COPY --chown=jovyan:users config/jupyter_notebook_config.py /home/jovyan/.jupyter/jupyter_notebook_config.py
-COPY --chown=jovyan:root config/user-mapping.xml /etc/guacamole/user-mapping.xml
-RUN chmod +x /opt/neurodesktop/guacamole.sh /opt/neurodesktop/xpra.sh \
-    /home/jovyan/.jupyter/jupyter_notebook_config.py \
-    /home/jovyan/.vnc/xstartup
+# Install extra tools
+RUN apt-get update \
+      && DEBIAN_FRONTEND=noninteractive apt-get install -y \
+        debootstrap \
+        libreoffice \
+        python3-annexremote \
+        s3fs \
+        uidmap \
+        wget \
+        yarn \
+        cvmfs \
+        gnome-keyring \
+        libpci3 \
+        lxtask \
+        qdirstat \
+        tcllib \
+        tk \
+        xdg-utils \
+    && rm -rf /var/lib/apt/lists/*
+
+# add Globus client
+WORKDIR /opt/globusconnectpersonal
+RUN wget https://downloads.globus.org/globus-connect-personal/linux/stable/globusconnectpersonal-latest.tgz \
+    && tar xzf globusconnectpersonal-latest.tgz \
+    && rm -rf globusconnectpersonal-latest.tgz/
+
+# add rclone
+WORKDIR /opt
+RUN wget https://downloads.rclone.org/v1.60.1/rclone-v1.60.1-linux-amd64.zip \
+    && unzip rclone-v1.60.1-linux-amd64.zip \
+    && rm rclone-v1.60.1-linux-amd64.zip \
+    && ln -s /opt/rclone-v1.60.1-linux-amd64/rclone /usr/bin/rclone
+COPY --chown=jovyan:users config/rclone.conf /home/jovyan/.config/rclone/rclone.conf
+
+# # Change firefox home
+# RUN echo 'pref("browser.startup.homepage", "https://www.neurodesk.org", locked);' >> /etc/firefox/syspref.js \
+#     && echo 'pref("browser.startup.firstrunSkipsHomepage", true, locked);' >> /etc/firefox/syspref.js \
+#     && echo 'pref("startup.homepage_welcome_url", "https://www.neurodesk.org", locked);' >> /etc/firefox/syspref.js \
+#     && echo 'pref("browser.aboutwelcome.enabled", true, locked);' >> /etc/firefox/syspref.js
+
+
+# Configure tiling of windows SHIFT-ALT-CTR-{Left,right,top,Bottom} and other openbox desktop mods
+COPY ./config/rc.xml /etc/xdg/openbox
+
+# Configure ITKsnap
+COPY ./config/.itksnap.org /home/jovyan/.itksnap.org
+RUN chown jovyan /home/jovyan/.itksnap.org -R
+COPY ./config/mimeapps.list /home/jovyan/.config/mimeapps.list
+
+# Allow the root user to access the sshfs mount
+# https://github.com/NeuroDesk/neurodesk/issues/47
+RUN sed -i 's/#user_allow_other/user_allow_other/g' /etc/fuse.conf
+
+# Fetch singularity bind mount list
+RUN mkdir -p `curl https://raw.githubusercontent.com/NeuroDesk/neurocontainers/master/recipes/globalMountPointList.txt`
+
+# Fix "No session for pid prompt"
+RUN mv /usr/bin/lxpolkit /usr/bin/lxpolkit.BAK
+
+# ## Update conda
+# RUN conda update -n base conda \
+#     && conda clean --all -f -y \
+#     && rm -rf /home/jovyan/.cache
+
+# ## Install conda packages
+# RUN conda install -c conda-forge nipype pip nb_conda_kernels \
+#     && conda clean --all -f -y \
+#     && rm -rf /home/jovyan/.cache
+# RUN conda config --system --prepend envs_dirs '~/conda-environments'
+
+RUN mkdir .ssh 
+RUN touch .ssh/authorized_keys && chmod 600 .ssh/authorized_keys
+RUN touch .ssh/config && chmod 600 .ssh/config
+RUN printf "Host localhost\n  Port 2222\n" >> .ssh/config
+RUN chmod -R 700 .ssh && chown -R jovyan:users .ssh
+
+# Setup git
+RUN git config --global user.email "user@neurodesk.github.io"
+RUN git config --global user.name "Neurodesk User"
+
+# Setup temp directory for matplotlib (required for fmriprep)
+WORKDIR /home/jovyan/.config/matplotlib-mpldir
+RUN chmod -R 700 /home/jovyan/.config/matplotlib-mpldir && chown -R jovyan:users /home/jovyan/.config/matplotlib-mpldir
+ENV MPLCONFIGDIR /home/jovyan/.config/matplotlib-mpldir
+
+COPY --chown=jovyan:users config/sshd_config /home/jovyan/.ssh/sshd_config
+
+# enable rootless mounts: 
+RUN chmod +x /usr/bin/fusermount
+
+# Create link to persistent storage on Desktop (This needs to happen before the users gets created!)
+RUN mkdir -p /etc/skel/Desktop/ \
+    && ln -s /neurodesktop-storage /etc/skel/Desktop/storage \
+    && ln -s /neurodesktop-storage /etc/skel/neurodesktop-storage
+
+# Create shorter link to persistent storage /neurodesktop-storage
+RUN ln -s /neurodesktop-storage /storage
+
+# Add checkversion script
+COPY ./config/checkversion.sh /usr/share/
+# Add CheckVersion script
+COPY ./config/CheckVersion.desktop /etc/skel/Desktop
+
+ENV DONT_PROMPT_WSL_INSTALL=1
+
+COPY config/vscode/settings.json /home/user/.config/Code/User/settings.json
+
+# Add libfm script
+RUN mkdir -p /home/user/.config/libfm
+COPY ./config/libfm.conf /home/user/.config/libfm
+
+RUN touch /home/user/.sudo_as_admin_successful
+
+# Add datalad-container datalad-osf and osfclient to the conda environment
+RUN pip install datalad-container datalad-osf osfclient
+ENV PATH=$PATH:/home/user/.local/bin
+
+
+
+
+
 
 ENV SINGULARITY_BINDPATH /data
 ENV LMOD_CMD /usr/share/lmod/lmod/libexec/lmod
@@ -290,6 +391,19 @@ RUN rm /tmp/skipcache \
     && bash build.sh --lxde --edit \
     && bash install.sh \
     && ln -s /neurodesktop-storage/containers /neurocommand/local/containers
+
+# Add startup and config files for neurodesktop, jupyter, guacamole, vnc
+RUN mkdir /home/jovyan/.vnc \
+    && chown jovyan /home/jovyan/.vnc \
+    && /usr/bin/printf '%s\n%s\n%s\n' 'password' 'password' 'n' | su jovyan -c vncpasswd
+COPY --chown=jovyan:users config/xstartup /home/jovyan/.vnc
+COPY --chown=jovyan:users config/guacamole.sh /opt/neurodesktop/guacamole.sh
+COPY --chown=jovyan:users config/xpra.sh /opt/neurodesktop/xpra.sh
+COPY --chown=jovyan:users config/jupyter_notebook_config.py /home/jovyan/.jupyter/jupyter_notebook_config.py
+COPY --chown=jovyan:root config/user-mapping.xml /etc/guacamole/user-mapping.xml
+RUN chmod +x /opt/neurodesktop/guacamole.sh /opt/neurodesktop/xpra.sh \
+    /home/jovyan/.jupyter/jupyter_notebook_config.py \
+    /home/jovyan/.vnc/xstartup
 
 # Temporary fix. Pushing select apps onto XNeurodesk menu
 RUN find /usr/share/applications/neurodesk/ -type f -name 'fsl*.desktop' -exec sed -i 's/Terminal=true/Terminal=false/g' {} \; \
