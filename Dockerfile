@@ -59,11 +59,9 @@ RUN apt-get update \
         cryptsetup \
         runc
 
-# openjdk-11-jre \
 # openssh-server \
 # libpango1.0-dev \
 # libssh2-1-dev \
-# openssh-server \
 
 ARG GO_VERSION="1.20.2"
 ARG SINGULARITY_VERSION="3.11.0"
@@ -227,7 +225,6 @@ COPY config/background.png /usr/share/lxde/wallpapers/desktop_wallpaper.png
 COPY config/pcmanfm.conf /etc/xdg/pcmanfm/LXDE/pcmanfm.conf
 COPY config/lxterminal.conf /usr/share/lxterminal/lxterminal.conf
 COPY config/panel /home/jovyan/.config/lxpanel/LXDE/panels/panel
-
 COPY config/module.sh /usr/share/
 COPY config/.bashrc /home/jovyan/tmp_bashrc
 RUN cat /home/jovyan/tmp_bashrc >> /home/jovyan/.bashrc && rm /home/jovyan/tmp_bashrc
@@ -246,8 +243,8 @@ RUN mkdir -p /home/jovyan/neurodesktop-storage/containers \
 # https://jupyter-docker-stacks.readthedocs.io/en/latest/using/common.html
 RUN mkdir -p /usr/local/bin/start-notebook.d/ \
     && mkdir -p /usr/local/bin/before-notebook.d/
-COPY config/before-start.sh /usr/local/bin/start-notebook.d/
-COPY config/after-start.sh /usr/local/bin/before-notebook.d/
+COPY config/start-notebook.sh /usr/local/bin/start-notebook.d/
+COPY config/before-notebook.sh /usr/local/bin/before-notebook.d/
 
 # Install xpra
 RUN wget -O "/usr/share/keyrings/xpra.asc" https://xpra.org/gpg.asc
