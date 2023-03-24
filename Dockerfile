@@ -117,8 +117,8 @@ RUN wget -q "https://dlcdn.apache.org/guacamole/${GUACAMOLE_VERSION}/binary/guac
     && rm -r /etc/guacamole/guacamole-server-${GUACAMOLE_VERSION}*
 
 # Create Guacamole configurations (user-mapping.xml gets filled in the startup.sh script)
-RUN echo -e "user-mapping: /etc/guacamole/user-mapping.xml\nguacd-hostname: 127.0.0.1" > /etc/guacamole/guacamole.properties
-RUN echo -e "[server]\nbind_host = 127.0.0.1\nbind_port = 4822" > /etc/guacamole/guacd.conf
+RUN echo -e "user-mapping: /etc/guacamole/user-mapping.xml\nguacd-hostname: 127.0.0.1" > /etc/guacamole/guacamole.properties \
+    &&echo -e "[server]\nbind_host = 127.0.0.1\nbind_port = 4822" > /etc/guacamole/guacd.conf
 
 # Add CVMFS
 RUN wget -q https://ecsft.cern.ch/dist/cvmfs/cvmfs-release/cvmfs-release-latest_all.deb -O /tmp/cvmfs-release-latest_all.deb \
@@ -132,8 +132,8 @@ RUN curl https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > mic
     && add-apt-repository ppa:nextcloud-devs/client
 
 # Add datalad
-RUN wget -q -O- http://neuro.debian.net/lists/focal.us-nh.full | sudo tee /etc/apt/sources.list.d/neurodebian.sources.list
-RUN apt-key adv --recv-keys --keyserver hkps://keyserver.ubuntu.com 0xA5D32F012649A5A9
+RUN wget -q -O- http://neuro.debian.net/lists/focal.us-nh.full | sudo tee /etc/apt/sources.list.d/neurodebian.sources.list \
+    && apt-key adv --recv-keys --keyserver hkps://keyserver.ubuntu.com 0xA5D32F012649A5A9
 
 RUN apt-get update \
     && DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y \
@@ -196,6 +196,31 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/* \
     && rm /etc/apt/sources.list.d/vs-code.list
 
+# Install xpra
+RUN wget -O "/usr/share/keyrings/xpra.asc" https://xpra.org/gpg.asc
+RUN cd /etc/apt/sources.list.d;wget https://raw.githubusercontent.com/Xpra-org/xpra/master/packaging/repos/jammy/xpra.sources
+RUN apt-get update \
+      && DEBIAN_FRONTEND=noninteractive apt-get install -y \
+        xpra \
+        tigervnc-tools \
+        debootstrap \
+        libreoffice \
+        python3-annexremote \
+        s3fs \
+        uidmap \
+        wget \
+        yarn \
+        cvmfs \
+        gnome-keyring \
+        libpci3 \
+        lxtask \
+        qdirstat \
+        tcllib \
+        tk \
+        xdg-utils \
+        && rm -rf /var/lib/apt/lists/*
+
+# Create cvmfs keys
 RUN mkdir -p /etc/cvmfs/keys/ardc.edu.au/ \
     && echo "-----BEGIN PUBLIC KEY-----" | sudo tee /etc/cvmfs/keys/ardc.edu.au/neurodesk.ardc.edu.au.pub \
     && echo "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAwUPEmxDp217SAtZxaBep" | sudo tee -a /etc/cvmfs/keys/ardc.edu.au/neurodesk.ardc.edu.au.pub \
@@ -214,65 +239,12 @@ RUN mkdir -p /etc/cvmfs/keys/ardc.edu.au/ \
     && cvmfs_config setup
 
 # Install jupyter-server-proxy and disable announcements
-RUN rm -rf /home/jovyan/.cache \
-    && su jovyan -c "/opt/conda/bin/pip install jupyter-server-proxy" \
-    && su jovyan -c "/opt/conda/bin/jupyter labextension disable @jupyterlab/apputils-extension:announcements"
-
-# Customise logo, wallpaper, terminal, panel
-COPY config/neurodesk_brain_logo.svg /opt/neurodesk_brain_logo.svg
-COPY config/neurodesk_brain_icon.svg /opt/neurodesk_brain_icon.svg
-COPY config/background.png /usr/share/lxde/wallpapers/desktop_wallpaper.png
-COPY config/pcmanfm.conf /etc/xdg/pcmanfm/LXDE/pcmanfm.conf
-COPY config/lxterminal.conf /usr/share/lxterminal/lxterminal.conf
-COPY config/panel /home/jovyan/.config/lxpanel/LXDE/panels/panel
-COPY config/module.sh /usr/share/
-COPY config/.bashrc /home/jovyan/tmp_bashrc
-RUN cat /home/jovyan/tmp_bashrc >> /home/jovyan/.bashrc && rm /home/jovyan/tmp_bashrc
-
-RUN rm -rf /home/jovyan/.cache \
-    && su jovyan -c "/opt/conda/bin/pip install jupyterlmod"
-
-# Create link to persistent storage on Desktop (This needs to happen before the users gets created!)
-RUN mkdir -p /home/jovyan/neurodesktop-storage/containers \
-    && mkdir -p /home/jovyan/Desktop/ /data \
-    && chown -R jovyan:users /home/jovyan/Desktop/ \
-    && chown -R jovyan:users /home/jovyan/neurodesktop-storage/ \
-    && ln -s /home/jovyan/neurodesktop-storage/ /neurodesktop-storage
-    
-# Add notebook startup scripts
-# https://jupyter-docker-stacks.readthedocs.io/en/latest/using/common.html
-RUN mkdir -p /usr/local/bin/start-notebook.d/ \
-    && mkdir -p /usr/local/bin/before-notebook.d/
-COPY config/start-notebook.sh /usr/local/bin/start-notebook.d/
-COPY config/before-notebook.sh /usr/local/bin/before-notebook.d/
-
-# Install xpra
-RUN wget -O "/usr/share/keyrings/xpra.asc" https://xpra.org/gpg.asc
-RUN cd /etc/apt/sources.list.d;wget https://raw.githubusercontent.com/Xpra-org/xpra/master/packaging/repos/jammy/xpra.sources
-RUN apt-get update \
-      && DEBIAN_FRONTEND=noninteractive apt-get install -y \
-      xpra \
-      tigervnc-tools
-
-# Install extra tools
-RUN apt-get update \
-      && DEBIAN_FRONTEND=noninteractive apt-get install -y \
-        debootstrap \
-        libreoffice \
-        python3-annexremote \
-        s3fs \
-        uidmap \
-        wget \
-        yarn \
-        cvmfs \
-        gnome-keyring \
-        libpci3 \
-        lxtask \
-        qdirstat \
-        tcllib \
-        tk \
-        xdg-utils \
-    && rm -rf /var/lib/apt/lists/*
+# Depracated: jupyter labextension install ..
+RUN su jovyan -c "/opt/conda/bin/pip install jupyter-server-proxy" \
+    && su jovyan -c "/opt/conda/bin/jupyter labextension disable @jupyterlab/apputils-extension:announcements" \ 
+    && su jovyan -c "/opt/conda/bin/pip install jupyterlmod" \
+    && su jovyan -c "jupyter labextension install jupyterlab-lmod " \
+    && rm -rf /home/jovyan/.cache
 
 # add Globus client
 WORKDIR /opt/globusconnectpersonal
@@ -294,10 +266,18 @@ COPY --chown=jovyan:users config/rclone.conf /home/jovyan/.config/rclone/rclone.
 #     && echo 'pref("startup.homepage_welcome_url", "https://www.neurodesk.org", locked);' >> /etc/firefox/syspref.js \
 #     && echo 'pref("browser.aboutwelcome.enabled", true, locked);' >> /etc/firefox/syspref.js
 
-
+# Customise logo, wallpaper, terminal, panel
+COPY config/neurodesk_brain_logo.svg /opt/neurodesk_brain_logo.svg
+COPY config/neurodesk_brain_icon.svg /opt/neurodesk_brain_icon.svg
+COPY config/background.png /usr/share/lxde/wallpapers/desktop_wallpaper.png
+COPY config/pcmanfm.conf /etc/xdg/pcmanfm/LXDE/pcmanfm.conf
+COPY config/lxterminal.conf /usr/share/lxterminal/lxterminal.conf
+COPY config/panel /home/jovyan/.config/lxpanel/LXDE/panels/panel
+COPY config/module.sh /usr/share/
+COPY config/.bashrc /home/jovyan/tmp_bashrc
+RUN cat /home/jovyan/tmp_bashrc >> /home/jovyan/.bashrc && rm /home/jovyan/tmp_bashrc
 # Configure tiling of windows SHIFT-ALT-CTR-{Left,right,top,Bottom} and other openbox desktop mods
 COPY ./config/rc.xml /etc/xdg/openbox
-
 # Configure ITKsnap
 COPY ./config/.itksnap.org /home/jovyan/.itksnap.org
 RUN chown jovyan /home/jovyan/.itksnap.org -R
@@ -313,6 +293,18 @@ RUN mkdir -p `curl https://raw.githubusercontent.com/NeuroDesk/neurocontainers/m
 # Fix "No session for pid prompt"
 RUN mv /usr/bin/lxpolkit /usr/bin/lxpolkit.BAK
 
+# Add notebook startup scripts
+# https://jupyter-docker-stacks.readthedocs.io/en/latest/using/common.html
+RUN mkdir -p /usr/local/bin/start-notebook.d/ \
+    && mkdir -p /usr/local/bin/before-notebook.d/
+COPY config/start-notebook.sh /usr/local/bin/start-notebook.d/
+COPY config/before-notebook.sh /usr/local/bin/before-notebook.d/
+
+# Create link to persistent storage on Desktop (This needs to happen before the users gets created!)
+RUN mkdir -p /home/jovyan/neurodesktop-storage/containers \
+    && mkdir -p /home/jovyan/Desktop/ /data \
+    && ln -s /home/jovyan/neurodesktop-storage/ /neurodesktop-storage
+
 # ## Update conda
 # RUN conda update -n base conda \
 #     && conda clean --all -f -y \
@@ -324,19 +316,20 @@ RUN mv /usr/bin/lxpolkit /usr/bin/lxpolkit.BAK
 #     && rm -rf /home/jovyan/.cache
 # RUN conda config --system --prepend envs_dirs '~/conda-environments'
 
-RUN mkdir .ssh 
-RUN touch .ssh/authorized_keys && chmod 600 .ssh/authorized_keys
-RUN touch .ssh/config && chmod 600 .ssh/config
-RUN printf "Host localhost\n  Port 2222\n" >> .ssh/config
-RUN chmod -R 700 .ssh && chown -R jovyan:users .ssh
+RUN mkdir .ssh \
+    && touch .ssh/authorized_keys && chmod 600 .ssh/authorized_keys \
+    && touch .ssh/config && chmod 600 .ssh/config \
+    && printf "Host localhost\n  Port 2222\n" >> .ssh/config \
+    && chmod -R 700 .ssh && chown -R jovyan:users .ssh
 
 # Setup git
-RUN git config --global user.email "user@neurodesk.github.io"
-RUN git config --global user.name "Neurodesk User"
+RUN git config --global user.email "user@neurodesk.github.io" \
+    && git config --global user.name "Neurodesk User"
 
 # Setup temp directory for matplotlib (required for fmriprep)
 WORKDIR /home/jovyan/.config/matplotlib-mpldir
-RUN chmod -R 700 /home/jovyan/.config/matplotlib-mpldir && chown -R jovyan:users /home/jovyan/.config/matplotlib-mpldir
+RUN chmod -R 700 /home/jovyan/.config/matplotlib-mpldir \
+    && chown -R jovyan:users /home/jovyan/.config/matplotlib-mpldir
 ENV MPLCONFIGDIR /home/jovyan/.config/matplotlib-mpldir
 
 COPY --chown=jovyan:users config/sshd_config /home/jovyan/.ssh/sshd_config
@@ -347,35 +340,27 @@ RUN chmod +x /usr/bin/fusermount
 # Create link to persistent storage on Desktop (This needs to happen before the users gets created!)
 RUN mkdir -p /etc/skel/Desktop/ \
     && ln -s /neurodesktop-storage /etc/skel/Desktop/storage \
-    && ln -s /neurodesktop-storage /etc/skel/neurodesktop-storage
-
-# Create shorter link to persistent storage /neurodesktop-storage
-RUN ln -s /neurodesktop-storage /storage
+    && ln -s /neurodesktop-storage /etc/skel/neurodesktop-storage \
+    && ln -s /neurodesktop-storage /storage
 
 # Add checkversion script
 COPY ./config/checkversion.sh /usr/share/
 # Add CheckVersion script
 COPY ./config/CheckVersion.desktop /etc/skel/Desktop
 
-ENV DONT_PROMPT_WSL_INSTALL=1
-
-COPY config/vscode/settings.json /home/user/.config/Code/User/settings.json
+COPY config/vscode/settings.json /home/jovyan/.config/Code/User/settings.json
 
 # Add libfm script
-RUN mkdir -p /home/user/.config/libfm
-COPY ./config/libfm.conf /home/user/.config/libfm
+RUN mkdir -p /home/jovyan/.config/libfm
+COPY ./config/libfm.conf /home/jovyan/.config/libfm
 
-RUN touch /home/user/.sudo_as_admin_successful
+RUN touch /home/jovyan/.sudo_as_admin_successful
 
 # Add datalad-container datalad-osf and osfclient to the conda environment
 RUN pip install datalad-container datalad-osf osfclient
-ENV PATH=$PATH:/home/user/.local/bin
 
-
-
-
-
-
+ENV DONT_PROMPT_WSL_INSTALL=1
+ENV PATH=$PATH:/home/jovyan/.local/bin
 ENV SINGULARITY_BINDPATH /data
 ENV LMOD_CMD /usr/share/lmod/lmod/libexec/lmod
 ENV MODULEPATH /cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/molecular_biology:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/workflows:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/visualization:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/structural_imaging:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/statistics:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/spine:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/spectroscopy:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/shape_analysis:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/segmentation:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/rodent_imaging:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/quantitative_imaging:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/quality_control:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/programming:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/phase_processing:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/machine_learning:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/image_segmentation:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/image_registration:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/image_reconstruction:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/hippocampus:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/functional_imaging:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/electrophysiology:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/diffusion_imaging:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/data_organisation:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/body
