@@ -374,7 +374,7 @@ WORKDIR /neurodesktop-storage
 ENTRYPOINT ["sudo", "-E", "/startup.sh"]
 
 # Install neurocommand
-RUN git ls-remote https://github.com/NeuroDesk/neurocommand HEAD > /tmp/skipcache
+ADD "https://api.github.com/repos/neurodesk/neurocommand/git/refs/heads/main" /tmp/skipcache
 RUN rm /tmp/skipcache \
     && git clone https://github.com/NeuroDesk/neurocommand.git /neurocommand \
     && cd /neurocommand \
