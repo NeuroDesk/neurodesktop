@@ -47,7 +47,7 @@ RUN apt-get update \
         pciutils \
         openjdk-19-jre \
     && rm -rf /var/lib/apt/lists/* \
-    && rm -rf /home/jovyan/.cache
+    && rm -rf /home/${NB_USER}/.cache
 
 RUN apt-get update \
     && DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y \
@@ -240,11 +240,17 @@ RUN mkdir -p /etc/cvmfs/keys/ardc.edu.au/ \
 
 # Install jupyter-server-proxy and disable announcements
 # Depracated: jupyter labextension install ..
-RUN su jovyan -c "/opt/conda/bin/pip install jupyter-server-proxy" \
-    && su jovyan -c "/opt/conda/bin/jupyter labextension disable @jupyterlab/apputils-extension:announcements" \ 
-    && su jovyan -c "/opt/conda/bin/pip install jupyterlmod" \
-    && su jovyan -c "jupyter labextension install jupyterlab-lmod " \
-    && rm -rf /home/jovyan/.cache
+RUN su ${NB_USER} -c "/opt/conda/bin/pip install jupyter-server-proxy" \
+    && su ${NB_USER} -c "/opt/conda/bin/jupyter labextension disable @jupyterlab/apputils-extension:announcements" \ 
+    && su ${NB_USER} -c "/opt/conda/bin/pip install jupyterlmod" \
+    # && su ${NB_USER} -c "/opt/conda/bin/jupyter labextension install jupyterlab-lmod" \
+    && rm -rf /home/${NB_USER}/.cache
+
+# Install nodejs for jupyter labextension
+RUN curl -fsSL https://deb.nodesource.com/setup_19.x | bash - && apt-get install -y nodejs
+
+RUN su ${NB_USER} -c "/opt/conda/bin/jupyter labextension install jupyterlab-lmod" \
+    && rm -rf /home/${NB_USER}/.cache
 
 # add Globus client
 WORKDIR /opt/globusconnectpersonal
@@ -258,7 +264,7 @@ RUN wget https://downloads.rclone.org/v1.60.1/rclone-v1.60.1-linux-amd64.zip \
     && unzip rclone-v1.60.1-linux-amd64.zip \
     && rm rclone-v1.60.1-linux-amd64.zip \
     && ln -s /opt/rclone-v1.60.1-linux-amd64/rclone /usr/bin/rclone
-COPY --chown=jovyan:users config/rclone.conf /home/jovyan/.config/rclone/rclone.conf
+COPY --chown=${NB_USER}:users config/rclone.conf /home/${NB_USER}/.config/rclone/rclone.conf
 
 # # Change firefox home
 # RUN echo 'pref("browser.startup.homepage", "https://www.neurodesk.org", locked);' >> /etc/firefox/syspref.js \
@@ -272,16 +278,16 @@ COPY config/neurodesk_brain_icon.svg /opt/neurodesk_brain_icon.svg
 COPY config/background.png /usr/share/lxde/wallpapers/desktop_wallpaper.png
 COPY config/pcmanfm.conf /etc/xdg/pcmanfm/LXDE/pcmanfm.conf
 COPY config/lxterminal.conf /usr/share/lxterminal/lxterminal.conf
-COPY config/panel /home/jovyan/.config/lxpanel/LXDE/panels/panel
+COPY config/panel /home/${NB_USER}/.config/lxpanel/LXDE/panels/panel
 COPY config/module.sh /usr/share/
-COPY config/.bashrc /home/jovyan/tmp_bashrc
-RUN cat /home/jovyan/tmp_bashrc >> /home/jovyan/.bashrc && rm /home/jovyan/tmp_bashrc
+COPY config/.bashrc /home/${NB_USER}/tmp_bashrc
+RUN cat /home/${NB_USER}/tmp_bashrc >> /home/${NB_USER}/.bashrc && rm /home/${NB_USER}/tmp_bashrc
 # Configure tiling of windows SHIFT-ALT-CTR-{Left,right,top,Bottom} and other openbox desktop mods
 COPY ./config/rc.xml /etc/xdg/openbox
 # Configure ITKsnap
-COPY ./config/.itksnap.org /home/jovyan/.itksnap.org
-RUN chown jovyan /home/jovyan/.itksnap.org -R
-COPY ./config/mimeapps.list /home/jovyan/.config/mimeapps.list
+COPY ./config/.itksnap.org /home/${NB_USER}/.itksnap.org
+RUN chown ${NB_USER} /home/${NB_USER}/.itksnap.org -R
+COPY ./config/mimeapps.list /home/${NB_USER}/.config/mimeapps.list
 
 # Allow the root user to access the sshfs mount
 # https://github.com/NeuroDesk/neurodesk/issues/47
@@ -301,38 +307,38 @@ COPY config/start-notebook.sh /usr/local/bin/start-notebook.d/
 COPY config/before-notebook.sh /usr/local/bin/before-notebook.d/
 
 # Create link to persistent storage on Desktop (This needs to happen before the users gets created!)
-RUN mkdir -p /home/jovyan/neurodesktop-storage/containers \
-    && mkdir -p /home/jovyan/Desktop/ /data \
-    && ln -s /home/jovyan/neurodesktop-storage/ /neurodesktop-storage
+RUN mkdir -p /home/${NB_USER}/neurodesktop-storage/containers \
+    && mkdir -p /home/${NB_USER}/Desktop/ /data \
+    && ln -s /home/${NB_USER}/neurodesktop-storage/ /neurodesktop-storage
 
 # ## Update conda
 # RUN conda update -n base conda \
 #     && conda clean --all -f -y \
-#     && rm -rf /home/jovyan/.cache
+#     && rm -rf /home/${NB_USER}/.cache
 
 # ## Install conda packages
 # RUN conda install -c conda-forge nipype pip nb_conda_kernels \
 #     && conda clean --all -f -y \
-#     && rm -rf /home/jovyan/.cache
+#     && rm -rf /home/${NB_USER}/.cache
 # RUN conda config --system --prepend envs_dirs '~/conda-environments'
 
 RUN mkdir .ssh \
     && touch .ssh/authorized_keys && chmod 600 .ssh/authorized_keys \
     && touch .ssh/config && chmod 600 .ssh/config \
     && printf "Host localhost\n  Port 2222\n" >> .ssh/config \
-    && chmod -R 700 .ssh && chown -R jovyan:users .ssh
+    && chmod -R 700 .ssh && chown -R ${NB_USER}:users .ssh
 
 # Setup git
 RUN git config --global user.email "user@neurodesk.github.io" \
     && git config --global user.name "Neurodesk User"
 
 # Setup temp directory for matplotlib (required for fmriprep)
-WORKDIR /home/jovyan/.config/matplotlib-mpldir
-RUN chmod -R 700 /home/jovyan/.config/matplotlib-mpldir \
-    && chown -R jovyan:users /home/jovyan/.config/matplotlib-mpldir
-ENV MPLCONFIGDIR /home/jovyan/.config/matplotlib-mpldir
+WORKDIR /home/${NB_USER}/.config/matplotlib-mpldir
+RUN chmod -R 700 /home/${NB_USER}/.config/matplotlib-mpldir \
+    && chown -R ${NB_USER}:users /home/${NB_USER}/.config/matplotlib-mpldir
+ENV MPLCONFIGDIR /home/${NB_USER}/.config/matplotlib-mpldir
 
-COPY --chown=jovyan:users config/sshd_config /home/jovyan/.ssh/sshd_config
+COPY --chown=${NB_USER}:users config/sshd_config /home/${NB_USER}/.ssh/sshd_config
 
 # enable rootless mounts: 
 RUN chmod +x /usr/bin/fusermount
@@ -348,19 +354,19 @@ COPY ./config/checkversion.sh /usr/share/
 # Add CheckVersion script
 COPY ./config/CheckVersion.desktop /etc/skel/Desktop
 
-COPY config/vscode/settings.json /home/jovyan/.config/Code/User/settings.json
+COPY config/vscode/settings.json /home/${NB_USER}/.config/Code/User/settings.json
 
 # Add libfm script
-RUN mkdir -p /home/jovyan/.config/libfm
-COPY ./config/libfm.conf /home/jovyan/.config/libfm
+RUN mkdir -p /home/${NB_USER}/.config/libfm
+COPY ./config/libfm.conf /home/${NB_USER}/.config/libfm
 
-RUN touch /home/jovyan/.sudo_as_admin_successful
+RUN touch /home/${NB_USER}/.sudo_as_admin_successful
 
 # Add datalad-container datalad-osf and osfclient to the conda environment
 RUN pip install datalad-container datalad-osf osfclient
 
 ENV DONT_PROMPT_WSL_INSTALL=1
-ENV PATH=$PATH:/home/jovyan/.local/bin
+ENV PATH=$PATH:/home/${NB_USER}/.local/bin
 ENV SINGULARITY_BINDPATH /data
 ENV LMOD_CMD /usr/share/lmod/lmod/libexec/lmod
 ENV MODULEPATH /cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/molecular_biology:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/workflows:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/visualization:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/structural_imaging:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/statistics:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/spine:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/spectroscopy:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/shape_analysis:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/segmentation:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/rodent_imaging:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/quantitative_imaging:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/quality_control:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/programming:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/phase_processing:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/machine_learning:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/image_segmentation:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/image_registration:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/image_reconstruction:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/hippocampus:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/functional_imaging:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/electrophysiology:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/diffusion_imaging:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/data_organisation:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/body
@@ -375,17 +381,17 @@ RUN rm /tmp/skipcache \
     && ln -s /neurodesktop-storage/containers /neurocommand/local/containers
 
 # Add startup and config files for neurodesktop, jupyter, guacamole, vnc
-RUN mkdir /home/jovyan/.vnc \
-    && chown jovyan /home/jovyan/.vnc \
-    && /usr/bin/printf '%s\n%s\n%s\n' 'password' 'password' 'n' | su jovyan -c vncpasswd
-COPY --chown=jovyan:users config/xstartup /home/jovyan/.vnc
-COPY --chown=jovyan:users config/guacamole.sh /opt/neurodesktop/guacamole.sh
-COPY --chown=jovyan:users config/xpra.sh /opt/neurodesktop/xpra.sh
-COPY --chown=jovyan:users config/jupyter_notebook_config.py /home/jovyan/.jupyter/jupyter_notebook_config.py
-COPY --chown=jovyan:root config/user-mapping.xml /etc/guacamole/user-mapping.xml
+RUN mkdir /home/${NB_USER}/.vnc \
+    && chown ${NB_USER} /home/${NB_USER}/.vnc \
+    && /usr/bin/printf '%s\n%s\n%s\n' 'password' 'password' 'n' | su ${NB_USER} -c vncpasswd
+COPY --chown=${NB_USER}:users config/xstartup /home/${NB_USER}/.vnc
+COPY --chown=${NB_USER}:users config/guacamole.sh /opt/neurodesktop/guacamole.sh
+COPY --chown=${NB_USER}:users config/xpra.sh /opt/neurodesktop/xpra.sh
+COPY --chown=${NB_USER}:users config/jupyter_notebook_config.py /home/${NB_USER}/.jupyter/jupyter_notebook_config.py
+COPY --chown=${NB_USER}:root config/user-mapping.xml /etc/guacamole/user-mapping.xml
 RUN chmod +x /opt/neurodesktop/guacamole.sh /opt/neurodesktop/xpra.sh \
-    /home/jovyan/.jupyter/jupyter_notebook_config.py \
-    /home/jovyan/.vnc/xstartup
+    /home/${NB_USER}/.jupyter/jupyter_notebook_config.py \
+    /home/${NB_USER}/.vnc/xstartup
 
 # Temporary fix. Pushing select apps onto XNeurodesk menu
 RUN find /usr/share/applications/neurodesk/ -type f -name 'fsl*.desktop' -exec sed -i 's/Terminal=true/Terminal=false/g' {} \; \
@@ -397,9 +403,9 @@ RUN find /usr/share/applications/neurodesk/ -type f -name 'fsl*.desktop' -exec s
     && find /usr/share/applications/neurodesk/ -type f -name 'itksnap*.desktop' -exec sed -i 's/Terminal=true/Terminal=false/g' {} \; \
     && find /usr/share/applications/neurodesk/ -type f -name 'itksnap*.desktop' -exec sed -i 's/Exec=\(.*\)/Exec=lxterminal --command="\1"/g' {} \;
 
-RUN echo "jovyan ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers.d/notebook
+RUN echo "${NB_USER} ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers.d/notebook
 
-RUN /usr/bin/printf '%s\n%s\n' 'password' 'password' | sudo passwd jovyan
+RUN /usr/bin/printf '%s\n%s\n' 'password' 'password' | sudo passwd ${NB_USER}
 
 USER ${NB_UID}
 
