@@ -1,4 +1,8 @@
 
+c.ContentsManager.root_dir = '/'
+c.ServerApp.preferred_dir = '/home/jovyan'
+c.ContentsManager.allow_hidden = True
+
 c.ServerProxy.servers = {
   'neurodesktop': {
     'command': ['/opt/neurodesktop/guacamole.sh'],
