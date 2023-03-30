@@ -255,10 +255,10 @@ RUN mkdir -p `curl https://raw.githubusercontent.com/NeuroDesk/neurocontainers/m
 # Fix "No session for pid prompt"
 RUN rm /usr/bin/lxpolkit
 
-RUN wget -O /tmp/Firefox.tar.bz2 "https://download.mozilla.org/?product=firefox-latest&os=linux64" \
-    && tar xjf /tmp/Firefox.tar.bz2 -C /opt/ \
-    && rm /tmp/Firefox.tar.bz2 \
-    && ln -s /opt/firefox/firefox /usr/bin/
+# RUN wget -O /tmp/Firefox.tar.bz2 "https://download.mozilla.org/?product=firefox-latest&os=linux64" \
+#     && tar xjf /tmp/Firefox.tar.bz2 -C /opt/ \
+#     && rm /tmp/Firefox.tar.bz2 \
+#     && ln -s /opt/firefox/firefox /usr/bin/
 
 # # Change firefox home
 # RUN echo 'pref("browser.startup.homepage", "https://www.neurodesk.org", locked);' >> /etc/firefox/syspref.js \
@@ -273,21 +273,6 @@ RUN wget -O /tmp/Firefox.tar.bz2 "https://download.mozilla.org/?product=firefox-
 #     && cd /etc/apt/sources.list.d;wget https://raw.githubusercontent.com/Xpra-org/xpra/master/packaging/repos/jammy/xpra.sources \
 #     && DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y \
 #         xpra
-
-# Install jupyter-server-proxy and disable announcements
-# Depracated: jupyter labextension install ..
-RUN su ${NB_USER} -c "/opt/conda/bin/pip install jupyter-server-proxy" \
-    && su ${NB_USER} -c "/opt/conda/bin/jupyter labextension disable @jupyterlab/apputils-extension:announcements" \ 
-    && su ${NB_USER} -c "/opt/conda/bin/pip install jupyterlmod" \
-    && su ${NB_USER} -c "/opt/conda/bin/jupyter labextension install jupyterlab-lmod" \
-    && rm -rf /home/${NB_USER}/.cache
-
-# Add notebook startup scripts
-# https://jupyter-docker-stacks.readthedocs.io/en/latest/using/common.html
-RUN mkdir -p /usr/local/bin/start-notebook.d/ \
-    && mkdir -p /usr/local/bin/before-notebook.d/
-COPY config/jupyter/start-notebook.sh /usr/local/bin/start-notebook.d/
-COPY config/jupyter/before-notebook.sh /usr/local/bin/before-notebook.d/
 
 # ## Update conda
 # RUN conda update -n base conda \
@@ -347,12 +332,20 @@ ENV SINGULARITY_BINDPATH /data
 ENV LMOD_CMD /usr/share/lmod/lmod/libexec/lmod
 ENV MODULEPATH /cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/molecular_biology:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/workflows:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/visualization:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/structural_imaging:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/statistics:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/spine:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/spectroscopy:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/shape_analysis:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/segmentation:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/rodent_imaging:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/quantitative_imaging:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/quality_control:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/programming:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/phase_processing:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/machine_learning:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/image_segmentation:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/image_registration:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/image_reconstruction:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/hippocampus:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/functional_imaging:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/electrophysiology:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/diffusion_imaging:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/data_organisation:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/body
 
-# Install neurocommand
-ADD --keep-git-dir=true https://github.com/NeuroDesk/neurocommand.git /neurocommand
-RUN cd /neurocommand \
-    && bash build.sh --lxde --edit \
-    && bash install.sh \
-    && ln -s /neurodesktop-storage/containers /neurocommand/local/containers
+# Install jupyter-server-proxy and disable announcements
+# Depracated: jupyter labextension install ..
+RUN su ${NB_USER} -c "/opt/conda/bin/pip install jupyter-server-proxy" \
+    && su ${NB_USER} -c "/opt/conda/bin/jupyter labextension disable @jupyterlab/apputils-extension:announcements" \ 
+    && su ${NB_USER} -c "/opt/conda/bin/pip install jupyterlmod" \
+    # && su ${NB_USER} -c "/opt/conda/bin/jupyter labextension install jupyterlab-lmod" \
+    && rm -rf /home/${NB_USER}/.cache
+
+# Add notebook startup scripts
+# https://jupyter-docker-stacks.readthedocs.io/en/latest/using/common.html
+RUN mkdir -p /usr/local/bin/start-notebook.d/ \
+    && mkdir -p /usr/local/bin/before-notebook.d/
+COPY config/jupyter/start-notebook.sh /usr/local/bin/start-notebook.d/
+COPY config/jupyter/before-notebook.sh /usr/local/bin/before-notebook.d/
 
 # Create Guacamole configurations (user-mapping.xml gets filled in the startup.sh script)
 RUN mkdir -p /etc/guacamole \
@@ -371,6 +364,13 @@ COPY --chown=${NB_USER}:users config/jupyter/jupyter_notebook_config.py /home/${
 RUN chmod +x /opt/neurodesktop/guacamole.sh /opt/neurodesktop/xpra.sh \
     /home/${NB_USER}/.jupyter/jupyter_notebook_config.py \
     /home/${NB_USER}/.vnc/xstartup
+
+# # Install neurocommand
+# ADD --keep-git-dir=true https://github.com/NeuroDesk/neurocommand.git /neurocommand
+# RUN cd /neurocommand \
+#     && bash build.sh --lxde --edit \
+#     && bash install.sh \
+#     && ln -s /neurodesktop-storage/containers /neurocommand/local/containers
 
 # # # Temporary fix. Pushing select apps onto XNeurodesk menu
 # # RUN find /usr/share/applications/neurodesk/ -type f -name 'fsl*.desktop' -exec sed -i 's/Terminal=true/Terminal=false/g' {} \; \
