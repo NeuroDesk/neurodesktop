@@ -373,12 +373,17 @@ RUN chmod +x /opt/neurodesktop/guacamole.sh /opt/neurodesktop/xpra.sh \
     /home/${NB_USER}/.jupyter/jupyter_notebook_config.py \
     /home/${NB_USER}/.vnc/xstartup
 
-# # Install neurocommand
-# ADD --keep-git-dir=true https://github.com/NeuroDesk/neurocommand.git /neurocommand
-# RUN cd /neurocommand \
-#     && bash build.sh --lxde --edit \
-#     && bash install.sh \
-#     && ln -s /neurodesktop-storage/containers /neurocommand/local/containers
+RUN echo "${NB_USER} ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers.d/notebook \
+# The following apply to Singleuser mode only. See config/jupyter/before-notebook.sh for Notebook mode
+    && /usr/bin/printf '%s\n%s\n' 'password' 'password' | passwd ${NB_USER} \
+    && usermod --shell /bin/bash ${NB_USER}
+
+# Install neurocommand
+ADD --keep-git-dir=true https://github.com/NeuroDesk/neurocommand.git /neurocommand
+RUN cd /neurocommand \
+    && bash build.sh --lxde --edit \
+    && bash install.sh \
+    && ln -s /neurodesktop-storage/containers /neurocommand/local/containers
 
 # # # Temporary fix. Pushing select apps onto XNeurodesk menu
 # # RUN find /usr/share/applications/neurodesk/ -type f -name 'fsl*.desktop' -exec sed -i 's/Terminal=true/Terminal=false/g' {} \; \
@@ -389,11 +394,6 @@ RUN chmod +x /opt/neurodesktop/guacamole.sh /opt/neurodesktop/xpra.sh \
 # #     && find /usr/share/applications/neurodesk/ -type f -name '3dslicer*.desktop' -exec sed -i 's/Exec=\(.*\)/Exec=lxterminal --command="\1"/g' {} \; \
 # #     && find /usr/share/applications/neurodesk/ -type f -name 'itksnap*.desktop' -exec sed -i 's/Terminal=true/Terminal=false/g' {} \; \
 # #     && find /usr/share/applications/neurodesk/ -type f -name 'itksnap*.desktop' -exec sed -i 's/Exec=\(.*\)/Exec=lxterminal --command="\1"/g' {} \;
-
-RUN echo "${NB_USER} ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers.d/notebook \
-# The following apply to Singleuser mode only. See config/jupyter/before-notebook.sh for Notebook mode
-    && /usr/bin/printf '%s\n%s\n' 'password' 'password' | passwd ${NB_USER} \
-    && usermod --shell /bin/bash ${NB_USER}
 
 USER ${NB_UID}
 
