@@ -29,4 +29,4 @@ c.ServerProxy.servers = {
 }
 c.ServerApp.root_dir = '/'
 c.ServerApp.preferred_dir = os.getcwd()
-c.ContentsManager.allow_hidden = True
+c.FileContentsManager.allow_hidden = True
