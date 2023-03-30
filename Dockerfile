@@ -202,6 +202,15 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
         zip \
         zlib1g-dev
 
+# Install firefox
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
+    --mount=type=cache,target=/var/lib/apt,sharing=locked \
+    add-apt-repository ppa:mozillateam/ppa \
+    && DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y \
+        --target-release 'o=LP-PPA-mozillateam' firefox
+COPY config/firefox/mozillateamppa /etc/apt/preferences.d/mozillateamppa
+COPY config/firefox/syspref.js /etc/firefox/syspref.js
+
 # Create cvmfs keys
 RUN mkdir -p /etc/cvmfs/keys/ardc.edu.au
 COPY config/cvmfs/neurodesk.ardc.edu.au.pub /etc/cvmfs/keys/ardc.edu.au/neurodesk.ardc.edu.au.pub
@@ -381,8 +390,8 @@ RUN chmod +x /opt/neurodesktop/guacamole.sh /opt/neurodesktop/xpra.sh \
 # #     && find /usr/share/applications/neurodesk/ -type f -name 'itksnap*.desktop' -exec sed -i 's/Terminal=true/Terminal=false/g' {} \; \
 # #     && find /usr/share/applications/neurodesk/ -type f -name 'itksnap*.desktop' -exec sed -i 's/Exec=\(.*\)/Exec=lxterminal --command="\1"/g' {} \;
 
-# This applies to Singleuser mode only. See config/jupyter/before-notebook.sh for Notebook mode
 RUN echo "${NB_USER} ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers.d/notebook \
+# The following apply to Singleuser mode only. See config/jupyter/before-notebook.sh for Notebook mode
     && /usr/bin/printf '%s\n%s\n' 'password' 'password' | passwd ${NB_USER} \
     && usermod --shell /bin/bash ${NB_USER}
 
