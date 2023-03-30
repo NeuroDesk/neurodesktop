@@ -218,12 +218,12 @@ COPY config/cvmfs/neurodesk.ardc.edu.au.conf /etc/cvmfs/config.d/neurodesk.ardc.
 COPY config/cvmfs/default.local /etc/cvmfs/default.local
 RUN cvmfs_config setup
 
-# Add Globus client
-RUN mkdir -p /opt/globusconnectpersonal \
-    && cd /opt/globusconnectpersonal \
-    && wget https://downloads.globus.org/globus-connect-personal/linux/stable/globusconnectpersonal-latest.tgz \
-    && tar xzf globusconnectpersonal-latest.tgz \
-    && rm -rf globusconnectpersonal-latest.tgz/
+# # Add Globus client
+# RUN mkdir -p /opt/globusconnectpersonal \
+#     && cd /opt/globusconnectpersonal \
+#     && wget https://downloads.globus.org/globus-connect-personal/linux/stable/globusconnectpersonal-latest.tgz \
+#     && tar xzf globusconnectpersonal-latest.tgz \
+#     && rm -rf globusconnectpersonal-latest.tgz/
 
 # Add rclone
 RUN cd /opt \
