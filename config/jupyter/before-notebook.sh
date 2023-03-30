@@ -32,16 +32,16 @@
 
 /usr/bin/printf '%s\n%s\n' 'password' 'password' | sudo passwd jovyan
 
-if [ -z "$CVMFS_DISABLE" ]; then
-    echo "\
-    ==================================================================
-    Mounting CVMFS"
-    sudo mkdir -p /cvmfs/neurodesk.ardc.edu.au
-    sudo mount -t cvmfs neurodesk.ardc.edu.au /cvmfs/neurodesk.ardc.edu.au
+# if [ -z "$CVMFS_DISABLE" ]; then
+#     echo "\
+#     ==================================================================
+#     Mounting CVMFS"
+#     sudo mkdir -p /cvmfs/neurodesk.ardc.edu.au
+#     sudo mount -t cvmfs neurodesk.ardc.edu.au /cvmfs/neurodesk.ardc.edu.au
 
-    echo "\
-    ==================================================================
-    Testing which CVMFS server is fastest"
-    sudo cvmfs_talk -i neurodesk.ardc.edu.au host probe
-    sudo cvmfs_talk -i neurodesk.ardc.edu.au host info
-fi
+#     echo "\
+#     ==================================================================
+#     Testing which CVMFS server is fastest"
+#     sudo cvmfs_talk -i neurodesk.ardc.edu.au host probe
+#     sudo cvmfs_talk -i neurodesk.ardc.edu.au host info
+# fi
