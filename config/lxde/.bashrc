@@ -24,7 +24,7 @@ if [ -f '/usr/share/module.sh' ]; then
 fi
 
 # this mounts the homedirecotry to the matlab license directories so that the activation via the GUI works
-export neurodesk_singularity_opts="${neurodesk_singularity_opts} --bind /home/jovyan:/home/matlab/.matlab/R2022a_licenses,/home/jovyan:/opt/matlab/R2022a/licenses "
+export neurodesk_singularity_opts="${neurodesk_singularity_opts} --bind /home/${NB_USER}:/home/matlab/.matlab/R2022a_licenses,/home/${NB_USER}:/opt/matlab/R2022a/licenses "
 
 
 # this adds --nv to the singularity calls -> but only if a GPU is present
@@ -37,4 +37,4 @@ PS1='\u@neurodesktop:\w$ '
 
 export SINGULARITYENV_SUBJECTS_DIR=~/freesurfer-subjects-dir
 export SINGULARITY_BINDPATH=/data,/cvmfs
-export MPLCONFIGDIR=/home/jovyan/.config/matplotlib-mpldir
+export MPLCONFIGDIR=/home/${NB_USER}/.config/matplotlib-mpldir

@@ -337,7 +337,6 @@ ENV MODULEPATH /cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/molecular_biology:
 RUN su ${NB_USER} -c "/opt/conda/bin/pip install jupyter-server-proxy" \
     && su ${NB_USER} -c "/opt/conda/bin/jupyter labextension disable @jupyterlab/apputils-extension:announcements" \ 
     && su ${NB_USER} -c "/opt/conda/bin/pip install jupyterlmod" \
-    # && su ${NB_USER} -c "/opt/conda/bin/jupyter labextension install jupyterlab-lmod" \
     && rm -rf /home/${NB_USER}/.cache
 
 # Add notebook startup scripts
@@ -382,9 +381,10 @@ RUN chmod +x /opt/neurodesktop/guacamole.sh /opt/neurodesktop/xpra.sh \
 # #     && find /usr/share/applications/neurodesk/ -type f -name 'itksnap*.desktop' -exec sed -i 's/Terminal=true/Terminal=false/g' {} \; \
 # #     && find /usr/share/applications/neurodesk/ -type f -name 'itksnap*.desktop' -exec sed -i 's/Exec=\(.*\)/Exec=lxterminal --command="\1"/g' {} \;
 
-RUN echo "${NB_USER} ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers.d/notebook
-
-RUN /usr/bin/printf '%s\n%s\n' 'password' 'password' | sudo passwd ${NB_USER}
+# This applies to Singleuser mode only. See config/jupyter/before-notebook.sh for Notebook mode
+RUN echo "${NB_USER} ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers.d/notebook \
+    && /usr/bin/printf '%s\n%s\n' 'password' 'password' | passwd ${NB_USER} \
+    && usermod --shell /bin/bash ${NB_USER}
 
 USER ${NB_UID}
 
