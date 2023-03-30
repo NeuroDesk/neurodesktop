@@ -1,6 +1,6 @@
 
 if [ -z "$GRANT_SUDO" ]; then
-export GRANT_SUDO='no'
+export GRANT_SUDO='yes'
 fi
 if [ -z "$RESTARTABLE" ]; then
 export RESTARTABLE='yes'

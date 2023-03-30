@@ -12,5 +12,5 @@ docker buildx build . -t neurodesktop:latest
 docker run --shm-size=1gb -it --cap-add SYS_ADMIN --security-opt apparmor:unconfined \
     --device=/dev/fuse --name neurodesktop -v ~/neurodesktop-storage:/neurodesktop-storage \
     -v /cvmfs:/cvmfs -p 8888:8888 \
-    --user=root -e NB_UID="$(id -u)" -e NB_GID="$(id -g)" -e GRANT_SUDO=yes \
+    --user=root -e NB_UID="$(id -u)" -e NB_GID="$(id -g)" \
     neurodesktop:latest
