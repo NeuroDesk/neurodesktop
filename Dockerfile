@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1-labs
-FROM jupyter/base-notebook:notebook-6.5.3
+FROM jupyter/base-notebook:2023-03-27
 # FROM jupyter/base-notebook:python-3.10.9
 # FROM jupyter/base-notebook:2023-02-28
 
