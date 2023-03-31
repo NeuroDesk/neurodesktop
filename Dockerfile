@@ -144,8 +144,6 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
         davfs2 \
         debootstrap \
         emacs \
-        g++ \
-        gcc \
         gedit \
         git \
         gnome-keyring \
@@ -160,10 +158,7 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
         libpci3 \
         libreoffice \
         libssh2-1-dev \
-        libxt6 \
-        libzstd1 \
         lmod \
-        lsb-release \
         lua-bit32 \
         lua-filesystem \
         lua-json \
@@ -171,9 +166,7 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
         lua-posix \
         lua-term \
         lua5.2 \
-        lxrandr \
         lxtask \
-        lxterminal \
         man-db \
         nano \
         nextcloud-client \
@@ -189,15 +182,14 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
         sshfs \
         tcllib \
         tk \
+        tmux \
         tree \
         uidmap \
         unzip \
         vim \
-        xauth \
         xdg-utils \
         yarn \
-        zip \
-        zlib1g-dev
+        zip
 
 # Install firefox
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
@@ -222,13 +214,13 @@ RUN cvmfs_config setup
 #     && tar xzf globusconnectpersonal-latest.tgz \
 #     && rm -rf globusconnectpersonal-latest.tgz/
 
-# Add rclone
-RUN cd /opt \
-    && wget https://downloads.rclone.org/v1.60.1/rclone-v1.60.1-linux-amd64.zip \
-    && unzip rclone-v1.60.1-linux-amd64.zip \
-    && rm rclone-v1.60.1-linux-amd64.zip \
-    && ln -s /opt/rclone-v1.60.1-linux-amd64/rclone /usr/bin/rclone
-COPY --chown=${NB_USER}:users config/rclone/rclone.conf /home/${NB_USER}/.config/rclone/rclone.conf
+# # Add rclone
+# RUN cd /opt \
+#     && wget https://downloads.rclone.org/v1.60.1/rclone-v1.60.1-linux-amd64.zip \
+#     && unzip rclone-v1.60.1-linux-amd64.zip \
+#     && rm rclone-v1.60.1-linux-amd64.zip \
+#     && ln -s /opt/rclone-v1.60.1-linux-amd64/rclone /usr/bin/rclone
+# COPY --chown=${NB_USER}:users config/rclone/rclone.conf /home/${NB_USER}/.config/rclone/rclone.conf
 
 # # Customise logo, wallpaper, terminal, panel
 COPY config/jupyter/neurodesk_brain_logo.svg /opt/neurodesk_brain_logo.svg
@@ -243,14 +235,17 @@ COPY config/lmod/module.sh /usr/share/
 COPY config/lxde/.bashrc /home/${NB_USER}/tmp_bashrc
 RUN cat /home/${NB_USER}/tmp_bashrc >> /home/${NB_USER}/.bashrc \
      && rm /home/${NB_USER}/tmp_bashrc
+
 # Configure tiling of windows SHIFT-ALT-CTR-{Left,right,top,Bottom} and other openbox desktop mods
 COPY ./config/lxde/rc.xml /etc/xdg/openbox
+
 # Configure ITKsnap
 RUN mkdir -p /home/${NB_USER}/.itksnap.org/ITK-SNAP \
     && chown ${NB_USER} /home/${NB_USER}/.itksnap.org -R
 COPY ./config/itksnap/UserPreferences.xml /home/${NB_USER}/.itksnap.org
 COPY ./config/lxde/mimeapps.list /home/${NB_USER}/.config/mimeapps.list
 COPY --chown=${NB_USER}:users config/ssh/sshd_config /home/${NB_USER}/.ssh/sshd_config
+
 # Allow the root user to access the sshfs mount
 # https://github.com/NeuroDesk/neurodesk/issues/47
 RUN sed -i 's/#user_allow_other/user_allow_other/g' /etc/fuse.conf
@@ -260,11 +255,6 @@ RUN mkdir -p `curl https://raw.githubusercontent.com/NeuroDesk/neurocontainers/m
 
 # Fix "No session for pid prompt"
 RUN rm /usr/bin/lxpolkit
-
-# RUN wget -O /tmp/Firefox.tar.bz2 "https://download.mozilla.org/?product=firefox-latest&os=linux64" \
-#     && tar xjf /tmp/Firefox.tar.bz2 -C /opt/ \
-#     && rm /tmp/Firefox.tar.bz2 \
-#     && ln -s /opt/firefox/firefox /usr/bin/
 
 # # Change firefox home
 # RUN echo 'pref("browser.startup.homepage", "https://www.neurodesk.org", locked);' >> /etc/firefox/syspref.js \
@@ -397,11 +387,21 @@ USER ${NB_UID}
 WORKDIR "${HOME}"
 
 # CMD ["/bin/bash"]
-# ## Possible requirements
-# # xorg \
-# # python3 \
-# # python3-annexremote \
-# # python3-pip \
-# # firefox \
-# # cryptsetup-bin\
-# # dbus-x11 \
+
+## Possible requirements
+# cryptsetup-bin\
+# dbus-x11 \
+# firefox \
+# g++ \
+# gcc \
+# libxt6 \
+# libzstd1 \
+# lsb-release \
+# lxrandr \
+# lxterminal \
+# python3 \
+# python3-annexremote \
+# python3-pip \
+# xauth \
+# xorg \
+# zlib1g-dev
