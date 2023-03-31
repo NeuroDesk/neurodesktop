@@ -158,7 +158,6 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
         libgpgme-dev \
         libossp-uuid-dev \
         libpci3 \
-        libpci3 \
         libreoffice \
         libssh2-1-dev \
         libxt6 \
@@ -184,13 +183,11 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
         owncloud-client \
         pciutils \
         qdirstat \
-        qdirstat \
         rsync \
         s3fs \
         screen \
         sshfs \
         tcllib \
-        tk \
         tk \
         tree \
         uidmap \
