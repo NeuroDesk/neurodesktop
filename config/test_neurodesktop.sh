@@ -1,10 +1,26 @@
 #!/bin/bash
 
-#set -euo pipefail
-# to check if variable exists with -u turn on, use [ -v VAR_NAME ] or [ $# -gt 0 ] if arguments
-#shopt -s failglob lastpipe
+###############################
+#
+#   test_neurodesktop.sh
+#   ====================
+#
+#   Usage: /usr/share/test_neurodesk.sh
+#
+#   Synopsis:
+#      Tests all containers and Neurodesktop itself
+#
+#   Output:
+#      Generates a ./test_containers_output/PACKAGE_VERSION_BUILDDATE folder for each package, and run app_test.sh within that folder
+#      The stdout and stderr of each test are saved to files in the folder
+#
+#      Prints out the command used to run each test, the stderr of each test and the result of each test
+#      Prints the summary of how many containers passed the test and how many don't have a test
+#      Prints the result of tests of neurodesktop
+#
+####################################
 
-# Assumes version 1.1 of fix_bash.sh
+# Assumes version 1.1.1 of fix_bash.sh
 full_path="$(realpath -e $0)"
 script_dir="$(dirname "$full_path")"
 source "$script_dir/fix_bash.sh"
