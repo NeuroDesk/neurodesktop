@@ -366,27 +366,15 @@ RUN echo "${NB_USER} ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers.d/notebook \
     && usermod --shell /bin/bash ${NB_USER}
 
 # Install neurocommand
-ADD --keep-git-dir=true https://github.com/NeuroDesk/neurocommand.git /neurocommand
+ADD --keep-git-dir=true https://github.com/NeuroDesk/neurocommand.git#main /neurocommand
 RUN cd /neurocommand \
     && bash build.sh --lxde --edit \
     && bash install.sh \
     && ln -s /neurodesktop-storage/containers /neurocommand/local/containers
 
-# # # Temporary fix. Pushing select apps onto XNeurodesk menu
-# # RUN find /usr/share/applications/neurodesk/ -type f -name 'fsl*.desktop' -exec sed -i 's/Terminal=true/Terminal=false/g' {} \; \
-# #     && find /usr/share/applications/neurodesk/ -type f -name 'fsl*.desktop' -exec sed -i 's/Exec=\(.*\)/Exec=lxterminal --command="\1"/g' {} \; \
-# #     && find /usr/share/applications/neurodesk/ -type f -name 'freesurfer*.desktop' -exec sed -i 's/Terminal=true/Terminal=false/g' {} \; \
-# #     && find /usr/share/applications/neurodesk/ -type f -name 'freesurfer*.desktop' -exec sed -i 's/Exec=\(.*\)/Exec=lxterminal --command="\1"/g' {} \; \
-# #     && find /usr/share/applications/neurodesk/ -type f -name '3dslicer*.desktop' -exec sed -i 's/Terminal=true/Terminal=false/g' {} \; \
-# #     && find /usr/share/applications/neurodesk/ -type f -name '3dslicer*.desktop' -exec sed -i 's/Exec=\(.*\)/Exec=lxterminal --command="\1"/g' {} \; \
-# #     && find /usr/share/applications/neurodesk/ -type f -name 'itksnap*.desktop' -exec sed -i 's/Terminal=true/Terminal=false/g' {} \; \
-# #     && find /usr/share/applications/neurodesk/ -type f -name 'itksnap*.desktop' -exec sed -i 's/Exec=\(.*\)/Exec=lxterminal --command="\1"/g' {} \;
-
 USER ${NB_UID}
 
 WORKDIR "${HOME}"
-
-# CMD ["/bin/bash"]
 
 ## Possible requirements
 # cryptsetup-bin\
