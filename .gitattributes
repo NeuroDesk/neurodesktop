@@ -4,4 +4,4 @@
 
 # Forcing UNIX LF line endings for text files added to container
 * text=auto eol=lf
-*.svg eol=lf
+*.svg text eol=lf
