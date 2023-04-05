@@ -1,7 +1,6 @@
 # Set non-text as binary
 # * text=auto
 # *.png binary
-*.svg text
 
 # Forcing UNIX LF line endings for text files added to container
 * text=auto eol=lf
