@@ -34,7 +34,8 @@
 /usr/bin/printf '%s\n%s\n' 'password' 'password' | passwd ${NB_USER}
 usermod --shell /bin/bash ${NB_USER}
 
-if [ -z "$CVMFS_DISABLE" ]; then
+if [ ! -d "/cvmfs/neurodesk.ardc.edu.au/containers/" ]; then
+    if [ -z "$CVMFS_DISABLE" ]; then
     echo "\
     ==================================================================
     Mounting CVMFS"
@@ -46,4 +47,6 @@ if [ -z "$CVMFS_DISABLE" ]; then
     Testing which CVMFS server is fastest"
     sudo cvmfs_talk -i neurodesk.ardc.edu.au host probe
     sudo cvmfs_talk -i neurodesk.ardc.edu.au host info
+    fi
 fi
+
