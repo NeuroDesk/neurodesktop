@@ -205,7 +205,8 @@ RUN mkdir -p /etc/cvmfs/keys/ardc.edu.au
 COPY config/cvmfs/neurodesk.ardc.edu.au.pub /etc/cvmfs/keys/ardc.edu.au/neurodesk.ardc.edu.au.pub
 COPY config/cvmfs/neurodesk.ardc.edu.au.conf /etc/cvmfs/config.d/neurodesk.ardc.edu.au.conf
 COPY config/cvmfs/default.local /etc/cvmfs/default.local
-RUN cvmfs_config setup
+# This causes conflicts with an external cvmfs setup that gets mounted
+# RUN cvmfs_config setup
 
 # # Add Globus client
 # RUN mkdir -p /opt/globusconnectpersonal \
@@ -366,7 +367,9 @@ RUN echo "${NB_USER} ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers.d/notebook \
     && usermod --shell /bin/bash ${NB_USER}
 
 # Install neurocommand
-ADD --keep-git-dir=true https://github.com/NeuroDesk/neurocommand.git#main /neurocommand
+# ADD --keep-git-dir=true https://github.com/NeuroDesk/neurocommand.git#main /neurocommand
+#WORKAROUND FOR STEFFEN OL7
+RUN git clone https://github.com/NeuroDesk/neurocommand.git /neurocommand
 RUN cd /neurocommand \
     && bash build.sh --lxde --edit \
     && bash install.sh \
