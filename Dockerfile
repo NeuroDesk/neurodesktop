@@ -121,7 +121,7 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     && wget -q -O- http://neuro.debian.net/lists/focal.us-nh.full | sudo tee /etc/apt/sources.list.d/neurodebian.sources.list \
     && apt-key adv --recv-keys --keyserver hkps://keyserver.ubuntu.com 0xA5D32F012649A5A9 \
     # NodeJS
-    && curl -fsSL https://deb.nodesource.com/setup_19.x | bash -
+    && curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
 
 # Install CVMFS
 RUN wget -q https://ecsft.cern.ch/dist/cvmfs/cvmfs-release/cvmfs-release-latest_all.deb -P /tmp \
