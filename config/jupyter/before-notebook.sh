@@ -30,6 +30,7 @@
 # ssh-keygen -t rsa -f /home/${NB_USER}/.ssh/ssh_host_rsa_key -N '' <<< n
 # cat /home/${NB_USER}/.ssh/id_rsa.pub >> /home/${NB_USER}/.ssh/authorized_keys
 
+# This script does NOT run in singleuser mode (e.g. kubernetes)
 # This runs for Notebook mode. Dockerfile changes to NB_USER are overridden in notebook mode
 /usr/bin/printf '%s\n%s\n' 'password' 'password' | passwd ${NB_USER}
 usermod --shell /bin/bash ${NB_USER}
