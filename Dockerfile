@@ -360,9 +360,9 @@ RUN mkdir /home/${NB_USER}/.vnc \
 COPY --chown=${NB_USER}:users config/lxde/xstartup /home/${NB_USER}/.vnc
 COPY --chown=${NB_USER}:root config/guacamole/user-mapping.xml /etc/guacamole/user-mapping.xml
 COPY --chown=${NB_USER}:users config/guacamole/guacamole.sh /opt/neurodesktop/guacamole.sh
-COPY --chown=${NB_USER}:users config/xpra/xpra.sh /opt/neurodesktop/xpra.sh
+# COPY --chown=${NB_USER}:users config/xpra/xpra.sh /opt/neurodesktop/xpra.sh
 COPY --chown=${NB_USER}:users config/jupyter/jupyter_notebook_config.py /home/${NB_USER}/.jupyter/jupyter_notebook_config.py
-RUN chmod +x /opt/neurodesktop/guacamole.sh /opt/neurodesktop/xpra.sh \
+# RUN chmod +x /opt/neurodesktop/guacamole.sh /opt/neurodesktop/xpra.sh \
     /home/${NB_USER}/.jupyter/jupyter_notebook_config.py \
     /home/${NB_USER}/.vnc/xstartup
 
