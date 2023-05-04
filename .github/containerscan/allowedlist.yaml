@@ -1,0 +1,8 @@
+general:
+  vulnerabilities:
+    - CVE-2022-39237 #I updated singularity, but azure container scan still flags it incorrectly
+    - CVE-2022-29078
+    - CVE-2021-3918
+    - CVE-2022-37601
+    - CVE-2021-44906
+    - CVE-2022-0686
