@@ -7,9 +7,10 @@
 <param name="password">password</param>
 <param name="port">3389</param>
 <param name="security\">any</param>
-<param name="ignore-cert\">true</param>
+<param name="ignore-cert">true</param>
 <param name="resize-method\">reconnect</param>
-<param name="enable-drive">false</param>
+<param name="enable-drive">true</param>
+<param name="drive-path">/home/jovyan/Desktop</param>
 </connection>
 <connection name="Desktop Fixed-Resolution (VNC)">
 <protocol>vnc</protocol>
@@ -17,7 +18,11 @@
 <param name="username">jovyan</param>
 <param name="password">password</param>
 <param name="port">5901</param>
-<param name="enable-sftp">false</param>
+<param name="enable-sftp">true</param>
+<param name="sftp-username">jovyan</param>
+<param name="sftp-password">password</param>
+<param name="sftp-directory">/home/jovyan/Desktop</param>
+<param name="sftp-root-directory">/home/jovyan/Desktop</param>
 <param name="enable-audio">false</param>
 </connection>
 </authorize>
