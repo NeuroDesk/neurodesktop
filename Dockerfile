@@ -362,9 +362,10 @@ COPY --chown=${NB_USER}:root config/guacamole/user-mapping.xml /etc/guacamole/us
 COPY --chown=${NB_USER}:users config/guacamole/guacamole.sh /opt/neurodesktop/guacamole.sh
 # COPY --chown=${NB_USER}:users config/xpra/xpra.sh /opt/neurodesktop/xpra.sh
 COPY --chown=${NB_USER}:users config/jupyter/jupyter_notebook_config.py /home/${NB_USER}/.jupyter/jupyter_notebook_config.py
-# RUN chmod +x /opt/neurodesktop/guacamole.sh /opt/neurodesktop/xpra.sh \
+RUN chmod +x /opt/neurodesktop/guacamole.sh \
     /home/${NB_USER}/.jupyter/jupyter_notebook_config.py \
     /home/${NB_USER}/.vnc/xstartup
+    # /opt/neurodesktop/xpra.sh
 
 RUN echo "${NB_USER} ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers.d/notebook \
 # The following apply to Singleuser mode only. See config/jupyter/before-notebook.sh for Notebook mode
