@@ -333,14 +333,9 @@ ENV MODULEPATH /cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/molecular_biology:
 # Depracated: jupyter labextension install ..
 RUN su ${NB_USER} -c "/opt/conda/bin/pip install jupyter-server-proxy" \
     && su ${NB_USER} -c "/opt/conda/bin/jupyter labextension disable @jupyterlab/apputils-extension:announcements" \ 
-    && su ${NB_USER} -c "/opt/conda/bin/jupyter labextension install jupyterlab-lmod" \ 
-    && su ${NB_USER} -c "/opt/conda/bin/pip install jupyterlmod==3.0.0" \ 
+    && su ${NB_USER} -c "/opt/conda/bin/pip install jupyterlmod==4.0.3" \ 
     && rm -rf /home/${NB_USER}/.cache
     
-# && su ${NB_USER} -c "/opt/conda/bin/pip install jupyterlmod" \
-# -> Doesnt work right now!
-# because 4.0.1 broke lmod.load -> https://github.com/cmd-ntrf/jupyter-lmod/issues/63
-
 # Add notebook startup scripts
 # https://jupyter-docker-stacks.readthedocs.io/en/latest/using/common.html
 RUN mkdir -p /usr/local/bin/start-notebook.d/ \
