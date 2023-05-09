@@ -1,9 +1,8 @@
-#	$OpenBSD: sshd_config,v 1.103 2018/04/09 20:41:22 tj Exp $
 
 # This is the sshd server system-wide configuration file.  See
 # sshd_config(5) for more information.
 
-# This sshd was compiled with PATH=/usr/bin:/bin:/usr/sbin:/sbin
+# This sshd was compiled with PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games
 
 # The strategy used for options in the default sshd_config shipped with
 # OpenSSH is to specify options with their default value where
@@ -13,6 +12,7 @@
 Include /etc/ssh/sshd_config.d/*.conf
 
 Port 2222
+#Port 22
 #AddressFamily any
 #ListenAddress 0.0.0.0
 #ListenAddress ::
@@ -27,7 +27,7 @@ HostKey /home/jovyan/.ssh/ssh_host_rsa_key
 
 # Logging
 #SyslogFacility AUTH
-#LogLevel INFO
+# LogLevel INFO
 
 # Authentication:
 
@@ -56,12 +56,13 @@ HostKey /home/jovyan/.ssh/ssh_host_rsa_key
 #IgnoreRhosts yes
 
 # To disable tunneled clear text passwords, change to no here!
+PasswordAuthentication no
 #PasswordAuthentication yes
 #PermitEmptyPasswords no
 
 # Change to yes to enable challenge-response passwords (beware issues with
 # some PAM modules and threads)
-ChallengeResponseAuthentication no
+KbdInteractiveAuthentication no
 
 # Kerberos options
 #KerberosAuthentication no
@@ -77,13 +78,13 @@ ChallengeResponseAuthentication no
 
 # Set this to 'yes' to enable PAM authentication, account processing,
 # and session processing. If this is enabled, PAM authentication will
-# be allowed through the ChallengeResponseAuthentication and
+# be allowed through the KbdInteractiveAuthentication and
 # PasswordAuthentication.  Depending on your PAM configuration,
-# PAM authentication via ChallengeResponseAuthentication may bypass
+# PAM authentication via KbdInteractiveAuthentication may bypass
 # the setting of "PermitRootLogin without-password".
 # If you just want the PAM account and session checks to run without
 # PAM authentication, then enable this but set PasswordAuthentication
-# and ChallengeResponseAuthentication to 'no'.
+# and KbdInteractiveAuthentication to 'no'.
 UsePAM yes
 
 #AllowAgentForwarding yes
@@ -119,8 +120,13 @@ Subsystem	sftp	/usr/lib/openssh/sftp-server
 
 # Example of overriding settings on a per-user basis
 #Match User anoncvs
-#	X11Forwarding no
 X11Forwarding yes
+#	X11Forwarding no
 #	AllowTcpForwarding no
 #	PermitTTY no
 #	ForceCommand cvs server
+
+# Enable RSA support for Apache Guacamole
+# HostbasedAcceptedKeyTypes +ssh-rsa
+HostKeyAlgorithms +ssh-rsa
+PubkeyAcceptedKeyTypes +ssh-rsa
