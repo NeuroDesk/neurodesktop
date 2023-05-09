@@ -1,7 +1,6 @@
 # syntax=docker/dockerfile:1-labs
-FROM jupyter/base-notebook:2023-03-27
-# FROM jupyter/base-notebook:python-3.10.9
-# FROM jupyter/base-notebook:2023-02-28
+FROM jupyter/base-notebook:2023-05-01
+# FROM jupyter/base-notebook:python-3.10.10
 
 # Parent image source
 # https://github.com/jupyter/docker-stacks/blob/86d42cadf4695b8e6fc3b3ead58e1f71067b765b/docker-stacks-foundation/Dockerfile
@@ -40,6 +39,9 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
         libvncserver-dev \
         libssl-dev \
         libwebp-dev \
+        libssh2-1-dev \
+        # SSH (Optional)
+        libpango1.0-dev \
         ## VNC
         tigervnc-common \
         tigervnc-standalone-server \
@@ -57,11 +59,11 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
         gpg-agent \
         software-properties-common
 
-ARG GO_VERSION="1.20.2"
-ARG SINGULARITY_VERSION="3.11.0"
+ARG GO_VERSION="1.20.4"
+ARG SINGULARITY_VERSION="3.11.3"
 ARG TOMCAT_REL="9"
-ARG TOMCAT_VERSION="9.0.73"
-ARG GUACAMOLE_VERSION="1.5.0"
+ARG TOMCAT_VERSION="9.0.74"
+ARG GUACAMOLE_VERSION="1.5.1"
 
 ENV LANG ""
 ENV LANGUAGE ""
@@ -157,7 +159,6 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
         libossp-uuid-dev \
         libpci3 \
         libreoffice \
-        libssh2-1-dev \
         lmod \
         lua-bit32 \
         lua-filesystem \
@@ -245,7 +246,6 @@ RUN mkdir -p /home/${NB_USER}/.itksnap.org/ITK-SNAP \
     && chown ${NB_USER} /home/${NB_USER}/.itksnap.org -R
 COPY ./config/itksnap/UserPreferences.xml /home/${NB_USER}/.itksnap.org
 COPY ./config/lxde/mimeapps.list /home/${NB_USER}/.config/mimeapps.list
-COPY --chown=${NB_USER}:users config/ssh/sshd_config /home/${NB_USER}/.ssh/sshd_config
 
 # Allow the root user to access the sshfs mount
 # https://github.com/NeuroDesk/neurodesk/issues/47
@@ -282,7 +282,7 @@ RUN rm /usr/bin/lxpolkit
 #     && rm -rf /home/${NB_USER}/.cache
 # RUN conda config --system --prepend envs_dirs '~/conda-environments'
 
-# RUN mkdir .ssh \
+# RUN mkdir -p .ssh \
 #     && touch .ssh/authorized_keys && chmod 600 .ssh/authorized_keys \
 #     && touch .ssh/config && chmod 600 .ssh/config \
 #     && printf "Host localhost\n  Port 2222\n" >> .ssh/config \
@@ -372,7 +372,10 @@ RUN echo "${NB_USER} ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers.d/notebook \
     && /usr/bin/printf '%s\n%s\n' 'password' 'password' | passwd ${NB_USER} \
     && usermod --shell /bin/bash ${NB_USER}
 
-# Install neurocommand
+COPY --chown=${NB_USER}:users config/ssh/sshd_config /home/${NB_USER}/.ssh/sshd_config
+# COPY --chown=root:root config/ssh/sshd_config_root /etc/ssh/sshd_config
+
+# # Install neurocommand
 # ADD --keep-git-dir=true https://github.com/NeuroDesk/neurocommand.git#main /neurocommand
 #WORKAROUND FOR STEFFEN OL7
 RUN git clone https://github.com/NeuroDesk/neurocommand.git /neurocommand
