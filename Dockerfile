@@ -370,10 +370,14 @@ RUN echo "${NB_USER} ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers.d/notebook \
 COPY --chown=${NB_USER}:users config/ssh/sshd_config /home/${NB_USER}/.ssh/sshd_config
 # COPY --chown=root:root config/ssh/sshd_config_root /etc/ssh/sshd_config
 
-# # Install neurocommand
+# Download Neurocommand
+## For CI
 # ADD --keep-git-dir=true https://github.com/NeuroDesk/neurocommand.git#main /neurocommand
-#WORKAROUND FOR STEFFEN OL7
+## For local build
+ADD "https://api.github.com/repos/neurodesk/neurocommand/git/refs/heads/main" /tmp/skipcache
 RUN git clone https://github.com/NeuroDesk/neurocommand.git /neurocommand
+
+# Install Neurocommand
 RUN cd /neurocommand \
     && bash build.sh --lxde --edit \
     && bash install.sh \
