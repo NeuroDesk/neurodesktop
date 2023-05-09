@@ -10,7 +10,7 @@ sudo service guacd start
 sudo service xrdp start
 
 # SSH/SFTP
-/usr/sbin/sshd -f /home/jovyan/.ssh/sshd_config
+/usr/sbin/sshd -f /home/${NB_USER}/.ssh/sshd_config
 
 # VNC
 vncserver -kill :1
