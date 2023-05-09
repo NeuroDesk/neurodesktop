@@ -22,6 +22,7 @@
             <param name="sftp-hostname">localhost</param>
             <param name="sftp-username">jovyan</param>
             <param name="sftp-port">2222</param>
+            <param name="sftp-directory">/home/jovyan/Desktop</param>
             <param name="sftp-private-key">
             </param>
         </connection>
