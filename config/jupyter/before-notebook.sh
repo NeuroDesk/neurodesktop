@@ -51,3 +51,15 @@ if [ ! -d "/cvmfs/neurodesk.ardc.edu.au/containers/" ]; then
     fi
 fi
 
+ssh-keygen -t rsa -f /home/jovyan/.ssh/guacamole_rsa -b 4096 -m PEM -N '' <<< n
+ssh-keygen -t rsa -f /home/jovyan/.ssh/id_rsa -b 4096 -m PEM -N '' <<< n
+ssh-keygen -t rsa -f /home/jovyan/.ssh/ssh_host_rsa_key -N '' <<< n
+cat /home/jovyan/.ssh/guacamole_rsa.pub >> /home/jovyan/.ssh/authorized_keys
+cat /home/jovyan/.ssh/id_rsa.pub >> /home/jovyan/.ssh/authorized_keys
+
+chmod -R 700 .ssh && chown -R jovyan:users .ssh
+sed -i '/private-key/ r /home/jovyan/.ssh/guacamole_rsa' /etc/guacamole/user-mapping.xml
+
+# Initialise SSH server
+sudo service ssh restart
+sudo service ssh stop
