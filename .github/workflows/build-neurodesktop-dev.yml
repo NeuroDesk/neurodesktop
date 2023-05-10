@@ -40,7 +40,6 @@ jobs:
         sed -i 's/# ADD --keep-git-dir=true/ADD --keep-git-dir=true/g' Dockerfile
         sed -i 's/ADD "https:\/\/api.github.com/# ADD "https:\/\/api.github.com/g' Dockerfile
         sed -i 's/RUN git clone https:\/\/github.com\/NeuroDesk\/neurocommand.git/# RUN git clone https:\/\/github.com\/NeuroDesk\/neurocommand.git/g' Dockerfile
-        cat Dockerfile
     - name: Build new neurodesktop-dev image
       run: |
         SHORT_SHA=$(git rev-parse --short $GITHUB_SHA)
