@@ -10,14 +10,14 @@ if [ ! -d "/cvmfs/neurodesk.ardc.edu.au/containers/" ]; then
     echo "\
     ==================================================================
     Mounting CVMFS"
-    sudo mkdir -p /cvmfs/neurodesk.ardc.edu.au
-    sudo mount -t cvmfs neurodesk.ardc.edu.au /cvmfs/neurodesk.ardc.edu.au
+    mkdir -p /cvmfs/neurodesk.ardc.edu.au
+    mount -t cvmfs neurodesk.ardc.edu.au /cvmfs/neurodesk.ardc.edu.au
 
     echo "\
     ==================================================================
     Testing which CVMFS server is fastest"
-    sudo cvmfs_talk -i neurodesk.ardc.edu.au host probe
-    sudo cvmfs_talk -i neurodesk.ardc.edu.au host info
+    cvmfs_talk -i neurodesk.ardc.edu.au host probe
+    cvmfs_talk -i neurodesk.ardc.edu.au host info
     fi
 fi
 
