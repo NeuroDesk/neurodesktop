@@ -1,111 +1,165 @@
-# Create final image
-FROM ubuntu:20.04
+# syntax=docker/dockerfile:1-labs
+FROM jupyter/base-notebook:2023-05-01
+# FROM jupyter/base-notebook:python-3.10.10
+
+# Parent image source
+# https://github.com/jupyter/docker-stacks/blob/86d42cadf4695b8e6fc3b3ead58e1f71067b765b/docker-stacks-foundation/Dockerfile
+# https://github.com/jupyter/docker-stacks/blob/86d42cadf4695b8e6fc3b3ead58e1f71067b765b/base-notebook/Dockerfile
+
+USER root
+
+# Update apt
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
+    --mount=type=cache,target=/var/lib/apt,sharing=locked \
+    apt update
 
 # Install base image dependancies
-RUN apt-get update \
-    && DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y \
-        locales \
-        sudo \
-        wget \
-        ca-certificates \
-        make \
-        debootstrap \
-        gcc \
-        g++ \
-        openjdk-11-jre \
-        libpng-dev \
-        libjpeg-turbo8-dev \
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
+    --mount=type=cache,target=/var/lib/apt,sharing=locked \
+    DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y \
+        # Singularity
+        build-essential \
+        libseccomp-dev \
+        libglib2.0-dev \
+        pkg-config \
+        squashfs-tools \
+        cryptsetup \
+        runc \
+        # Apache Tomcat
+        openjdk-19-jre \
+        # Apache Guacamole
+        ## Core
         libcairo2-dev \
+        libjpeg-turbo8-dev \
+        libpng-dev \
         libtool-bin \
-        libossp-uuid-dev \
-        libwebp-dev \
-        lxde \
-        openssh-server \
-        libpango1.0-dev \
-        libssh2-1-dev \
-        libssl-dev \
-        openssh-server \
-        libvncserver-dev \
-        libxt6 \
-        xauth \
-        xorg \
+        uuid-dev \
+        ## Optionals
         freerdp2-dev \
-        xrdp \
-        xauth \
-        xorg \
-        xorgxrdp \
-        tigervnc-standalone-server \
+        libvncserver-dev \
+        libssl-dev \
+        libwebp-dev \
+        libssh2-1-dev \
+        # SSH (Optional)
+        libpango1.0-dev \
+        ## VNC
         tigervnc-common \
-        lxterminal \
-        lxrandr \
+        tigervnc-standalone-server \
+        tigervnc-tools \
+        ## RDP
+        xorgxrdp \
+        xrdp \
+        # Destop Env
+        lxde \
+        # Installer tools
+        wget \
         curl \
+        dirmngr \ 
         gpg \
-        software-properties-common \
-        dirmngr \
         gpg-agent \
-        pciutils \
-    && rm -rf /var/lib/apt/lists/*
+        software-properties-common
 
-# # Set locale - This seems to cause https://github.com/NeuroDesk/neurodesktop/issues/100
-# RUN sed -i -e 's/# en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen \
-#     && locale-gen
-# ENV LANG en_US.UTF-8
-# ENV LANGUAGE en_US:en
-# ENV LC_ALL en_US.UTF-8
-# Hypothesis: The singularity containers set their own locale (or not) and therefore setting this in the main container causes this error?
-# Workaround: setting variables empty, so the containers can overwrite them
+ARG GO_VERSION="1.20.4"
+ARG SINGULARITY_VERSION="3.11.3"
+ARG TOMCAT_REL="9"
+ARG TOMCAT_VERSION="9.0.74"
+ARG GUACAMOLE_VERSION="1.5.1"
+
 ENV LANG ""
 ENV LANGUAGE ""
 ENV LC_ALL ""
 
+# Install singularity
+RUN export VERSION=${GO_VERSION} OS=linux ARCH=amd64 \
+    && wget https://go.dev/dl/go${VERSION}.${OS}-${ARCH}.tar.gz \
+    && sudo tar -C /usr/local -xzvf go$VERSION.$OS-$ARCH.tar.gz \
+    && rm go$VERSION.$OS-$ARCH.tar.gz \
+    && export GOPATH=/opt/go \
+    && export PATH=/usr/local/go/bin:${PATH}:${GOPATH}/bin \
+    && mkdir -p $GOPATH/src/github.com/sylabs \
+    && cd $GOPATH/src/github.com/sylabs \
+    && wget https://github.com/sylabs/singularity/releases/download/v${SINGULARITY_VERSION}/singularity-ce-${SINGULARITY_VERSION}.tar.gz \
+    && tar -xzvf singularity-ce-${SINGULARITY_VERSION}.tar.gz \
+    && cd singularity-ce-${SINGULARITY_VERSION} \
+    && ./mconfig --without-suid --prefix=/usr/local/singularity \
+    && make -C builddir \
+    && make -C builddir install \
+    && rm -rf singularity-ce-${SINGULARITY_VERSION} \
+    && rm -rf /usr/local/go $GOPATH \
+    && ln -s /usr/local/singularity/bin/singularity /bin/ \ 
+    && rm -rf /root/.cache
+
 # Install Apache Tomcat
-ARG TOMCAT_REL="9"
-ARG TOMCAT_VERSION="9.0.58"
 RUN wget -q https://archive.apache.org/dist/tomcat/tomcat-${TOMCAT_REL}/v${TOMCAT_VERSION}/bin/apache-tomcat-${TOMCAT_VERSION}.tar.gz -P /tmp \
     && tar -xf /tmp/apache-tomcat-${TOMCAT_VERSION}.tar.gz -C /tmp \
     && rm -rf /tmp/apache-tomcat-${TOMCAT_VERSION}.tar.gz \
     && mv /tmp/apache-tomcat-${TOMCAT_VERSION} /usr/local/tomcat \
     && mv /usr/local/tomcat/webapps /usr/local/tomcat/webapps.dist \
     && mkdir /usr/local/tomcat/webapps \
-    && sh -c 'chmod +x /usr/local/tomcat/bin/*.sh'
+    && chmod +x /usr/local/tomcat/bin/*.sh
 
 # Install Apache Guacamole
-ARG GUACAMOLE_VERSION="1.4.0"
-WORKDIR /etc/guacamole
-RUN wget -q "https://archive.apache.org/dist/guacamole/${GUACAMOLE_VERSION}/binary/guacamole-${GUACAMOLE_VERSION}.war" -O /usr/local/tomcat/webapps/ROOT.war \
-    && wget -q "https://archive.apache.org/dist/guacamole/${GUACAMOLE_VERSION}/source/guacamole-server-${GUACAMOLE_VERSION}.tar.gz" -O /etc/guacamole/guacamole-server-${GUACAMOLE_VERSION}.tar.gz \
-    && tar xvf /etc/guacamole/guacamole-server-${GUACAMOLE_VERSION}.tar.gz \
-    && rm -rf /etc/guacamole/guacamole-server-${GUACAMOLE_VERSION}.tar.gz \
-    && cd /etc/guacamole/guacamole-server-${GUACAMOLE_VERSION} \
+RUN wget -q "https://dlcdn.apache.org/guacamole/${GUACAMOLE_VERSION}/binary/guacamole-${GUACAMOLE_VERSION}.war" -O /usr/local/tomcat/webapps/ROOT.war \
+    && wget -q "https://dlcdn.apache.org/guacamole/${GUACAMOLE_VERSION}/source/guacamole-server-${GUACAMOLE_VERSION}.tar.gz" -P /tmp \
+    && tar xvf /tmp/guacamole-server-${GUACAMOLE_VERSION}.tar.gz -C /tmp \
+    && rm /tmp/guacamole-server-${GUACAMOLE_VERSION}.tar.gz \
+    && cd /tmp/guacamole-server-${GUACAMOLE_VERSION} \
     && ./configure --with-init-dir=/etc/init.d \
     && make \
     && make install \
     && ldconfig \
-    && rm -r /etc/guacamole/guacamole-server-${GUACAMOLE_VERSION}*
+    && rm -r /tmp/guacamole-server-${GUACAMOLE_VERSION}
 
-# Create Guacamole configurations (user-mapping.xml gets filled in the startup.sh script)
-RUN echo "user-mapping: /etc/guacamole/user-mapping.xml" > /etc/guacamole/guacamole.properties
-
-# Add Visual Studio code and nextcloud client
-RUN curl https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > microsoft.gpg \
+# Add Software sources
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
+    --mount=type=cache,target=/var/lib/apt,sharing=locked \
+    # VS Code
+    curl https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > microsoft.gpg \
     && mv microsoft.gpg /etc/apt/trusted.gpg.d/microsoft.gpg \
     && echo "deb [arch=amd64] http://packages.microsoft.com/repos/vscode stable main" | tee /etc/apt/sources.list.d/vs-code.list \
-    && add-apt-repository ppa:nextcloud-devs/client
+    # Nextcloud Client
+    && add-apt-repository ppa:nextcloud-devs/client \
+    # Datalad
+    && wget -q -O- http://neuro.debian.net/lists/focal.us-nh.full | sudo tee /etc/apt/sources.list.d/neurodebian.sources.list \
+    && apt-key adv --recv-keys --keyserver hkps://keyserver.ubuntu.com 0xA5D32F012649A5A9 \
+    # NodeJS
+    && curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
 
-# Add CVMFS
-RUN wget -q https://ecsft.cern.ch/dist/cvmfs/cvmfs-release/cvmfs-release-latest_all.deb -O /tmp/cvmfs-release-latest_all.deb \
+# Install CVMFS
+RUN wget -q https://ecsft.cern.ch/dist/cvmfs/cvmfs-release/cvmfs-release-latest_all.deb -P /tmp \
     && dpkg -i /tmp/cvmfs-release-latest_all.deb \
     && rm /tmp/cvmfs-release-latest_all.deb
 
-# Add datalad
-RUN wget -q -O- http://neuro.debian.net/lists/focal.us-nh.full | sudo tee /etc/apt/sources.list.d/neurodebian.sources.list
-RUN apt-key adv --recv-keys --keyserver hkps://keyserver.ubuntu.com 0xA5D32F012649A5A9
+# Update apt
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
+    --mount=type=cache,target=/var/lib/apt,sharing=locked \
+    apt update
 
-# Install basic tools
-RUN apt-get update \
-    && DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y \
-        cryptsetup \
-        squashfs-tools \
+# Install Tools and Libs
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
+    --mount=type=cache,target=/var/lib/apt,sharing=locked \
+    DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y \
+        aria2 \
+        code \
+        cvmfs \
+        datalad \
+        davfs2 \
+        debootstrap \
+        emacs \
+        gedit \
+        git \
+        gnome-keyring \
+        graphviz \
+        htop \
+        imagemagick \
+        iputils-ping \
+        less \
+        libgfortran5 \
+        libgpgme-dev \
+        libossp-uuid-dev \
+        libpci3 \
+        libreoffice \
+        lmod \
         lua-bit32 \
         lua-filesystem \
         lua-json \
@@ -113,274 +167,169 @@ RUN apt-get update \
         lua-posix \
         lua-term \
         lua5.2 \
-        lmod \
-        aria2 \
-        code \
-        emacs \
-        gedit \
-        htop \
-        imagemagick \
-        less \
-        nano \
-        openssh-client \
-        rsync \
-        screen \
-        tree \
-        vim \
-        gcc \
-        graphviz \
-        libzstd1 \
-        libgfortran5 \
-        zlib1g-dev \
-        zip \
-        unzip \
-        nextcloud-client \
-        iputils-ping \
-        sshfs \
-        build-essential \
-        uuid-dev \
-        libgpgme-dev \
-        squashfs-tools \
-        libseccomp-dev \
-        pkg-config \
-        git \
-        cryptsetup-bin\
-        lsb-release \
-        cvmfs \
-        davfs2 \
-        owncloud-client \
-        firefox \
-        gnome-keyring \
-        xdg-utils \
-        libpci3 \
-        tk \
-        tcllib \
-        datalad \
-        python3-pip \
-        python3 \
         lxtask \
+        man-db \
+        nano \
+        nextcloud-client \
+        nodejs \
+        openssh-client \
+        openssh-server \
+        owncloud-client \
+        pciutils \
         qdirstat \
-    && rm -rf /var/lib/apt/lists/* \
-    && rm /etc/apt/sources.list.d/vs-code.list
+        rsync \
+        s3fs \
+        screen \
+        sshfs \
+        tcllib \
+        tk \
+        tmux \
+        tree \
+        uidmap \
+        unzip \
+        vim \
+        xdg-utils \
+        yarn \
+        zip
 
-# Configure CVMFS
-# CVMFS Server setup:
-# http://cvmfs.neurodesk.org/cvmfs/@fqrn@;
-# -> this is a DNS geo location steering setup that automatically routes to: brisbane (backup sydney); frankfurt (backup zurich); toronto (backup ashburn)
-# This is the complete list of servers right now:
-# http://cvmfs-ashburn.neurodesk.org/cvmfs/@fqrn@;
-# http://cvmfs-zurich.neurodesk.org/cvmfs/@fqrn@;
-# http://cvmfs-toronto.neurodesk.org/cvmfs/@fqrn@;
-# http://cvmfs-frankfurt.neurodesk.org/cvmfs/@fqrn@;
-# http://cvmfs-sydney.neurodesk.org/cvmfs/@fqrn@;
-# http://cvmfs-brisbane.neurodesk.org/cvmfs/@fqrn@;
-# http://cvmfs-perth.neurodesk.org/cvmfs/@fqrn@;
-# http://cvmfs-phoenix.neurodesk.org/cvmfs/@fqrn@;
-# http://cvmfs-tokyo.neurodesk.org/cvmfs/@fqrn@;
-# This is the list of "unique" servers accounting for dns geo location steering:
-# http://cvmfs.neurodesk.org/cvmfs/@fqrn@;
-# http://cvmfs-ashburn.neurodesk.org/cvmfs/@fqrn@;
-# http://cvmfs-zurich.neurodesk.org/cvmfs/@fqrn@;
-# http://cvmfs-sydney.neurodesk.org/cvmfs/@fqrn@;
-# http://cvmfs-perth.neurodesk.org/cvmfs/@fqrn@;
-# http://cvmfs-phoenix.neurodesk.org/cvmfs/@fqrn@;
-RUN mkdir -p /etc/cvmfs/keys/ardc.edu.au/ \
-    && echo "-----BEGIN PUBLIC KEY-----" | sudo tee /etc/cvmfs/keys/ardc.edu.au/neurodesk.ardc.edu.au.pub \
-    && echo "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAwUPEmxDp217SAtZxaBep" | sudo tee -a /etc/cvmfs/keys/ardc.edu.au/neurodesk.ardc.edu.au.pub \
-    && echo "Bi2TQcLoh5AJ//HSIz68ypjOGFjwExGlHb95Frhu1SpcH5OASbV+jJ60oEBLi3sD" | sudo tee -a /etc/cvmfs/keys/ardc.edu.au/neurodesk.ardc.edu.au.pub \
-    && echo "qA6rGYt9kVi90lWvEjQnhBkPb0uWcp1gNqQAUocybCzHvoiG3fUzAe259CrK09qR" | sudo tee -a /etc/cvmfs/keys/ardc.edu.au/neurodesk.ardc.edu.au.pub \
-    && echo "pX8sZhgK3eHlfx4ycyMiIQeg66AHlgVCJ2fKa6fl1vnh6adJEPULmn6vZnevvUke" | sudo tee -a /etc/cvmfs/keys/ardc.edu.au/neurodesk.ardc.edu.au.pub \
-    && echo "I6U1VcYTKm5dPMrOlY/fGimKlyWvivzVv1laa5TAR2Dt4CfdQncOz+rkXmWjLjkD" | sudo tee -a /etc/cvmfs/keys/ardc.edu.au/neurodesk.ardc.edu.au.pub \
-    && echo "87WMiTgtKybsmMLb2yCGSgLSArlSWhbMA0MaZSzAwE9PJKCCMvTANo5644zc8jBe" | sudo tee -a /etc/cvmfs/keys/ardc.edu.au/neurodesk.ardc.edu.au.pub \
-    && echo "NQIDAQAB" | sudo tee -a /etc/cvmfs/keys/ardc.edu.au/neurodesk.ardc.edu.au.pub \
-    && echo "-----END PUBLIC KEY-----" | sudo tee -a /etc/cvmfs/keys/ardc.edu.au/neurodesk.ardc.edu.au.pub \
-    && echo "CVMFS_USE_GEOAPI=yes" | sudo tee /etc/cvmfs/config.d/neurodesk.ardc.edu.au.conf \
-    && echo 'CVMFS_SERVER_URL="http://cvmfs.neurodesk.org/cvmfs/@fqrn@;http://cvmfs-phoenix.neurodesk.org/cvmfs/@fqrn@;http://cvmfs-perth.neurodesk.org/cvmfs/@fqrn@;http://cvmfs-ashburn.neurodesk.org/cvmfs/@fqrn@;http://cvmfs-zurich.neurodesk.org/cvmfs/@fqrn@;http://cvmfs-sydney.neurodesk.org/cvmfs/@fqrn@"' | sudo tee -a /etc/cvmfs/config.d/neurodesk.ardc.edu.au.conf \
-    && echo 'CVMFS_KEYS_DIR="/etc/cvmfs/keys/ardc.edu.au/"' | sudo tee -a /etc/cvmfs/config.d/neurodesk.ardc.edu.au.conf \
-    && echo "CVMFS_HTTP_PROXY=DIRECT" | sudo tee  /etc/cvmfs/default.local \
-    && echo "CVMFS_QUOTA_LIMIT=5000" | sudo tee -a  /etc/cvmfs/default.local \
-    && cvmfs_config setup 
+# Install firefox
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
+    --mount=type=cache,target=/var/lib/apt,sharing=locked \
+    add-apt-repository ppa:mozillateam/ppa \
+    && DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y \
+        --target-release 'o=LP-PPA-mozillateam' firefox
+COPY config/firefox/mozillateamppa /etc/apt/preferences.d/mozillateamppa
+COPY config/firefox/syspref.js /etc/firefox/syspref.js
 
-# Add module script
-COPY ./config/module.sh /usr/share/
+# Create cvmfs keys
+RUN mkdir -p /etc/cvmfs/keys/ardc.edu.au
+COPY config/cvmfs/neurodesk.ardc.edu.au.pub /etc/cvmfs/keys/ardc.edu.au/neurodesk.ardc.edu.au.pub
+COPY config/cvmfs/neurodesk.ardc.edu.au.conf /etc/cvmfs/config.d/neurodesk.ardc.edu.au.conf
+COPY config/cvmfs/default.local /etc/cvmfs/default.local
+# This causes conflicts with an external cvmfs setup that gets mounted
+# RUN cvmfs_config setup
 
-# This should be installed in miniconda environment
-# # Install nipype
-# RUN pip3 install nipype \
-#     && rm -rf /root/.cache/pip \
-#     && rm -rf /home/ubuntu/.cache/
+# # Customise logo, wallpaper, terminal, panel
+COPY config/jupyter/neurodesk_brain_logo.svg /opt/neurodesk_brain_logo.svg
+COPY config/jupyter/neurodesk_brain_icon.svg /opt/neurodesk_brain_icon.svg
 
-# Configure shortcuts for tiling of windows and other openbox desktop mods
-COPY ./config/rc.xml /etc/xdg/openbox
+COPY config/lxde/background.png /usr/share/lxde/wallpapers/desktop_wallpaper.png
+COPY config/lxde/pcmanfm.conf /etc/xdg/pcmanfm/LXDE/pcmanfm.conf
+COPY config/lxde/lxterminal.conf /usr/share/lxterminal/lxterminal.conf
+COPY config/lxde/panel /home/${NB_USER}/.config/lxpanel/LXDE/panels/panel
+
+COPY config/lmod/module.sh /usr/share/
+COPY config/lxde/.bashrc /home/${NB_USER}/tmp_bashrc
+RUN cat /home/${NB_USER}/tmp_bashrc >> /home/${NB_USER}/.bashrc \
+     && rm /home/${NB_USER}/tmp_bashrc
+
+# Configure tiling of windows SHIFT-ALT-CTR-{Left,right,top,Bottom} and other openbox desktop mods
+COPY ./config/lxde/rc.xml /etc/xdg/openbox
 
 # Configure ITKsnap
-COPY ./config/.itksnap.org /etc/skel/.itksnap.org
-COPY ./config/mimeapps.list /etc/skel/.config/mimeapps.list
-
-# Apply custom bottom panel configuration
-COPY ./config/panel /etc/skel/.config/lxpanel/LXDE/panels/panel
+RUN mkdir -p /home/${NB_USER}/.itksnap.org/ITK-SNAP \
+    && chown ${NB_USER} /home/${NB_USER}/.itksnap.org -R
+COPY ./config/itksnap/UserPreferences.xml /home/${NB_USER}/.itksnap.org
+COPY ./config/lxde/mimeapps.list /home/${NB_USER}/.config/mimeapps.list
 
 # Allow the root user to access the sshfs mount
 # https://github.com/NeuroDesk/neurodesk/issues/47
 RUN sed -i 's/#user_allow_other/user_allow_other/g' /etc/fuse.conf
 
-# Fetch singularity bind mount list
+# Fetch singularity bind mount list and create placeholder mountpoints
 RUN mkdir -p `curl https://raw.githubusercontent.com/NeuroDesk/neurocontainers/master/recipes/globalMountPointList.txt`
 
-# Install singularity
-ARG GO_VERSION="1.19"
-ARG SINGULARITY_VERSION="3.10.3"
-RUN export VERSION=${GO_VERSION} OS=linux ARCH=amd64 \
-    && wget -q https://dl.google.com/go/go$VERSION.$OS-$ARCH.tar.gz \
-    && sudo tar -C /usr/local -xzvf go$VERSION.$OS-$ARCH.tar.gz \
-    && rm go$VERSION.$OS-$ARCH.tar.gz \
-    && export GOPATH=${HOME}/go \
-    && export PATH=/usr/local/go/bin:${PATH}:${GOPATH}/bin \
-    && mkdir -p $GOPATH/src/github.com/sylabs \
-    && cd $GOPATH/src/github.com/sylabs \
-    && wget -q https://github.com/sylabs/singularity/releases/download/v${SINGULARITY_VERSION}/singularity-ce-${SINGULARITY_VERSION}.tar.gz \
-    && tar -xzvf singularity-ce-${SINGULARITY_VERSION}.tar.gz \
-    && cd singularity-ce-${SINGULARITY_VERSION} \
-    && ./mconfig --prefix=/usr/local/singularity \
-    && make -C builddir \
-    && make -C builddir install \
-    && cd .. \
-    && rm -rf singularity-ce-${SINGULARITY_VERSION} \
-    && rm -rf /usr/local/go $GOPATH \
-    && ln -s /usr/local/singularity/bin/singularity /bin/ \ 
-    && rm -rf /root/.cache
+# Fix "No session for pid prompt"
+RUN rm /usr/bin/lxpolkit
 
-# Setup module system & singularity
-COPY ./config/.bashrc /tmp/.bashrc
-RUN cat /tmp/.bashrc >> /etc/skel/.bashrc && rm /tmp/.bashrc \
-    && directories=`curl https://raw.githubusercontent.com/NeuroDesk/caid/master/recipes/globalMountPointList.txt` \
-    && mounts=`echo $directories | sed 's/ /,/g'` \
-    && echo "export SINGULARITY_BINDPATH=${mounts},/neurodesktop-storage" >> /etc/skel/.bashrc
+# ## Update conda
+# RUN conda update -n base conda \
+#     && conda clean --all -f -y \
+#     && rm -rf /home/${NB_USER}/.cache
 
-# add Globus client (requires tk and tcllib -> installed earlier to speed up build)
-WORKDIR /opt/globusconnectpersonal
-RUN wget -q https://downloads.globus.org/globus-connect-personal/linux/stable/globusconnectpersonal-latest.tgz \
-    && tar xzf globusconnectpersonal-latest.tgz \
-    && rm -rf globusconnectpersonal-latest.tgz
+# ## Install conda packages
+# RUN conda install -c conda-forge nipype pip nb_conda_kernels \
+#     && conda clean --all -f -y \
+#     && rm -rf /home/${NB_USER}/.cache
+# RUN conda config --system --prepend envs_dirs '~/conda-environments'
 
-# add rclone
-WORKDIR /opt
-RUN wget https://downloads.rclone.org/v1.60.1/rclone-v1.60.1-linux-amd64.zip \
-    && unzip rclone-v1.60.1-linux-amd64.zip \
-    && rm rclone-v1.60.1-linux-amd64.zip \
-    && ln -s /opt/rclone-v1.60.1-linux-amd64/rclone /usr/bin/rclone
+# Setup git
+RUN git config --global user.email "user@neurodesk.org" \
+    && git config --global user.name "Neurodesk User"
 
-# Desktop styling
-COPY config/desktop_wallpaper.jpg /usr/share/lxde/wallpapers/desktop_wallpaper.jpg
-COPY config/pcmanfm.conf /etc/xdg/pcmanfm/LXDE/pcmanfm.conf
-COPY config/lxterminal.conf /usr/share/lxterminal/lxterminal.conf
+# Setup temp directory for matplotlib (required for fmriprep)
+RUN mkdir -p /home/${NB_USER}/.config/matplotlib-mpldir \
+    && chmod -R 700 /home/${NB_USER}/.config/matplotlib-mpldir \
+    && chown -R ${NB_USER}:users /home/${NB_USER}/.config/matplotlib-mpldir
+ENV MPLCONFIGDIR /home/${NB_USER}/.config/matplotlib-mpldir
 
-# Change firefox home
-RUN echo 'pref("browser.startup.homepage", "http://neurodesk.github.io", locked);' >> /etc/firefox/syspref.js \
-    && echo 'pref("browser.startup.firstrunSkipsHomepage", true, locked);' >> /etc/firefox/syspref.js \
-    && echo 'pref("startup.homepage_welcome_url", "http://neurodesk.github.io", locked);' >> /etc/firefox/syspref.js \
-    && echo 'pref("browser.aboutwelcome.enabled", true, locked);' >> /etc/firefox/syspref.js
+# enable rootless mounts: 
+RUN chmod +x /usr/bin/fusermount
 
 # Create link to persistent storage on Desktop (This needs to happen before the users gets created!)
-RUN mkdir -p /etc/skel/Desktop/ \
-    && ln -s /neurodesktop-storage /etc/skel/Desktop/storage \
-    && ln -s /neurodesktop-storage /etc/skel/neurodesktop-storage
+RUN mkdir -p /home/${NB_USER}/neurodesktop-storage/containers \
+    && mkdir -p /home/${NB_USER}/Desktop/ /data \
+    && ln -s /home/${NB_USER}/neurodesktop-storage/ /neurodesktop-storage \
+    && ln -s /neurodesktop-storage /storage
 
-# Create shorter link to persistent storage /neurodesktop-storage
-RUN ln -s /neurodesktop-storage /storage
+# # Add checkversion script
+# COPY ./config/checkversion.sh /usr/share/
+# # Add CheckVersion script
+# COPY ./config/CheckVersion.desktop /etc/skel/Desktop
 
-# Add checkversion script
-COPY ./config/checkversion.sh /usr/share/
-# Add CheckVersion script
-COPY ./config/CheckVersion.desktop /etc/skel/Desktop
-
-# Create user account with password-less sudo abilities and vnc user
-RUN addgroup --gid 9001 user \
-    && useradd -s /bin/bash -g user -G sudo -m user \
-    && /usr/bin/printf '%s\n%s\n' 'password' 'password'| passwd user \
-    && echo "user ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers \
-    && mkdir /home/user/.vnc \
-    && chown user /home/user/.vnc \
-    && /usr/bin/printf '%s\n%s\n%s\n' 'password' 'password' 'n' | su user -c vncpasswd \
-    && echo -n 'password\npassword\nn\n' | su user -c vncpasswd
-
-COPY --chown=user:users config/rclone.conf /home/user/.config/rclone/rclone.conf
-COPY --chown=user:9001 config/xstartup /home/user/.vnc
-
-
-
-# Install Julia
-# WORKDIR /opt
-# ARG JULIA_VERSION='1.6.1'
-# ARG JULIA_MAIN_VERSION='1.6'
-# RUN wget https://julialang-s3.julialang.org/bin/linux/x64/${JULIA_MAIN_VERSION}/julia-${JULIA_VERSION}-linux-x86_64.tar.gz \
-#     && tar zxvf julia-${JULIA_VERSION}-linux-x86_64.tar.gz \
-#     && rm -rf julia-${JULIA_VERSION}-linux-x86_64.tar.gz \
-#     && ln -s /opt/julia-${JULIA_VERSION} /opt/julia-latest
-# ENV PATH=$PATH:/opt/julia-${JULIA_VERSION}/bin
-
-USER user
-WORKDIR /home/user
-
-# Install vscode extensions and configure vscode for miniconda and julia
-ENV DONT_PROMPT_WSL_INSTALL=1
-# RUN code --install-extension julialang.language-julia \
-#     && code --install-extension ms-python.python \
-#     && code --install-extension ms-python.vscode-pylance \
-#     && code --install-extension ms-toolsai.jupyter \
-#     && code --install-extension ms-toolsai.jupyter-keymap \
-#     && code --install-extension ms-toolsai.jupyter-renderers
-COPY config/vscode/settings.json /home/user/.config/Code/User/settings.json
+COPY config/vscode/settings.json /home/${NB_USER}/.config/Code/User/settings.json
 
 # Add libfm script
-RUN mkdir -p /home/user/.config/libfm
-COPY ./config/libfm.conf /home/user/.config/libfm
+RUN mkdir -p /home/${NB_USER}/.config/libfm
+COPY ./config/lxde/libfm.conf /home/${NB_USER}/.config/libfm
 
-RUN touch /home/user/.sudo_as_admin_successful
-
-# This doesn't work if we install extensions - can we do this in the startup file and move the folder over once the persistent storage?
-# # Link vscode config to persistant storage
-# RUN mkdir -p /home/user/.config \
-#     && ln -s /neurodesktop-storage/.config/Code .config/Code \
-#     && ln -s /neurodesktop-storage/.vscode .vscode
-
-# RUN wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh \
-#     && bash Miniconda3-latest-Linux-x86_64.sh -b \
-#     && rm Miniconda3-latest-Linux-x86_64.sh \
-#     && miniconda3/bin/conda init
+RUN touch /home/${NB_USER}/.sudo_as_admin_successful
 
 # Add datalad-container datalad-osf and osfclient to the conda environment
 RUN pip install datalad-container datalad-osf osfclient
-ENV PATH=$PATH:/home/user/.local/bin
 
+ENV DONT_PROMPT_WSL_INSTALL=1
+ENV PATH=$PATH:/home/${NB_USER}/.local/bin
+ENV SINGULARITY_BINDPATH /data,/neurodesktop-storage
+ENV LMOD_CMD /usr/share/lmod/lmod/libexec/lmod
+ENV MODULEPATH /cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/molecular_biology:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/workflows:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/visualization:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/structural_imaging:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/statistics:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/spine:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/spectroscopy:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/shape_analysis:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/segmentation:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/rodent_imaging:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/quantitative_imaging:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/quality_control:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/programming:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/phase_processing:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/machine_learning:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/image_segmentation:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/image_registration:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/image_reconstruction:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/hippocampus:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/functional_imaging:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/electrophysiology:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/diffusion_imaging:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/data_organisation:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/body
 
+# Install jupyter-server-proxy and disable announcements
+# Depracated: jupyter labextension install ..
+RUN su ${NB_USER} -c "/opt/conda/bin/pip install jupyter-server-proxy" \
+    && su ${NB_USER} -c "/opt/conda/bin/jupyter labextension disable @jupyterlab/apputils-extension:announcements" \ 
+    && su ${NB_USER} -c "/opt/conda/bin/pip install jupyterlmod==4.0.3" \ 
+    && rm -rf /home/${NB_USER}/.cache
+    
+# Add notebook startup scripts
+# https://jupyter-docker-stacks.readthedocs.io/en/latest/using/common.html
+RUN mkdir -p /usr/local/bin/start-notebook.d/ \
+    && mkdir -p /usr/local/bin/before-notebook.d/
+COPY config/jupyter/start-notebook.sh /usr/local/bin/start-notebook.d/
+COPY config/jupyter/before-notebook.sh /usr/local/bin/before-notebook.d/
 
-# Setup git
-RUN git config --global user.email "user@neurodesk.github.io"
-RUN git config --global user.name "Neurodesk User"
+# Create Guacamole configurations (user-mapping.xml gets filled in the startup.sh script)
+RUN mkdir -p /etc/guacamole \
+    && echo -e "user-mapping: /etc/guacamole/user-mapping.xml\nguacd-hostname: 127.0.0.1" > /etc/guacamole/guacamole.properties \
+    && echo -e "[server]\nbind_host = 127.0.0.1\nbind_port = 4822" > /etc/guacamole/guacd.conf
 
-USER root
+# Add startup and config files for neurodesktop, jupyter, guacamole, vnc
+RUN mkdir /home/${NB_USER}/.vnc \
+    && chown ${NB_USER} /home/${NB_USER}/.vnc \
+    && /usr/bin/printf '%s\n%s\n%s\n' 'password' 'password' 'n' | su ${NB_USER} -c vncpasswd
+COPY --chown=${NB_USER}:users config/lxde/xstartup /home/${NB_USER}/.vnc
+COPY --chown=${NB_USER}:root config/guacamole/user-mapping.xml /etc/guacamole/user-mapping.xml
+COPY --chown=${NB_USER}:users config/guacamole/guacamole.sh /opt/neurodesktop/guacamole.sh
+COPY --chown=${NB_USER}:users config/jupyter/jupyter_notebook_config.py /home/${NB_USER}/.jupyter/jupyter_notebook_config.py
+COPY --chown=${NB_USER}:users config/ssh/sshd_config /home/${NB_USER}/.ssh/sshd_config
+RUN chmod +x /opt/neurodesktop/guacamole.sh \
+    /home/${NB_USER}/.jupyter/jupyter_notebook_config.py \
+    /home/${NB_USER}/.vnc/xstartup
 
-# make vs code settings editable for user 
-RUN chown user /home/user/.config/Code/ -R
-
-# Add entrypoint script
-COPY config/startup.sh /startup.sh
-RUN chmod +x /startup.sh
-
-WORKDIR /neurodesktop-storage
-
-# Enable entrypoint
-ENTRYPOINT ["sudo", "-E", "/startup.sh"]
-
-# Install neurocommand
-ADD "https://api.github.com/repos/neurodesk/neurocommand/git/refs/heads/main" /tmp/skipcache
-RUN rm /tmp/skipcache \
-    && git clone https://github.com/NeuroDesk/neurocommand.git /neurocommand \
-    && cd /neurocommand \
-    && bash build.sh --lxde --edit \
-    && bash install.sh \
-    && ln -s /neurodesktop-storage/containers /neurocommand/local/containers 
+RUN echo "${NB_USER} ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers.d/notebook \
+# The following apply to Singleuser mode only. See config/jupyter/before-notebook.sh for Notebook mode
+    && /usr/bin/printf '%s\n%s\n' 'password' 'password' | passwd ${NB_USER} \
+    && usermod --shell /bin/bash ${NB_USER}
 
 # Copy script to test_containers 
 COPY config/test_neurodesktop.sh /usr/share/test_neurodesktop.sh
@@ -393,3 +342,22 @@ RUN git clone https://github.com/civier/fix_bash.git /tmp/fix_bash \
       && cp /tmp/fix_bash/fix_bash.sh /usr/share \
       && rm -Rf /tmp/fix_bash
 
+# Download Neurocommand
+## For CI
+# ADD --keep-git-dir=true https://github.com/NeuroDesk/neurocommand.git#main /neurocommand
+## For local build
+ADD "https://api.github.com/repos/neurodesk/neurocommand/git/refs/heads/main" /tmp/skipcache
+RUN git clone https://github.com/NeuroDesk/neurocommand.git /neurocommand
+
+# Install Neurocommand
+RUN cd /neurocommand \
+    && bash build.sh --lxde --edit \
+    && bash install.sh \
+    && ln -s /neurodesktop-storage/containers /neurocommand/local/containers
+
+USER ${NB_UID}
+
+WORKDIR "${HOME}"
+
+# Add example notebooks
+RUN git clone https://github.com/NeuroDesk/example-notebooks

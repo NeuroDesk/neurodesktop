@@ -1,27 +1,29 @@
 name: Build neurodesktop-dev
 
+# Scheduled production builds at 17:00 UTC every day.
+# Build manually from here: https://github.com/NeuroDesk/neurodesktop/actions/workflows/build-neurodesktop.yml
+
+# DockerHub: https://hub.docker.com/r/vnmd/neurodesktop
+# Github Packages: https://github.com/NeuroDesk/neurodesktop/pkgs/container/neurodesktop%2Fneurodesktop
+
 on:
   workflow_dispatch:
-  repository_dispatch:
+  # schedule:
+  #   - cron:  '0 17 * * *'
     
 env:
   DOCKERHUB_ORG: ${{ secrets.DOCKERHUB_ORG }}
 
 jobs:
-  test_cvmfs:
-    runs-on: ubuntu-22.04
-    strategy:
-      matrix:
-        cvmfs-server: [cvmfs-brisbane.neurodesk.org, cvmfs-sydney.neurodesk.org, cvmfs-frankfurt.neurodesk.org, 	cvmfs-zurich.neurodesk.org, cvmfs-toronto.neurodesk.org, cvmfs-ashburn.neurodesk.org, cvmfs.neurodesk.org]
-    steps:
-    - uses: actions/checkout@v2
-    - name: check if ${{ matrix.cvmfs-server }} is online and up-to-date
-      run: /bin/bash .github/workflows/test_cvmfs.sh  ${{ matrix.cvmfs-server }}
-  build:
+  build_neurodesktop-dev:
+    # needs: [check_commits_neurodesktop-dev, check_commits_neurocommand]
+    # if: ${{ needs.check_date.outputs.should_run != 'false' }}
     runs-on: ubuntu-22.04
     steps:
-    - uses: actions/checkout@v2
-    - name: Pull latest neurodesktop build from GitHub packages
+    - uses: actions/checkout@v3
+      with:
+        ref: ${{ github.ref }}
+    - name: Pull latest neurodesktop-dev build from GitHub packages
       run: |
         echo ${GITHUB_REF}
         echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u $GITHUB_ACTOR --password-stdin
@@ -33,18 +35,21 @@ jobs:
             && echo "ROOTFS_CACHE=$ROOTFS_CACHE" >> $GITHUB_ENV
         } || echo "$IMAGEID not found. Resuming build..."
         echo "IMAGEID=$IMAGEID" >> $GITHUB_ENV
-    - name: Build new neurodesktop image
+    - name: Modify Dockerfile for CI build
+      run: |
+        sed -i 's/# ADD --keep-git-dir=true/ADD --keep-git-dir=true/g' Dockerfile
+        sed -i 's/ADD "https:\/\/api.github.com/# ADD "https:\/\/api.github.com/g' Dockerfile
+        sed -i 's/RUN git clone https:\/\/github.com\/NeuroDesk\/neurocommand.git/# RUN git clone https:\/\/github.com\/NeuroDesk\/neurocommand.git/g' Dockerfile
+    - name: Build new neurodesktop-dev image
       run: |
         SHORT_SHA=$(git rev-parse --short $GITHUB_SHA)
-        IMAGETAG=$IMAGEID:$SHORT_SHA
-        docker build . --file Dockerfile --tag $IMAGETAG --cache-from $IMAGEID --label "GITHUB_REPOSITORY=$GITHUB_REPOSITORY" --label "GITHUB_SHA=$GITHUB_SHA"
+        docker buildx build . --file Dockerfile --tag $IMAGEID:$SHORT_SHA --cache-from $IMAGEID --label "GITHUB_REPOSITORY=$GITHUB_REPOSITORY" --label "GITHUB_SHA=$GITHUB_SHA"
         ROOTFS_NEW=$(docker inspect --format='{{.RootFS}}' $IMAGEID:$SHORT_SHA)
         BUILDDATE=`date +%Y%m%d`
         echo "SHORT_SHA=$SHORT_SHA" >> $GITHUB_ENV
         echo "ROOTFS_NEW=$ROOTFS_NEW" >> $GITHUB_ENV
         echo "BUILDDATE=$BUILDDATE" >> $GITHUB_ENV
-        echo "IMAGETAG=$IMAGETAG" >> $GITHUB_ENV
-    - name: Push neurodesktop to GitHub packages (if changes found)
+    - name: Push neurodesktop-dev to GitHub packages (if changes found)
       if: env.ROOTFS_NEW != env.ROOTFS_CACHE
       run: |
         # Push to GH Packages
@@ -52,16 +57,35 @@ jobs:
         docker tag $IMAGEID:$SHORT_SHA $IMAGEID:latest
         docker push $IMAGEID:latest
         docker push $IMAGEID:$BUILDDATE
-    - name: Push neurodesktop to Docker Hub (if enabled & changes found)
+    - name: Push neurodesktop-dev to Docker Hub (if enabled & changes found)
       if: env.ROOTFS_NEW != env.ROOTFS_CACHE && env.DOCKERHUB_ORG != ''
       run: |
         echo "${{ secrets.DOCKERHUB_PASSWORD }}" | docker login -u ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin
         # Push to GH Packages
+        docker tag $IMAGEID:$SHORT_SHA $DOCKERHUB_ORG/neurodesktop-dev:$BUILDDATE
         docker tag $IMAGEID:$SHORT_SHA $DOCKERHUB_ORG/neurodesktop-dev:latest
         docker push $DOCKERHUB_ORG/neurodesktop-dev:latest
+        docker push $DOCKERHUB_ORG/neurodesktop-dev:$BUILDDATE
     - name: Container image scan
-      uses: Azure/container-scan@v0.1
+      uses: aquasecurity/trivy-action@0.8.0
       with:
-        image-name: ${{ env.IMAGEID }}
-        severity-threshold: CRITICAL
-        run-quality-checks: false
+        image-ref: ${{ env.IMAGEID }}
+        format: table
+        exit-code: '1'
+        severity: CRITICAL
+        timeout: 25m0s
+        skip-files: /opt/rclone-v1.60.1-linux-amd64/README.txt, /opt/rclone-v1.60.1-linux-amd64/README.html, /opt/rclone-v1.60.1-linux-amd64/rclone.1
+
+    - name: Generate issue on job failure
+      if: always() && failure()
+      uses: JasonEtco/create-an-issue@v2
+      env: 
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GITHUB_WORKFLOW: ${{ env.GITHUB_WORKFLOW }}
+        GITHUB_SERVER_URL: ${{ env.GITHUB_SERVER_URL }}
+        GITHUB_REPOSITORY: ${{ env.GITHUB_REPOSITORY }}
+        GITHUB_RUN_ID: ${{ env.GITHUB_RUN_ID }}
+      with:
+        filename: .github/job_failure_issue_template.md
+        update_existing: true
+        search_existing: open
