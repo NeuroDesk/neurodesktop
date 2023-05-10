@@ -209,21 +209,6 @@ COPY config/cvmfs/default.local /etc/cvmfs/default.local
 # This causes conflicts with an external cvmfs setup that gets mounted
 # RUN cvmfs_config setup
 
-# # Add Globus client
-# RUN mkdir -p /opt/globusconnectpersonal \
-#     && cd /opt/globusconnectpersonal \
-#     && wget https://downloads.globus.org/globus-connect-personal/linux/stable/globusconnectpersonal-latest.tgz \
-#     && tar xzf globusconnectpersonal-latest.tgz \
-#     && rm -rf globusconnectpersonal-latest.tgz/
-
-# # Add rclone
-# RUN cd /opt \
-#     && wget https://downloads.rclone.org/v1.60.1/rclone-v1.60.1-linux-amd64.zip \
-#     && unzip rclone-v1.60.1-linux-amd64.zip \
-#     && rm rclone-v1.60.1-linux-amd64.zip \
-#     && ln -s /opt/rclone-v1.60.1-linux-amd64/rclone /usr/bin/rclone
-# COPY --chown=${NB_USER}:users config/rclone/rclone.conf /home/${NB_USER}/.config/rclone/rclone.conf
-
 # # Customise logo, wallpaper, terminal, panel
 COPY config/jupyter/neurodesk_brain_logo.svg /opt/neurodesk_brain_logo.svg
 COPY config/jupyter/neurodesk_brain_icon.svg /opt/neurodesk_brain_icon.svg
@@ -257,20 +242,6 @@ RUN mkdir -p `curl https://raw.githubusercontent.com/NeuroDesk/neurocontainers/m
 # Fix "No session for pid prompt"
 RUN rm /usr/bin/lxpolkit
 
-# # Change firefox home
-# RUN echo 'pref("browser.startup.homepage", "https://www.neurodesk.org", locked);' >> /etc/firefox/syspref.js \
-#     && echo 'pref("browser.startup.firstrunSkipsHomepage", true, locked);' >> /etc/firefox/syspref.js \
-#     && echo 'pref("startup.homepage_welcome_url", "https://www.neurodesk.org", locked);' >> /etc/firefox/syspref.js \
-#     && echo 'pref("browser.aboutwelcome.enabled", true, locked);' >> /etc/firefox/syspref.js
-
-# # Install xpra
-# RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
-#     --mount=type=cache,target=/var/lib/apt,sharing=locked \
-#     wget -O "/usr/share/keyrings/xpra.asc" https://xpra.org/gpg.asc \
-#     && cd /etc/apt/sources.list.d;wget https://raw.githubusercontent.com/Xpra-org/xpra/master/packaging/repos/jammy/xpra.sources \
-#     && DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y \
-#         xpra
-
 # ## Update conda
 # RUN conda update -n base conda \
 #     && conda clean --all -f -y \
@@ -281,12 +252,6 @@ RUN rm /usr/bin/lxpolkit
 #     && conda clean --all -f -y \
 #     && rm -rf /home/${NB_USER}/.cache
 # RUN conda config --system --prepend envs_dirs '~/conda-environments'
-
-# RUN mkdir -p .ssh \
-#     && touch .ssh/authorized_keys && chmod 600 .ssh/authorized_keys \
-#     && touch .ssh/config && chmod 600 .ssh/config \
-#     && printf "Host localhost\n  Port 2222\n" >> .ssh/config \
-#     && chmod -R 700 .ssh && chown -R ${NB_USER}:users .ssh
 
 # Setup git
 RUN git config --global user.email "user@neurodesk.org" \
@@ -355,12 +320,10 @@ RUN mkdir /home/${NB_USER}/.vnc \
 COPY --chown=${NB_USER}:users config/lxde/xstartup /home/${NB_USER}/.vnc
 COPY --chown=${NB_USER}:root config/guacamole/user-mapping.xml /etc/guacamole/user-mapping.xml
 COPY --chown=${NB_USER}:users config/guacamole/guacamole.sh /opt/neurodesktop/guacamole.sh
-# COPY --chown=${NB_USER}:users config/xpra/xpra.sh /opt/neurodesktop/xpra.sh
 COPY --chown=${NB_USER}:users config/jupyter/jupyter_notebook_config.py /home/${NB_USER}/.jupyter/jupyter_notebook_config.py
 RUN chmod +x /opt/neurodesktop/guacamole.sh \
     /home/${NB_USER}/.jupyter/jupyter_notebook_config.py \
     /home/${NB_USER}/.vnc/xstartup
-    # /opt/neurodesktop/xpra.sh
 
 RUN echo "${NB_USER} ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers.d/notebook \
 # The following apply to Singleuser mode only. See config/jupyter/before-notebook.sh for Notebook mode
@@ -368,7 +331,6 @@ RUN echo "${NB_USER} ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers.d/notebook \
     && usermod --shell /bin/bash ${NB_USER}
 
 COPY --chown=${NB_USER}:users config/ssh/sshd_config /home/${NB_USER}/.ssh/sshd_config
-# COPY --chown=root:root config/ssh/sshd_config_root /etc/ssh/sshd_config
 
 # Download Neurocommand
 ## For CI
@@ -389,21 +351,3 @@ WORKDIR "${HOME}"
 
 # Add example notebooks
 RUN git clone https://github.com/NeuroDesk/example-notebooks
-
-## Possible requirements
-# cryptsetup-bin\
-# dbus-x11 \
-# firefox \
-# g++ \
-# gcc \
-# libxt6 \
-# libzstd1 \
-# lsb-release \
-# lxrandr \
-# lxterminal \
-# python3 \
-# python3-annexremote \
-# python3-pip \
-# xauth \
-# xorg \
-# zlib1g-dev
