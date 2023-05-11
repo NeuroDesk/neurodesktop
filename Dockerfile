@@ -322,6 +322,7 @@ COPY --chown=${NB_USER}:root config/guacamole/user-mapping.xml /etc/guacamole/us
 COPY --chown=${NB_USER}:users config/guacamole/guacamole.sh /opt/neurodesktop/guacamole.sh
 COPY --chown=${NB_USER}:users config/jupyter/jupyter_notebook_config.py /home/${NB_USER}/.jupyter/jupyter_notebook_config.py
 COPY --chown=${NB_USER}:users config/ssh/sshd_config /home/${NB_USER}/.ssh/sshd_config
+COPY --chown=${NB_USER}:users config/k8s_postStart_copy_homedirectory.sh /tmp/k8s_postStart_copy_homedirectory.sh
 RUN chmod +x /opt/neurodesktop/guacamole.sh \
     /home/${NB_USER}/.jupyter/jupyter_notebook_config.py \
     /home/${NB_USER}/.vnc/xstartup
