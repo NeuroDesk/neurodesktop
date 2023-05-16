@@ -8,15 +8,11 @@ FROM jupyter/base-notebook:2023-05-01
 
 USER root
 
-# Update apt
-RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
-    --mount=type=cache,target=/var/lib/apt,sharing=locked \
-    apt update
-
 # Install base image dependancies
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     --mount=type=cache,target=/var/lib/apt,sharing=locked \
-    DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y \
+    DEBIAN_FRONTEND=noninteractive apt update \
+    && apt install --no-install-recommends -y \
         # Singularity
         build-essential \
         libseccomp-dev \
@@ -62,7 +58,7 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
 ARG GO_VERSION="1.20.4"
 ARG SINGULARITY_VERSION="3.11.3"
 ARG TOMCAT_REL="9"
-ARG TOMCAT_VERSION="9.0.74"
+ARG TOMCAT_VERSION="9.0.75"
 ARG GUACAMOLE_VERSION="1.5.1"
 
 ENV LANG ""
@@ -130,15 +126,11 @@ RUN wget -q https://ecsft.cern.ch/dist/cvmfs/cvmfs-release/cvmfs-release-latest_
     && dpkg -i /tmp/cvmfs-release-latest_all.deb \
     && rm /tmp/cvmfs-release-latest_all.deb
 
-# Update apt
-RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
-    --mount=type=cache,target=/var/lib/apt,sharing=locked \
-    apt update
-
 # Install Tools and Libs
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     --mount=type=cache,target=/var/lib/apt,sharing=locked \
-    DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y \
+    DEBIAN_FRONTEND=noninteractive apt update \
+    && apt install --no-install-recommends -y \
         aria2 \
         code \
         cvmfs \
@@ -196,7 +188,8 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     --mount=type=cache,target=/var/lib/apt,sharing=locked \
     add-apt-repository ppa:mozillateam/ppa \
-    && DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y \
+    && DEBIAN_FRONTEND=noninteractive apt update \
+    && apt install --no-install-recommends -y \
         --target-release 'o=LP-PPA-mozillateam' firefox
 COPY config/firefox/mozillateamppa /etc/apt/preferences.d/mozillateamppa
 COPY config/firefox/syspref.js /etc/firefox/syspref.js
