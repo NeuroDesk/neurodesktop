@@ -184,13 +184,13 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
         yarn \
         zip
 
-# Install firefox
-RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
-    --mount=type=cache,target=/var/lib/apt,sharing=locked \
-    add-apt-repository ppa:mozillateam/ppa \
-    && DEBIAN_FRONTEND=noninteractive apt update \
-    && apt install --no-install-recommends -y \
-        --target-release 'o=LP-PPA-mozillateam' firefox
+# # Install firefox
+# RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
+#     --mount=type=cache,target=/var/lib/apt,sharing=locked \
+#     add-apt-repository ppa:mozillateam/ppa \
+#     && DEBIAN_FRONTEND=noninteractive apt update \
+#     && apt install --no-install-recommends -y \
+#         --target-release 'o=LP-PPA-mozillateam' firefox
 COPY config/firefox/mozillateamppa /etc/apt/preferences.d/mozillateamppa
 COPY config/firefox/syspref.js /etc/firefox/syspref.js
 
@@ -256,14 +256,14 @@ RUN mkdir -p /home/${NB_USER}/.config/matplotlib-mpldir \
     && chown -R ${NB_USER}:users /home/${NB_USER}/.config/matplotlib-mpldir
 ENV MPLCONFIGDIR /home/${NB_USER}/.config/matplotlib-mpldir
 
-# enable rootless mounts: 
-RUN chmod +x /usr/bin/fusermount
+# # enable rootless mounts: 
+# RUN chmod +x /usr/bin/fusermount
 
-# Create link to persistent storage on Desktop (This needs to happen before the users gets created!)
-RUN mkdir -p /home/${NB_USER}/neurodesktop-storage/containers \
-    && mkdir -p /home/${NB_USER}/Desktop/ /data \
-    && ln -s /home/${NB_USER}/neurodesktop-storage/ /neurodesktop-storage \
-    && ln -s /neurodesktop-storage /storage
+# # Create link to persistent storage on Desktop (This needs to happen before the users gets created!)
+# RUN mkdir -p /home/${NB_USER}/neurodesktop-storage/containers \
+#     && mkdir -p /home/${NB_USER}/Desktop/ /data \
+#     && ln -s /home/${NB_USER}/neurodesktop-storage/ /neurodesktop-storage \
+#     && ln -s /neurodesktop-storage /storage
 
 # # Add checkversion script
 # COPY ./config/checkversion.sh /usr/share/
