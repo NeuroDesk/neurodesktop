@@ -52,14 +52,14 @@ jobs:
         docker images
         ROOTFS_NEW=$(docker inspect --format='{{.RootFS}}' $IMAGEID:$SHORT_SHA)
         echo "ROOTFS_NEW=$ROOTFS_NEW" >> $GITHUB_ENV
-    # - name: Push image to GitHub packages (if changes found)
-    #   if: env.ROOTFS_NEW != env.ROOTFS_CACHE
-    #   run: |
-    #     # Push to GH Packages
-    #     docker tag $IMAGEID:$SHORT_SHA $IMAGEID:$BUILDDATE
-    #     docker tag $IMAGEID:$SHORT_SHA $IMAGEID:latest
-    #     docker push $IMAGEID:latest
-    #     docker push $IMAGEID:$BUILDDATE
+    - name: Push image to GitHub packages (if changes found)
+      if: env.ROOTFS_NEW != env.ROOTFS_CACHE
+      run: |
+        # Push to GH Packages
+        docker tag $IMAGEID:$SHORT_SHA $IMAGEID:$BUILDDATE
+        docker tag $IMAGEID:$SHORT_SHA $IMAGEID:latest
+        docker push $IMAGEID:latest
+        docker push $IMAGEID:$BUILDDATE
     # - name: Push image to Docker Hub (if enabled & changes found)
     #   if: env.ROOTFS_NEW != env.ROOTFS_CACHE && env.DOCKERHUB_ORG != ''
     #   run: |
