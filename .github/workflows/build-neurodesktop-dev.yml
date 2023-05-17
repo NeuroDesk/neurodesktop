@@ -37,8 +37,8 @@ jobs:
         echo ${GITHUB_REF}
         echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u $GITHUB_ACTOR --password-stdin
         {
-          docker pull $IMAGEID \
-            && ROOTFS_CACHE=$(docker inspect --format='{{.RootFS}}' $IMAGEID) \
+          docker pull $IMAGEID:latest \
+            && ROOTFS_CACHE=$(docker inspect --format='{{.RootFS}}' $IMAGEID:latest) \
             && echo "ROOTFS_CACHE=$ROOTFS_CACHE" >> $GITHUB_ENV
         } || echo "$IMAGEID not found. Resuming build..."
     - name: Modify Dockerfile for CI build
@@ -48,17 +48,19 @@ jobs:
         sed -i 's/RUN git clone https:\/\/github.com\/NeuroDesk\/neurocommand.git/# RUN git clone https:\/\/github.com\/NeuroDesk\/neurocommand.git/g' Dockerfile
     - name: Build new image
       run: |
-        docker buildx build . --file Dockerfile --tag $IMAGEID:$SHORT_SHA --cache-from $IMAGEID --label "GITHUB_REPOSITORY=$GITHUB_REPOSITORY" --label "GITHUB_SHA=$GITHUB_SHA"
+        docker buildx build . --file Dockerfile --tag $IMAGEID:$SHORT_SHA --label "GITHUB_REPOSITORY=$GITHUB_REPOSITORY" --label "GITHUB_SHA=$GITHUB_SHA"
+        # docker buildx build . --file Dockerfile --tag $IMAGEID:$SHORT_SHA --cache-from $IMAGEID:latest --label "GITHUB_REPOSITORY=$GITHUB_REPOSITORY" --label "GITHUB_SHA=$GITHUB_SHA"
+        docker images
         ROOTFS_NEW=$(docker inspect --format='{{.RootFS}}' $IMAGEID:$SHORT_SHA)
         echo "ROOTFS_NEW=$ROOTFS_NEW" >> $GITHUB_ENV
-    - name: Push image to GitHub packages (if changes found)
-      if: env.ROOTFS_NEW != env.ROOTFS_CACHE
-      run: |
-        # Push to GH Packages
-        docker tag $IMAGEID:$SHORT_SHA $IMAGEID:$BUILDDATE
-        docker tag $IMAGEID:$SHORT_SHA $IMAGEID:latest
-        docker push $IMAGEID:latest
-        docker push $IMAGEID:$BUILDDATE
+    # - name: Push image to GitHub packages (if changes found)
+    #   if: env.ROOTFS_NEW != env.ROOTFS_CACHE
+    #   run: |
+    #     # Push to GH Packages
+    #     docker tag $IMAGEID:$SHORT_SHA $IMAGEID:$BUILDDATE
+    #     docker tag $IMAGEID:$SHORT_SHA $IMAGEID:latest
+    #     docker push $IMAGEID:latest
+    #     docker push $IMAGEID:$BUILDDATE
     # - name: Push image to Docker Hub (if enabled & changes found)
     #   if: env.ROOTFS_NEW != env.ROOTFS_CACHE && env.DOCKERHUB_ORG != ''
     #   run: |
