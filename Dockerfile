@@ -8,10 +8,10 @@ FROM jupyter/base-notebook:2023-05-01
 
 USER root
 
-# Install base image dependancies
-RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
-    --mount=type=cache,target=/var/lib/apt,sharing=locked \
-    DEBIAN_FRONTEND=noninteractive apt update
+# # Install base image dependancies
+# RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
+#     --mount=type=cache,target=/var/lib/apt,sharing=locked \
+#     DEBIAN_FRONTEND=noninteractive apt update
 
 # # Install base image dependancies
 # RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
