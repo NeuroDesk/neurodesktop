@@ -13,15 +13,18 @@ FROM jupyter/base-notebook:2023-05-01
 #     --mount=type=cache,target=/var/lib/apt,sharing=locked \
 #     apt update
 
-# # Install base image dependancies
-# RUN apt update \
-    # && rm -rf /var/lib/apt/lists/*
+RUN apt-get update --yes \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# # # Install base image dependancies
+# RUN apt-get update --yes && \
+#     apt-get install --yes --no-install-recommends \
+#     apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # # Install base image dependancies
 # RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
 #     --mount=type=cache,target=/var/lib/apt,sharing=locked \
-#     DEBIAN_FRONTEND=noninteractive apt update \
-#     && apt install --no-install-recommends -y \
+#     DEBIAN_FRONTEND=noninteractive apt install --no-install-recommends -y \
 #         # Singularity
 #         build-essential \
 #         libseccomp-dev \
@@ -138,8 +141,7 @@ FROM jupyter/base-notebook:2023-05-01
 # # Install Tools and Libs
 # RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
 #     --mount=type=cache,target=/var/lib/apt,sharing=locked \
-#     DEBIAN_FRONTEND=noninteractive apt update \
-#     && apt install --no-install-recommends -y \
+#     DEBIAN_FRONTEND=noninteractive apt install --no-install-recommends -y \
 #         aria2 \
 #         code \
 #         cvmfs \
@@ -197,8 +199,7 @@ FROM jupyter/base-notebook:2023-05-01
 # # RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
 # #     --mount=type=cache,target=/var/lib/apt,sharing=locked \
 # #     add-apt-repository ppa:mozillateam/ppa \
-# #     && DEBIAN_FRONTEND=noninteractive apt update \
-# #     && apt install --no-install-recommends -y \
+# #     && DEBIAN_FRONTEND=noninteractive apt install --no-install-recommends -y \
 # #         --target-release 'o=LP-PPA-mozillateam' firefox
 # COPY config/firefox/mozillateamppa /etc/apt/preferences.d/mozillateamppa
 # COPY config/firefox/syspref.js /etc/firefox/syspref.js
