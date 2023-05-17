@@ -1,4 +1,4 @@
-# syntax=docker/dockerfile:1.2-labs
+# syntax=docker/dockerfile:1-labs
 FROM jupyter/base-notebook:2023-05-01
 # FROM jupyter/base-notebook:python-3.10.10
 
