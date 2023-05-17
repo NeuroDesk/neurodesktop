@@ -6,6 +6,8 @@ FROM jupyter/base-notebook:2023-05-01
 # https://github.com/jupyter/docker-stacks/blob/86d42cadf4695b8e6fc3b3ead58e1f71067b765b/docker-stacks-foundation/Dockerfile
 # https://github.com/jupyter/docker-stacks/blob/86d42cadf4695b8e6fc3b3ead58e1f71067b765b/base-notebook/Dockerfile
 
+RUN echo
+
 # USER root
 
 # # Install base image dependancies
