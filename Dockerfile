@@ -1,4 +1,4 @@
-# syntax=docker/dockerfile:1-labs
+
 FROM jupyter/base-notebook:2023-05-01
 # FROM jupyter/base-notebook:python-3.10.10
 
@@ -329,19 +329,6 @@ RUN git clone https://github.com/civier/fix_bash.git /tmp/fix_bash \
       && git checkout tags/1.1.1 \
       && cp /tmp/fix_bash/fix_bash.sh /usr/share \
       && rm -Rf /tmp/fix_bash
-
-# Download Neurocommand
-## For CI
-# ADD --keep-git-dir=true https://github.com/NeuroDesk/neurocommand.git#main /neurocommand
-## For local build
-ADD "https://api.github.com/repos/neurodesk/neurocommand/git/refs/heads/main" /tmp/skipcache
-RUN git clone https://github.com/NeuroDesk/neurocommand.git /neurocommand
-
-# Install Neurocommand
-RUN cd /neurocommand \
-    && bash build.sh --lxde --edit \
-    && bash install.sh \
-    && ln -s /neurodesktop-storage/containers /neurocommand/local/containers
 
 USER ${NB_UID}
 
