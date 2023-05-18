@@ -49,9 +49,12 @@ jobs:
     - name: Build new image
       run: |
         docker buildx build . --file Dockerfile --tag $IMAGEID:$SHORT_SHA --cache-from $IMAGEID:latest --label "GITHUB_REPOSITORY=$GITHUB_REPOSITORY" --label "GITHUB_SHA=$GITHUB_SHA"
-        docker images
         ROOTFS_NEW=$(docker inspect --format='{{.RootFS}}' $IMAGEID:$SHORT_SHA)
         echo "ROOTFS_NEW=$ROOTFS_NEW" >> $GITHUB_ENV
+    - name: Compare images
+      run: | 
+        docker images
+        diff <(echo "$ROOTFS_CACHE") <(echo "$ROOTFS_NEW")
     - name: Push image to GitHub packages (if changes found)
       if: ${{ env.ROOTFS_NEW != env.ROOTFS_CACHE }}
       run: |
