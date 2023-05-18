@@ -53,10 +53,10 @@ jobs:
         echo "ROOTFS_NEW=$ROOTFS_NEW" >> $GITHUB_ENV
     - name: Compare images
       run: |
-        if test "$ROOTFS_NEW" = "$ROOTFS_CACHE"; then
-          echo "Changed"
-        else
+        if [ "$ROOTFS_NEW" == "$ROOTFS_CACHE" ]; then
           echo "Unchanged"
+        else
+          echo "Changed"
         fi
     - name: Push image to GitHub packages (if changes found)
       if: ${{ env.ROOTFS_NEW != env.ROOTFS_CACHE }}
