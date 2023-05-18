@@ -8,51 +8,51 @@ FROM jupyter/base-notebook:2023-05-01
 
 USER root
 
-# # Install base image dependancies
-# RUN apt-get update --yes \
-#     && DEBIAN_FRONTEND=noninteractive apt install --yes --no-install-recommends \
-#         # Singularity
-#         build-essential \
-#         libseccomp-dev \
-#         libglib2.0-dev \
-#         pkg-config \
-#         squashfs-tools \
-#         cryptsetup \
-#         runc \
-#         # Apache Tomcat
-#         openjdk-19-jre \
-#         # Apache Guacamole
-#         ## Core
-#         libcairo2-dev \
-#         libjpeg-turbo8-dev \
-#         libpng-dev \
-#         libtool-bin \
-#         uuid-dev \
-#         ## Optionals
-#         freerdp2-dev \
-#         libvncserver-dev \
-#         libssl-dev \
-#         libwebp-dev \
-#         libssh2-1-dev \
-#         # SSH (Optional)
-#         libpango1.0-dev \
-#         ## VNC
-#         tigervnc-common \
-#         tigervnc-standalone-server \
-#         tigervnc-tools \
-#         ## RDP
-#         xorgxrdp \
-#         xrdp \
-#         # Destop Env
-#         lxde \
-#         # Installer tools
-#         wget \
-#         curl \
-#         dirmngr \ 
-#         gpg \
-#         gpg-agent \
-#         software-properties-common \
-#         && apt-get clean && rm -rf /var/lib/apt/lists/*
+# Install base image dependancies
+RUN apt-get update --yes \
+    && DEBIAN_FRONTEND=noninteractive apt install --yes --no-install-recommends \
+        # Singularity
+        build-essential \
+        libseccomp-dev \
+        libglib2.0-dev \
+        pkg-config \
+        squashfs-tools \
+        cryptsetup \
+        runc \
+        # Apache Tomcat
+        openjdk-19-jre \
+        # Apache Guacamole
+        ## Core
+        libcairo2-dev \
+        libjpeg-turbo8-dev \
+        libpng-dev \
+        libtool-bin \
+        uuid-dev \
+        ## Optionals
+        freerdp2-dev \
+        libvncserver-dev \
+        libssl-dev \
+        libwebp-dev \
+        libssh2-1-dev \
+        # SSH (Optional)
+        libpango1.0-dev \
+        ## VNC
+        tigervnc-common \
+        tigervnc-standalone-server \
+        tigervnc-tools \
+        ## RDP
+        xorgxrdp \
+        xrdp \
+        # Destop Env
+        lxde \
+        # Installer tools
+        wget \
+        curl \
+        dirmngr \ 
+        gpg \
+        gpg-agent \
+        software-properties-common \
+        && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # ARG GO_VERSION="1.20.4"
 # ARG SINGULARITY_VERSION="3.11.3"
