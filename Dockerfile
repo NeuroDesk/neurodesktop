@@ -181,7 +181,7 @@ RUN apt-get update --yes \
 
 # Install firefox
 RUN add-apt-repository ppa:mozillateam/ppa \
-    && pt-get update --yes \
+    && apt-get update --yes \
     && DEBIAN_FRONTEND=noninteractive apt install --yes --no-install-recommends \
         --target-release 'o=LP-PPA-mozillateam' firefox \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
