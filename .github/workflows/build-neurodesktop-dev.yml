@@ -52,9 +52,12 @@ jobs:
         ROOTFS_NEW=$(docker inspect --format='{{.RootFS}}' $IMAGEID:$SHORT_SHA)
         echo "ROOTFS_NEW=$ROOTFS_NEW" >> $GITHUB_ENV
     - name: Compare images
-      run: | 
-        docker images
-        diff <(echo "$ROOTFS_CACHE") <(echo "$ROOTFS_NEW")
+      run: |
+        if test "$ROOTFS_NEW" = "$ROOTFS_CACHE"; then
+          echo "Changed"
+        else
+          echo "Unchanged"
+        fi
     - name: Push image to GitHub packages (if changes found)
       if: ${{ env.ROOTFS_NEW != env.ROOTFS_CACHE }}
       run: |
