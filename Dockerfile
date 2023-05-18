@@ -334,5 +334,5 @@ USER ${NB_UID}
 
 WORKDIR "${HOME}"
 
-# Add example notebooks
-RUN git clone https://github.com/NeuroDesk/example-notebooks
+# # Add example notebooks
+# RUN git clone https://github.com/NeuroDesk/example-notebooks
