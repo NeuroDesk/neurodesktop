@@ -54,56 +54,56 @@ RUN apt-get update --yes \
         software-properties-common \
         && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-ARG GO_VERSION="1.20.4"
-ARG SINGULARITY_VERSION="3.11.3"
-ARG TOMCAT_REL="9"
-ARG TOMCAT_VERSION="9.0.75"
-ARG GUACAMOLE_VERSION="1.5.1"
+# ARG GO_VERSION="1.20.4"
+# ARG SINGULARITY_VERSION="3.11.3"
+# ARG TOMCAT_REL="9"
+# ARG TOMCAT_VERSION="9.0.75"
+# ARG GUACAMOLE_VERSION="1.5.1"
 
-ENV LANG ""
-ENV LANGUAGE ""
-ENV LC_ALL ""
+# ENV LANG ""
+# ENV LANGUAGE ""
+# ENV LC_ALL ""
 
-# Install singularity
-RUN export VERSION=${GO_VERSION} OS=linux ARCH=amd64 \
-    && wget https://go.dev/dl/go${VERSION}.${OS}-${ARCH}.tar.gz \
-    && sudo tar -C /usr/local -xzvf go$VERSION.$OS-$ARCH.tar.gz \
-    && rm go$VERSION.$OS-$ARCH.tar.gz \
-    && export GOPATH=/opt/go \
-    && export PATH=/usr/local/go/bin:${PATH}:${GOPATH}/bin \
-    && mkdir -p $GOPATH/src/github.com/sylabs \
-    && cd $GOPATH/src/github.com/sylabs \
-    && wget https://github.com/sylabs/singularity/releases/download/v${SINGULARITY_VERSION}/singularity-ce-${SINGULARITY_VERSION}.tar.gz \
-    && tar -xzvf singularity-ce-${SINGULARITY_VERSION}.tar.gz \
-    && cd singularity-ce-${SINGULARITY_VERSION} \
-    && ./mconfig --without-suid --prefix=/usr/local/singularity \
-    && make -C builddir \
-    && make -C builddir install \
-    && rm -rf singularity-ce-${SINGULARITY_VERSION} \
-    && rm -rf /usr/local/go $GOPATH \
-    && ln -s /usr/local/singularity/bin/singularity /bin/ \ 
-    && rm -rf /root/.cache
+# # Install singularity
+# RUN export VERSION=${GO_VERSION} OS=linux ARCH=amd64 \
+#     && wget https://go.dev/dl/go${VERSION}.${OS}-${ARCH}.tar.gz \
+#     && sudo tar -C /usr/local -xzvf go$VERSION.$OS-$ARCH.tar.gz \
+#     && rm go$VERSION.$OS-$ARCH.tar.gz \
+#     && export GOPATH=/opt/go \
+#     && export PATH=/usr/local/go/bin:${PATH}:${GOPATH}/bin \
+#     && mkdir -p $GOPATH/src/github.com/sylabs \
+#     && cd $GOPATH/src/github.com/sylabs \
+#     && wget https://github.com/sylabs/singularity/releases/download/v${SINGULARITY_VERSION}/singularity-ce-${SINGULARITY_VERSION}.tar.gz \
+#     && tar -xzvf singularity-ce-${SINGULARITY_VERSION}.tar.gz \
+#     && cd singularity-ce-${SINGULARITY_VERSION} \
+#     && ./mconfig --without-suid --prefix=/usr/local/singularity \
+#     && make -C builddir \
+#     && make -C builddir install \
+#     && rm -rf singularity-ce-${SINGULARITY_VERSION} \
+#     && rm -rf /usr/local/go $GOPATH \
+#     && ln -s /usr/local/singularity/bin/singularity /bin/ \ 
+#     && rm -rf /root/.cache
 
-# Install Apache Tomcat
-RUN wget -q https://archive.apache.org/dist/tomcat/tomcat-${TOMCAT_REL}/v${TOMCAT_VERSION}/bin/apache-tomcat-${TOMCAT_VERSION}.tar.gz -P /tmp \
-    && tar -xf /tmp/apache-tomcat-${TOMCAT_VERSION}.tar.gz -C /tmp \
-    && rm -rf /tmp/apache-tomcat-${TOMCAT_VERSION}.tar.gz \
-    && mv /tmp/apache-tomcat-${TOMCAT_VERSION} /usr/local/tomcat \
-    && mv /usr/local/tomcat/webapps /usr/local/tomcat/webapps.dist \
-    && mkdir /usr/local/tomcat/webapps \
-    && chmod +x /usr/local/tomcat/bin/*.sh
+# # Install Apache Tomcat
+# RUN wget -q https://archive.apache.org/dist/tomcat/tomcat-${TOMCAT_REL}/v${TOMCAT_VERSION}/bin/apache-tomcat-${TOMCAT_VERSION}.tar.gz -P /tmp \
+#     && tar -xf /tmp/apache-tomcat-${TOMCAT_VERSION}.tar.gz -C /tmp \
+#     && rm -rf /tmp/apache-tomcat-${TOMCAT_VERSION}.tar.gz \
+#     && mv /tmp/apache-tomcat-${TOMCAT_VERSION} /usr/local/tomcat \
+#     && mv /usr/local/tomcat/webapps /usr/local/tomcat/webapps.dist \
+#     && mkdir /usr/local/tomcat/webapps \
+#     && chmod +x /usr/local/tomcat/bin/*.sh
 
-# Install Apache Guacamole
-RUN wget -q "https://dlcdn.apache.org/guacamole/${GUACAMOLE_VERSION}/binary/guacamole-${GUACAMOLE_VERSION}.war" -O /usr/local/tomcat/webapps/ROOT.war \
-    && wget -q "https://dlcdn.apache.org/guacamole/${GUACAMOLE_VERSION}/source/guacamole-server-${GUACAMOLE_VERSION}.tar.gz" -P /tmp \
-    && tar xvf /tmp/guacamole-server-${GUACAMOLE_VERSION}.tar.gz -C /tmp \
-    && rm /tmp/guacamole-server-${GUACAMOLE_VERSION}.tar.gz \
-    && cd /tmp/guacamole-server-${GUACAMOLE_VERSION} \
-    && ./configure --with-init-dir=/etc/init.d \
-    && make \
-    && make install \
-    && ldconfig \
-    && rm -r /tmp/guacamole-server-${GUACAMOLE_VERSION}
+# # Install Apache Guacamole
+# RUN wget -q "https://dlcdn.apache.org/guacamole/${GUACAMOLE_VERSION}/binary/guacamole-${GUACAMOLE_VERSION}.war" -O /usr/local/tomcat/webapps/ROOT.war \
+#     && wget -q "https://dlcdn.apache.org/guacamole/${GUACAMOLE_VERSION}/source/guacamole-server-${GUACAMOLE_VERSION}.tar.gz" -P /tmp \
+#     && tar xvf /tmp/guacamole-server-${GUACAMOLE_VERSION}.tar.gz -C /tmp \
+#     && rm /tmp/guacamole-server-${GUACAMOLE_VERSION}.tar.gz \
+#     && cd /tmp/guacamole-server-${GUACAMOLE_VERSION} \
+#     && ./configure --with-init-dir=/etc/init.d \
+#     && make \
+#     && make install \
+#     && ldconfig \
+#     && rm -r /tmp/guacamole-server-${GUACAMOLE_VERSION}
 
 # # Add Software sources
 # RUN curl https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > microsoft.gpg \
