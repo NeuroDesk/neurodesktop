@@ -1,5 +1,7 @@
 
-FROM jupyter/base-notebook:2023-05-01
+FROM ubuntu:22.04
+
+# FROM jupyter/base-notebook:2023-05-01
 # FROM jupyter/base-notebook:python-3.10.10
 
 # Parent image source
