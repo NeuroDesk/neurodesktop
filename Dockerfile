@@ -330,9 +330,9 @@ RUN apt-get update --yes \
 #       && cp /tmp/fix_bash/fix_bash.sh /usr/share \
 #       && rm -Rf /tmp/fix_bash
 
-USER ${NB_UID}
+# USER ${NB_UID}
 
-WORKDIR "${HOME}"
+# WORKDIR "${HOME}"
 
 # # Add example notebooks
 # RUN git clone https://github.com/NeuroDesk/example-notebooks
