@@ -48,7 +48,7 @@ jobs:
         sed -i 's/RUN git clone https:\/\/github.com\/NeuroDesk\/neurocommand.git/# RUN git clone https:\/\/github.com\/NeuroDesk\/neurocommand.git/g' Dockerfile
     - name: Build new image
       run: |
-        docker buildx build . --file Dockerfile --tag $IMAGEID:$SHORT_SHA --cache-from type=registry,ref=$IMAGEID --label "GITHUB_REPOSITORY=$GITHUB_REPOSITORY" --label "GITHUB_SHA=$GITHUB_SHA"
+        docker build . --file Dockerfile --tag $IMAGEID:$SHORT_SHA --cache-from $IMAGEID --label "GITHUB_REPOSITORY=$GITHUB_REPOSITORY" --label "GITHUB_SHA=$GITHUB_SHA"
         ROOTFS_NEW=$(docker inspect --format='{{.RootFS}}' $IMAGEID:$SHORT_SHA)
         echo "ROOTFS_NEW=$ROOTFS_NEW" >> $GITHUB_ENV
     - name: Compare images
