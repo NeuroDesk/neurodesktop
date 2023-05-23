@@ -71,7 +71,7 @@ jobs:
         docker push $IMAGEID:latest
         docker push $IMAGEID:$BUILDDATE
     - name: Push image to Docker Hub (if enabled & changes found)
-      if: env.ROOTFS_NEW != env.ROOTFS_CACHE && env.DOCKERHUB_ORG != ''
+      if: ${{ env.GITHUB_RATE_REMAINING > 0 && env.ROOTFS_NEW != env.ROOTFS_CACHE && env.DOCKERHUB_ORG != '' }}
       run: |
         echo "${{ secrets.DOCKERHUB_PASSWORD }}" | docker login -u ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin
         # Push to GH Packages
