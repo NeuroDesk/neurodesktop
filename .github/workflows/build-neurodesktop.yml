@@ -22,10 +22,14 @@ jobs:
       run: |
         GITHUB_RATE_REMAINING=$(curl -H "Accept: application/vnd.github.v3+json" https://api.github.com/rate_limit | jq '.rate.remaining')
         echo "GITHUB_RATE_REMAINING=${GITHUB_RATE_REMAINING}"
-    - uses: actions/checkout@v3
+        echo "GITHUB_RATE_REMAINING=$GITHUB_RATE_REMAINING" >> $GITHUB_ENV
+    - name: Checkout repository
+      if: ${{ env.GITHUB_RATE_REMAINING > 0 }}
+      uses: actions/checkout@v3
       with:
         ref: ${{ github.ref }}
     - name: Set environment variables
+      if: ${{ env.GITHUB_RATE_REMAINING > 0 }}
       run: |
         IMAGENAME="neurodesktop"
         BUILDDATE=`date +%Y%m%d`
@@ -37,26 +41,29 @@ jobs:
         echo "IMAGEID=$IMAGEID" >> $GITHUB_ENV
         echo "IMAGENAME=$IMAGENAME" >> $GITHUB_ENV
     - name: Pull latest image from GitHub packages
+      if: ${{ env.GITHUB_RATE_REMAINING > 0 }}
       run: |
         echo ${GITHUB_REF}
         echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u $GITHUB_ACTOR --password-stdin
         {
-          docker pull $IMAGEID \
-            && ROOTFS_CACHE=$(docker inspect --format='{{.RootFS}}' $IMAGEID) \
+          docker pull $IMAGEID:latest \
+            && ROOTFS_CACHE=$(docker inspect --format='{{.RootFS}}' $IMAGEID:latest) \
             && echo "ROOTFS_CACHE=$ROOTFS_CACHE" >> $GITHUB_ENV
         } || echo "$IMAGEID not found. Resuming build..."
-    - name: Modify Dockerfile for CI build
-      run: |
-        sed -i 's/# ADD --keep-git-dir=true/ADD --keep-git-dir=true/g' Dockerfile
-        sed -i 's/ADD "https:\/\/api.github.com/# ADD "https:\/\/api.github.com/g' Dockerfile
-        sed -i 's/RUN git clone https:\/\/github.com\/NeuroDesk\/neurocommand.git/# RUN git clone https:\/\/github.com\/NeuroDesk\/neurocommand.git/g' Dockerfile
+    # - name: Modify Dockerfile for CI build
+    #   if: ${{ env.GITHUB_RATE_REMAINING > 0 }}
+    #   run: |
+    #     sed -i 's/# ADD --keep-git-dir=true/ADD --keep-git-dir=true/g' Dockerfile
+    #     sed -i 's/ADD "https:\/\/api.github.com/# ADD "https:\/\/api.github.com/g' Dockerfile
+    #     sed -i 's/RUN git clone https:\/\/github.com\/NeuroDesk\/neurocommand.git/# RUN git clone https:\/\/github.com\/NeuroDesk\/neurocommand.git/g' Dockerfile
     - name: Build new image
+      if: ${{ env.GITHUB_RATE_REMAINING > 0 }}
       run: |
-        docker buildx build . --file Dockerfile --tag $IMAGEID:$SHORT_SHA --cache-from $IMAGEID --label "GITHUB_REPOSITORY=$GITHUB_REPOSITORY" --label "GITHUB_SHA=$GITHUB_SHA"
+        docker build . --file Dockerfile --tag $IMAGEID:$SHORT_SHA --cache-from $IMAGEID --label "GITHUB_REPOSITORY=$GITHUB_REPOSITORY" --label "GITHUB_SHA=$GITHUB_SHA"
         ROOTFS_NEW=$(docker inspect --format='{{.RootFS}}' $IMAGEID:$SHORT_SHA)
         echo "ROOTFS_NEW=$ROOTFS_NEW" >> $GITHUB_ENV
     - name: Push image to GitHub packages (if changes found)
-      if: env.ROOTFS_NEW != env.ROOTFS_CACHE
+      if: ${{ env.GITHUB_RATE_REMAINING > 0 && env.ROOTFS_NEW != env.ROOTFS_CACHE }}
       run: |
         # Push to GH Packages
         docker tag $IMAGEID:$SHORT_SHA $IMAGEID:$BUILDDATE
@@ -73,6 +80,7 @@ jobs:
         docker push $DOCKERHUB_ORG/$IMAGENAME:latest
         docker push $DOCKERHUB_ORG/$IMAGENAME:$BUILDDATE
     - name: Container image scan
+      if: ${{ env.GITHUB_RATE_REMAINING > 0 }}
       uses: aquasecurity/trivy-action@0.8.0
       with:
         image-ref: ${{ env.IMAGEID }}

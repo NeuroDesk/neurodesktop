@@ -62,14 +62,6 @@ jobs:
         docker build . --file Dockerfile --tag $IMAGEID:$SHORT_SHA --cache-from $IMAGEID --label "GITHUB_REPOSITORY=$GITHUB_REPOSITORY" --label "GITHUB_SHA=$GITHUB_SHA"
         ROOTFS_NEW=$(docker inspect --format='{{.RootFS}}' $IMAGEID:$SHORT_SHA)
         echo "ROOTFS_NEW=$ROOTFS_NEW" >> $GITHUB_ENV
-    - name: Compare images
-      if: ${{ env.GITHUB_RATE_REMAINING > 0 }}
-      run: |
-        if [ "$ROOTFS_NEW" == "$ROOTFS_CACHE" ]; then
-          echo "Unchanged"
-        else
-          echo "Changed"
-        fi
     - name: Push image to GitHub packages (if changes found)
       if: ${{ env.GITHUB_RATE_REMAINING > 0 && env.ROOTFS_NEW != env.ROOTFS_CACHE }}
       run: |
@@ -78,34 +70,35 @@ jobs:
         docker tag $IMAGEID:$SHORT_SHA $IMAGEID:latest
         docker push $IMAGEID:latest
         docker push $IMAGEID:$BUILDDATE
-    # - name: Push image to Docker Hub (if enabled & changes found)
-    #   if: env.ROOTFS_NEW != env.ROOTFS_CACHE && env.DOCKERHUB_ORG != ''
-    #   run: |
-    #     echo "${{ secrets.DOCKERHUB_PASSWORD }}" | docker login -u ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin
-    #     # Push to GH Packages
-    #     docker tag $IMAGEID:$SHORT_SHA $DOCKERHUB_ORG/$IMAGENAME:$BUILDDATE
-    #     docker tag $IMAGEID:$SHORT_SHA $DOCKERHUB_ORG/$IMAGENAME:latest
-    #     docker push $DOCKERHUB_ORG/$IMAGENAME:latest
-    #     docker push $DOCKERHUB_ORG/$IMAGENAME:$BUILDDATE
-    # - name: Container image scan
-    #   uses: aquasecurity/trivy-action@0.8.0
-    #   with:
-    #     image-ref: ${{ env.IMAGEID }}
-    #     format: table
-    #     exit-code: '1'
-    #     severity: CRITICAL
-    #     timeout: 25m0s
-    #     skip-files: /opt/rclone-v1.60.1-linux-amd64/README.txt, /opt/rclone-v1.60.1-linux-amd64/README.html, /opt/rclone-v1.60.1-linux-amd64/rclone.1
-    # - name: Generate issue on job failure
-    #   if: always() && failure()
-    #   uses: JasonEtco/create-an-issue@v2
-    #   env: 
-    #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    #     GITHUB_WORKFLOW: ${{ env.GITHUB_WORKFLOW }}
-    #     GITHUB_SERVER_URL: ${{ env.GITHUB_SERVER_URL }}
-    #     GITHUB_REPOSITORY: ${{ env.GITHUB_REPOSITORY }}
-    #     GITHUB_RUN_ID: ${{ env.GITHUB_RUN_ID }}
-    #   with:
-    #     filename: .github/job_failure_issue_template.md
-    #     update_existing: true
-    #     search_existing: open
+    - name: Push image to Docker Hub (if enabled & changes found)
+      if: env.ROOTFS_NEW != env.ROOTFS_CACHE && env.DOCKERHUB_ORG != ''
+      run: |
+        echo "${{ secrets.DOCKERHUB_PASSWORD }}" | docker login -u ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin
+        # Push to GH Packages
+        docker tag $IMAGEID:$SHORT_SHA $DOCKERHUB_ORG/$IMAGENAME:$BUILDDATE
+        docker tag $IMAGEID:$SHORT_SHA $DOCKERHUB_ORG/$IMAGENAME:latest
+        docker push $DOCKERHUB_ORG/$IMAGENAME:latest
+        docker push $DOCKERHUB_ORG/$IMAGENAME:$BUILDDATE
+    - name: Container image scan
+      if: ${{ env.GITHUB_RATE_REMAINING > 0 }}
+      uses: aquasecurity/trivy-action@0.8.0
+      with:
+        image-ref: ${{ env.IMAGEID }}
+        format: table
+        exit-code: '1'
+        severity: CRITICAL
+        timeout: 25m0s
+        skip-files: /opt/rclone-v1.60.1-linux-amd64/README.txt, /opt/rclone-v1.60.1-linux-amd64/README.html, /opt/rclone-v1.60.1-linux-amd64/rclone.1
+    - name: Generate issue on job failure
+      if: always() && failure()
+      uses: JasonEtco/create-an-issue@v2
+      env: 
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GITHUB_WORKFLOW: ${{ env.GITHUB_WORKFLOW }}
+        GITHUB_SERVER_URL: ${{ env.GITHUB_SERVER_URL }}
+        GITHUB_REPOSITORY: ${{ env.GITHUB_REPOSITORY }}
+        GITHUB_RUN_ID: ${{ env.GITHUB_RUN_ID }}
+      with:
+        filename: .github/job_failure_issue_template.md
+        update_existing: true
+        search_existing: open
