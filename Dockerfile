@@ -1,4 +1,4 @@
-# syntax=docker/dockerfile:1-labs
+
 FROM jupyter/base-notebook:2023-05-01
 # FROM jupyter/base-notebook:python-3.10.10
 
@@ -9,10 +9,8 @@ FROM jupyter/base-notebook:2023-05-01
 USER root
 
 # Install base image dependancies
-RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
-    --mount=type=cache,target=/var/lib/apt,sharing=locked \
-    DEBIAN_FRONTEND=noninteractive apt update \
-    && apt install --no-install-recommends -y \
+RUN apt-get update --yes \
+    && DEBIAN_FRONTEND=noninteractive apt install --yes --no-install-recommends \
         # Singularity
         build-essential \
         libseccomp-dev \
@@ -53,7 +51,8 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
         dirmngr \ 
         gpg \
         gpg-agent \
-        software-properties-common
+        software-properties-common \
+        && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 ARG GO_VERSION="1.20.4"
 ARG SINGULARITY_VERSION="3.11.3"
@@ -107,10 +106,7 @@ RUN wget -q "https://dlcdn.apache.org/guacamole/${GUACAMOLE_VERSION}/binary/guac
     && rm -r /tmp/guacamole-server-${GUACAMOLE_VERSION}
 
 # Add Software sources
-RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
-    --mount=type=cache,target=/var/lib/apt,sharing=locked \
-    # VS Code
-    curl https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > microsoft.gpg \
+RUN curl https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > microsoft.gpg \
     && mv microsoft.gpg /etc/apt/trusted.gpg.d/microsoft.gpg \
     && echo "deb [arch=amd64] http://packages.microsoft.com/repos/vscode stable main" | tee /etc/apt/sources.list.d/vs-code.list \
     # Nextcloud Client
@@ -127,10 +123,8 @@ RUN wget -q https://ecsft.cern.ch/dist/cvmfs/cvmfs-release/cvmfs-release-latest_
     && rm /tmp/cvmfs-release-latest_all.deb
 
 # Install Tools and Libs
-RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
-    --mount=type=cache,target=/var/lib/apt,sharing=locked \
-    DEBIAN_FRONTEND=noninteractive apt update \
-    && apt install --no-install-recommends -y \
+RUN apt-get update --yes \
+    && DEBIAN_FRONTEND=noninteractive apt install --yes --no-install-recommends \
         aria2 \
         code \
         cvmfs \
@@ -182,15 +176,15 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
         vim \
         xdg-utils \
         yarn \
-        zip
+        zip \
+        && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# # Install firefox
-# RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
-#     --mount=type=cache,target=/var/lib/apt,sharing=locked \
-#     add-apt-repository ppa:mozillateam/ppa \
-#     && DEBIAN_FRONTEND=noninteractive apt update \
-#     && apt install --no-install-recommends -y \
-#         --target-release 'o=LP-PPA-mozillateam' firefox
+# Install firefox
+RUN add-apt-repository ppa:mozillateam/ppa \
+    && apt-get update --yes \
+    && DEBIAN_FRONTEND=noninteractive apt install --yes --no-install-recommends \
+        --target-release 'o=LP-PPA-mozillateam' firefox \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
 COPY config/firefox/mozillateamppa /etc/apt/preferences.d/mozillateamppa
 COPY config/firefox/syspref.js /etc/firefox/syspref.js
 
@@ -256,14 +250,14 @@ RUN mkdir -p /home/${NB_USER}/.config/matplotlib-mpldir \
     && chown -R ${NB_USER}:users /home/${NB_USER}/.config/matplotlib-mpldir
 ENV MPLCONFIGDIR /home/${NB_USER}/.config/matplotlib-mpldir
 
-# # enable rootless mounts: 
-# RUN chmod +x /usr/bin/fusermount
+# enable rootless mounts: 
+RUN chmod +x /usr/bin/fusermount
 
-# # Create link to persistent storage on Desktop (This needs to happen before the users gets created!)
-# RUN mkdir -p /home/${NB_USER}/neurodesktop-storage/containers \
-#     && mkdir -p /home/${NB_USER}/Desktop/ /data \
-#     && ln -s /home/${NB_USER}/neurodesktop-storage/ /neurodesktop-storage \
-#     && ln -s /neurodesktop-storage /storage
+# Create link to persistent storage on Desktop (This needs to happen before the users gets created!)
+RUN mkdir -p /home/${NB_USER}/neurodesktop-storage/containers \
+    && mkdir -p /home/${NB_USER}/Desktop/ /data \
+    && ln -s /home/${NB_USER}/neurodesktop-storage/ /neurodesktop-storage \
+    && ln -s /neurodesktop-storage /storage
 
 # # Add checkversion script
 # COPY ./config/checkversion.sh /usr/share/
@@ -336,18 +330,14 @@ RUN git clone https://github.com/civier/fix_bash.git /tmp/fix_bash \
       && cp /tmp/fix_bash/fix_bash.sh /usr/share \
       && rm -Rf /tmp/fix_bash
 
-# Download Neurocommand
-## For CI
-# ADD --keep-git-dir=true https://github.com/NeuroDesk/neurocommand.git#main /neurocommand
-## For local build
+# Install neurocommand
 ADD "https://api.github.com/repos/neurodesk/neurocommand/git/refs/heads/main" /tmp/skipcache
-RUN git clone https://github.com/NeuroDesk/neurocommand.git /neurocommand
-
-# Install Neurocommand
-RUN cd /neurocommand \
+RUN rm /tmp/skipcache \
+    && git clone https://github.com/NeuroDesk/neurocommand.git /neurocommand \
+    && cd /neurocommand \
     && bash build.sh --lxde --edit \
     && bash install.sh \
-    && ln -s /neurodesktop-storage/containers /neurocommand/local/containers
+    && ln -s /neurodesktop-storage/containers /neurocommand/local/containers 
 
 USER ${NB_UID}
 
