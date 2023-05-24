@@ -38,7 +38,10 @@ sed -i "/private-key/ r /home/${NB_USER}/.ssh/guacamole_rsa" /etc/guacamole/user
 sudo service ssh restart
 sudo service ssh stop
 
-
+# Create a symlink in home is /data is mounted
+if mountpoint -q /data; then
+    ln -s /data /home/${NB_USER}/data
+fi
 
 # # clean up old session files (they prevent the start of the next session):
 # echo "starting cleanup before if"
