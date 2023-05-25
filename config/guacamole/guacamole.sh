@@ -3,8 +3,6 @@
 # Tomcat
 sudo /usr/local/tomcat/bin/startup.sh
 
-# Guacamole
-sudo service guacd start
 
 # RDP
 sudo service xrdp start
@@ -16,3 +14,8 @@ sudo service xrdp start
 vncserver -kill :1
 vncserver -depth 24 -geometry 1920x1080 -name \"VNC\" :1
 xset -display :1 s off
+
+# Guacamole
+# sudo service guacd start
+guacd -b 127.0.0.1
+echo "    Running guacamole"
