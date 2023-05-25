@@ -248,16 +248,22 @@ RUN git config --global user.email "user@neurodesk.org" \
 RUN mkdir -p /home/${NB_USER}/.config/matplotlib-mpldir \
     && chmod -R 700 /home/${NB_USER}/.config/matplotlib-mpldir \
     && chown -R ${NB_USER}:users /home/${NB_USER}/.config/matplotlib-mpldir
-ENV MPLCONFIGDIR /home/${NB_USER}/.config/matplotlib-mpldir
 
 # enable rootless mounts: 
 RUN chmod +x /usr/bin/fusermount
 
 # Create link to persistent storage on Desktop (This needs to happen before the users gets created!)
-RUN mkdir -p /home/${NB_USER}/neurodesktop-storage/containers \
-    && mkdir -p /home/${NB_USER}/Desktop/ /data \
-    && ln -s /home/${NB_USER}/neurodesktop-storage/ /neurodesktop-storage \
-    && ln -s /neurodesktop-storage /storage
+# This currently doesn't work, because /neurodesktop-storage gets mounted in from outside
+# RUN mkdir -p /home/${NB_USER}/neurodesktop-storage/containers \
+#     && mkdir -p /home/${NB_USER}/Desktop/ /data \
+#     && ln -s /home/${NB_USER}/neurodesktop-storage/ /neurodesktop-storage \
+#     && ln -s /neurodesktop-storage /storage
+
+# In kubernetes we later have to put persistent storage to /neurodesktop-storage
+RUN mkdir -p /home/${NB_USER}/Desktop/ /data \
+    && ln -s /neurodesktop-storage/ /home/${NB_USER} \
+    && ln -s /neurodesktop-storage /storage \
+    && ln -s /data /home/${NB_USER}
 
 # # Add checkversion script
 # COPY ./config/checkversion.sh /usr/share/
@@ -277,10 +283,7 @@ RUN su ${NB_USER} -c "/opt/conda/bin/pip install datalad-container datalad-osf o
     && rm -rf /home/${NB_USER}/.cache
 
 ENV DONT_PROMPT_WSL_INSTALL=1
-ENV PATH=$PATH:/home/${NB_USER}/.local/bin
-ENV SINGULARITY_BINDPATH /data,/neurodesktop-storage,/tmp,/cvmfs,/home/${NB_USER}:/home/matlab/.matlab/R2022a_licenses,/home/${NB_USER}:/opt/matlab/R2022a/licenses
 ENV LMOD_CMD /usr/share/lmod/lmod/libexec/lmod
-ENV MODULEPATH /cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/bids_apps:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/molecular_biology:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/workflows:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/visualization:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/structural_imaging:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/statistics:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/spine:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/spectroscopy:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/shape_analysis:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/segmentation:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/rodent_imaging:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/quantitative_imaging:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/quality_control:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/programming:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/phase_processing:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/machine_learning:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/image_segmentation:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/image_registration:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/image_reconstruction:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/hippocampus:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/functional_imaging:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/electrophysiology:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/diffusion_imaging:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/data_organisation:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/body
 
 # Install jupyter-server-proxy and disable announcements
 # Depracated: jupyter labextension install ..
@@ -308,6 +311,7 @@ RUN mkdir /home/${NB_USER}/.vnc \
 COPY --chown=${NB_USER}:users config/lxde/xstartup /home/${NB_USER}/.vnc
 COPY --chown=${NB_USER}:root config/guacamole/user-mapping.xml /etc/guacamole/user-mapping.xml
 COPY --chown=${NB_USER}:users config/guacamole/guacamole.sh /opt/neurodesktop/guacamole.sh
+COPY --chown=${NB_USER}:users config/jupyter/environment_variables.sh /opt/neurodesktop/environment_variables.sh
 COPY --chown=${NB_USER}:users config/jupyter/jupyter_notebook_config.py /home/${NB_USER}/.jupyter/jupyter_notebook_config.py
 COPY --chown=${NB_USER}:users config/ssh/sshd_config /home/${NB_USER}/.ssh/sshd_config
 COPY --chown=${NB_USER}:users config/k8s_postStart_copy_homedirectory.sh /tmp/k8s_postStart_copy_homedirectory.sh
