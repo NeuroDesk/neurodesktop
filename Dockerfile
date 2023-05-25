@@ -229,16 +229,16 @@ RUN mkdir -p `curl https://raw.githubusercontent.com/NeuroDesk/neurocontainers/m
 # Fix "No session for pid prompt"
 RUN rm /usr/bin/lxpolkit
 
-# ## Update conda
-# RUN conda update -n base conda \
-#     && conda clean --all -f -y \
-#     && rm -rf /home/${NB_USER}/.cache
+## Update conda
+RUN conda update -n base conda \
+    && conda clean --all -f -y \
+    && rm -rf /home/${NB_USER}/.cache
 
-# ## Install conda packages
-# RUN conda install -c conda-forge nipype pip nb_conda_kernels \
-#     && conda clean --all -f -y \
-#     && rm -rf /home/${NB_USER}/.cache
-# RUN conda config --system --prepend envs_dirs '~/conda-environments'
+## Install conda packages
+RUN conda install -c conda-forge nipype pip nb_conda_kernels \
+    && conda clean --all -f -y \
+    && rm -rf /home/${NB_USER}/.cache
+RUN conda config --system --prepend envs_dirs '~/conda-environments'
 
 # Setup git
 RUN git config --global user.email "user@neurodesk.org" \
@@ -272,20 +272,21 @@ COPY ./config/lxde/libfm.conf /home/${NB_USER}/.config/libfm
 
 RUN touch /home/${NB_USER}/.sudo_as_admin_successful
 
-# Add datalad-container datalad-osf and osfclient to the conda environment
-RUN pip install datalad-container datalad-osf osfclient
+# Add datalad-container datalad-osf osfclient ipyniivue to the conda environment
+RUN su ${NB_USER} -c "/opt/conda/bin/pip install datalad-container datalad-osf osfclient ipyniivue" \
+    && rm -rf /home/${NB_USER}/.cache
 
 ENV DONT_PROMPT_WSL_INSTALL=1
 ENV PATH=$PATH:/home/${NB_USER}/.local/bin
-ENV SINGULARITY_BINDPATH /data,/neurodesktop-storage
+ENV SINGULARITY_BINDPATH /data,/neurodesktop-storage,/tmp,/cvmfs
 ENV LMOD_CMD /usr/share/lmod/lmod/libexec/lmod
-ENV MODULEPATH /cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/molecular_biology:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/workflows:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/visualization:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/structural_imaging:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/statistics:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/spine:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/spectroscopy:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/shape_analysis:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/segmentation:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/rodent_imaging:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/quantitative_imaging:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/quality_control:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/programming:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/phase_processing:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/machine_learning:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/image_segmentation:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/image_registration:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/image_reconstruction:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/hippocampus:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/functional_imaging:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/electrophysiology:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/diffusion_imaging:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/data_organisation:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/body
+ENV MODULEPATH /cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/bids_apps:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/molecular_biology:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/workflows:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/visualization:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/structural_imaging:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/statistics:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/spine:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/spectroscopy:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/shape_analysis:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/segmentation:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/rodent_imaging:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/quantitative_imaging:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/quality_control:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/programming:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/phase_processing:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/machine_learning:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/image_segmentation:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/image_registration:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/image_reconstruction:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/hippocampus:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/functional_imaging:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/electrophysiology:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/diffusion_imaging:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/data_organisation:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/body
 
 # Install jupyter-server-proxy and disable announcements
 # Depracated: jupyter labextension install ..
 RUN su ${NB_USER} -c "/opt/conda/bin/pip install jupyter-server-proxy" \
     && su ${NB_USER} -c "/opt/conda/bin/jupyter labextension disable @jupyterlab/apputils-extension:announcements" \ 
-    && su ${NB_USER} -c "/opt/conda/bin/pip install jupyterlmod==4.0.3" \ 
+    && su ${NB_USER} -c "/opt/conda/bin/pip install jupyterlmod" \ 
     && rm -rf /home/${NB_USER}/.cache
     
 # Add notebook startup scripts
