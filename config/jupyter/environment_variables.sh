@@ -4,7 +4,7 @@ fi
 
 if [ -d /cvmfs/neurodesk.ardc.edu.au/neurodesk-modules ]; then
         MODULEPATH=/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/*
-        export MODULEPATH=${MODULEPATH// /,}
+        export MODULEPATH=`echo $MODULEPATH | sed 's/ /:/g'`
 fi
 
 export SINGULARITY_BINDPATH=/data,/neurodesktop-storage,/tmp,/cvmfs,/home/${NB_USER}:/home/matlab/.matlab/R2022a_licenses,/home/${NB_USER}:/opt/matlab/R2022a/licenses
