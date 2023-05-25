@@ -50,6 +50,7 @@ if mountpoint -q /data; then
     ln -s /data /home/${NB_USER}/data
 fi
 
+export NB_USER=${NB_USER}
 source /opt/neurodesktop/environment_variables.sh
 
 # # clean up old session files (they prevent the start of the next session):
