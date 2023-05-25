@@ -22,9 +22,16 @@ if [ ! -d "/cvmfs/neurodesk.ardc.edu.au/containers/" ]; then
 fi
 
 # Generate SSH keys
-ssh-keygen -t rsa -f /home/${NB_USER}/.ssh/guacamole_rsa -b 4096 -m PEM -N '' <<< n
-ssh-keygen -t rsa -f /home/${NB_USER}/.ssh/id_rsa -b 4096 -m PEM -N '' <<< n
-ssh-keygen -t rsa -f /home/${NB_USER}/.ssh/ssh_host_rsa_key -N '' <<< n
+if [ ! -f "/home/${NB_USER}/.ssh/guacamole_rsa" ]; then
+    ssh-keygen -t rsa -f /home/${NB_USER}/.ssh/guacamole_rsa -b 4096 -m PEM -N '' <<< n
+fi
+if [ ! -f "/home/${NB_USER}/.ssh/id_rsa" ]; then
+    ssh-keygen -t rsa -f /home/${NB_USER}/.ssh/id_rsa -b 4096 -m PEM -N '' <<< n
+fi
+if [ ! -f "/home/${NB_USER}/.ssh/ssh_host_rsa_key" ]; then
+    ssh-keygen -t rsa -f /home/${NB_USER}/.ssh/ssh_host_rsa_key -N '' <<< n
+fi
+
 cat /home/${NB_USER}/.ssh/guacamole_rsa.pub >> /home/${NB_USER}/.ssh/authorized_keys
 cat /home/${NB_USER}/.ssh/id_rsa.pub >> /home/${NB_USER}/.ssh/authorized_keys
 
