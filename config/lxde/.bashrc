@@ -18,6 +18,8 @@ if [ -f '/usr/share/module.sh' ]; then
         fi
 fi
 
+source /opt/neurodesktop/environment_variables.sh
+
 # this adds --nv to the singularity calls -> but only if a GPU is present
 if [ "`lspci | grep -i nvidia`" ]
 then
@@ -26,5 +28,4 @@ fi
 
 PS1='\u@neurodesktop:\w$ '
 
-export SINGULARITYENV_SUBJECTS_DIR=~/freesurfer-subjects-dir
-export MPLCONFIGDIR=/home/${USER}/.config/matplotlib-mpldir
+
