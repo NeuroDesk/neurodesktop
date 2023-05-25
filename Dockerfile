@@ -248,7 +248,6 @@ RUN git config --global user.email "user@neurodesk.org" \
 RUN mkdir -p /home/${NB_USER}/.config/matplotlib-mpldir \
     && chmod -R 700 /home/${NB_USER}/.config/matplotlib-mpldir \
     && chown -R ${NB_USER}:users /home/${NB_USER}/.config/matplotlib-mpldir
-ENV MPLCONFIGDIR /home/${NB_USER}/.config/matplotlib-mpldir
 
 # enable rootless mounts: 
 RUN chmod +x /usr/bin/fusermount
@@ -277,7 +276,6 @@ RUN su ${NB_USER} -c "/opt/conda/bin/pip install datalad-container datalad-osf o
     && rm -rf /home/${NB_USER}/.cache
 
 ENV DONT_PROMPT_WSL_INSTALL=1
-ENV PATH=$PATH:/home/${NB_USER}/.local/bin
 ENV LMOD_CMD /usr/share/lmod/lmod/libexec/lmod
 
 # Install jupyter-server-proxy and disable announcements
