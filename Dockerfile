@@ -285,7 +285,7 @@ ENV MODULEPATH /cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/bids_apps:/cvmfs/n
 # Depracated: jupyter labextension install ..
 RUN su ${NB_USER} -c "/opt/conda/bin/pip install jupyter-server-proxy" \
     && su ${NB_USER} -c "/opt/conda/bin/jupyter labextension disable @jupyterlab/apputils-extension:announcements" \ 
-    && su ${NB_USER} -c "/opt/conda/bin/pip install jupyterlmod==4.0.3" \ 
+    && su ${NB_USER} -c "/opt/conda/bin/pip install jupyterlmod" \ 
     && rm -rf /home/${NB_USER}/.cache
     
 # Add notebook startup scripts
