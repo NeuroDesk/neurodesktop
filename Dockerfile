@@ -229,16 +229,16 @@ RUN mkdir -p `curl https://raw.githubusercontent.com/NeuroDesk/neurocontainers/m
 # Fix "No session for pid prompt"
 RUN rm /usr/bin/lxpolkit
 
-# ## Update conda
-# RUN conda update -n base conda \
-#     && conda clean --all -f -y \
-#     && rm -rf /home/${NB_USER}/.cache
+## Update conda
+RUN conda update -n base conda \
+    && conda clean --all -f -y \
+    && rm -rf /home/${NB_USER}/.cache
 
-# ## Install conda packages
-# RUN conda install -c conda-forge nipype pip nb_conda_kernels \
-#     && conda clean --all -f -y \
-#     && rm -rf /home/${NB_USER}/.cache
-# RUN conda config --system --prepend envs_dirs '~/conda-environments'
+## Install conda packages
+RUN conda install -c conda-forge nipype pip nb_conda_kernels \
+    && conda clean --all -f -y \
+    && rm -rf /home/${NB_USER}/.cache
+RUN conda config --system --prepend envs_dirs '~/conda-environments'
 
 # Setup git
 RUN git config --global user.email "user@neurodesk.org" \
