@@ -272,8 +272,8 @@ COPY ./config/lxde/libfm.conf /home/${NB_USER}/.config/libfm
 
 RUN touch /home/${NB_USER}/.sudo_as_admin_successful
 
-# Add datalad-container datalad-osf and osfclient to the conda environment
-RUN pip install datalad-container datalad-osf osfclient
+# Add datalad-container datalad-osf osfclient ipyniivue to the conda environment
+RUN pip install datalad-container datalad-osf osfclient ipyniivue
 
 ENV DONT_PROMPT_WSL_INSTALL=1
 ENV PATH=$PATH:/home/${NB_USER}/.local/bin
