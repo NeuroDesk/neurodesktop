@@ -253,10 +253,17 @@ RUN mkdir -p /home/${NB_USER}/.config/matplotlib-mpldir \
 RUN chmod +x /usr/bin/fusermount
 
 # Create link to persistent storage on Desktop (This needs to happen before the users gets created!)
-RUN mkdir -p /home/${NB_USER}/neurodesktop-storage/containers \
-    && mkdir -p /home/${NB_USER}/Desktop/ /data \
-    && ln -s /home/${NB_USER}/neurodesktop-storage/ /neurodesktop-storage \
-    && ln -s /neurodesktop-storage /storage
+# This currently doesn't work, because /neurodesktop-storage gets mounted in from outside
+# RUN mkdir -p /home/${NB_USER}/neurodesktop-storage/containers \
+#     && mkdir -p /home/${NB_USER}/Desktop/ /data \
+#     && ln -s /home/${NB_USER}/neurodesktop-storage/ /neurodesktop-storage \
+#     && ln -s /neurodesktop-storage /storage
+
+# In kubernetes we later have to put persistent storage to /neurodesktop-storage
+RUN mkdir -p /home/${NB_USER}/Desktop/ /data \
+    && ln -s /neurodesktop-storage/ /home/${NB_USER} \
+    && ln -s /neurodesktop-storage /storage \
+    && ln -s /data /home/${NB_USER}
 
 # # Add checkversion script
 # COPY ./config/checkversion.sh /usr/share/
