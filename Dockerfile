@@ -52,7 +52,7 @@ RUN apt-get update --yes \
         gpg \
         gpg-agent \
         software-properties-common \
-        && apt-get clean && rm -rf /var/lib/apt/lists/*
+        && apt-get clean && rm -rf /var/lib/apt/lists/* 
 
 ARG GO_VERSION="1.20.4"
 ARG SINGULARITY_VERSION="3.11.3"
@@ -82,7 +82,7 @@ RUN export VERSION=${GO_VERSION} OS=linux ARCH=amd64 \
     && rm -rf singularity-ce-${SINGULARITY_VERSION} \
     && rm -rf /usr/local/go $GOPATH \
     && ln -s /usr/local/singularity/bin/singularity /bin/ \ 
-    && rm -rf /root/.cache
+    && rm -rf /root/.cache && rm -rf /home/${NB_USER}/.cache
 
 # Install Apache Tomcat
 RUN wget -q https://archive.apache.org/dist/tomcat/tomcat-${TOMCAT_REL}/v${TOMCAT_VERSION}/bin/apache-tomcat-${TOMCAT_VERSION}.tar.gz -P /tmp \
@@ -115,7 +115,8 @@ RUN curl https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > mic
     && wget -q -O- http://neuro.debian.net/lists/focal.us-nh.full | sudo tee /etc/apt/sources.list.d/neurodebian.sources.list \
     && apt-key adv --recv-keys --keyserver hkps://keyserver.ubuntu.com 0xA5D32F012649A5A9 \
     # NodeJS
-    && curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
+    && curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Install CVMFS
 RUN wget -q https://ecsft.cern.ch/dist/cvmfs/cvmfs-release/cvmfs-release-latest_all.deb -P /tmp \
@@ -229,10 +230,10 @@ RUN mkdir -p `curl https://raw.githubusercontent.com/NeuroDesk/neurocontainers/m
 # Fix "No session for pid prompt"
 RUN rm /usr/bin/lxpolkit
 
-## Update conda
-RUN conda update -n base conda \
-    && conda clean --all -f -y \
-    && rm -rf /home/${NB_USER}/.cache
+## Update conda / this will update pandoc and consume quite a bit of unnessary space
+# RUN conda update -n base conda \
+#     && conda clean --all -f -y \
+#     && rm -rf /home/${NB_USER}/.cache
 
 ## Install conda packages
 RUN conda install -c conda-forge nipype pip nb_conda_kernels \
