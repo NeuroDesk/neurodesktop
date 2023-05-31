@@ -36,6 +36,6 @@ then
         export neurodesk_singularity_opts="${neurodesk_singularity_opts} --nv "
 fi
 
-export PS1='\u@neurodesktop:\w$ '
+export PS1='\u@neurodesktop-$NEURODESKTOP_VERSION:\w$ '
 
 alias ll='ls -la'
