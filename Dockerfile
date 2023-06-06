@@ -326,6 +326,9 @@ RUN echo "${NB_USER} ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers.d/notebook \
     && /usr/bin/printf '%s\n%s\n' 'password' 'password' | passwd ${NB_USER} \
     && usermod --shell /bin/bash ${NB_USER}
 
+# Enable deletion of non-empty-directories in JupyterLab: https://github.com/jupyter/notebook/issues/4916
+RUN sed -i 's/c.FileContentsManager.delete_to_trash = False/c.FileContentsManager.always_delete_dir = True/g' /etc/jupyter/jupyter_server_config.py
+
 # Copy script to test_containers 
 COPY config/test_neurodesktop.sh /usr/share/test_neurodesktop.sh
 RUN chmod +x /usr/share/test_neurodesktop.sh
