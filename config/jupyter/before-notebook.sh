@@ -38,10 +38,10 @@ if mountpoint -q /data; then
 fi
 
 # check if we are connected to the internet:
-if curl --output /dev/null --silent --head --fail "http://cvmfs.neurodesk.org"; then
-  printf '%s\n' "http://cvmfs.neurodesk.org can be reached"
+if curl --output /dev/null --silent --head --fail "https://neurodesk.org"; then
+  printf '%s\n' "https://neurodesk.org can be reached"
 else
-  printf '%s\n' "http://cvmfs.neurodesk.org cannot be reached! Disabling CVMFS! Try mounting it manually once the container is started!"
+  printf '%s\n' "https://neurodesk.org cannot be reached! Disabling CVMFS! Try mounting it manually once the container is started!"
   export CVMFS_DISABLE=True
 fi
 
