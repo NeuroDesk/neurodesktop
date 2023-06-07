@@ -58,7 +58,7 @@ ARG GO_VERSION="1.20.4"
 ARG SINGULARITY_VERSION="3.11.3"
 ARG TOMCAT_REL="9"
 ARG TOMCAT_VERSION="9.0.75"
-ARG GUACAMOLE_VERSION="1.5.1"
+ARG GUACAMOLE_VERSION="1.5.2"
 
 ENV LANG ""
 ENV LANGUAGE ""
@@ -94,8 +94,8 @@ RUN wget -q https://archive.apache.org/dist/tomcat/tomcat-${TOMCAT_REL}/v${TOMCA
     && chmod +x /usr/local/tomcat/bin/*.sh
 
 # Install Apache Guacamole
-RUN wget -q "https://dlcdn.apache.org/guacamole/${GUACAMOLE_VERSION}/binary/guacamole-${GUACAMOLE_VERSION}.war" -O /usr/local/tomcat/webapps/ROOT.war \
-    && wget -q "https://dlcdn.apache.org/guacamole/${GUACAMOLE_VERSION}/source/guacamole-server-${GUACAMOLE_VERSION}.tar.gz" -P /tmp \
+RUN wget -q "https://archive.apache.org/dist/guacamole/${GUACAMOLE_VERSION}/binary/guacamole-${GUACAMOLE_VERSION}.war" -O /usr/local/tomcat/webapps/ROOT.war \
+    && wget -q "https://archive.apache.org/dist/guacamole/${GUACAMOLE_VERSION}/source/guacamole-server-${GUACAMOLE_VERSION}.tar.gz" -P /tmp \
     && tar xvf /tmp/guacamole-server-${GUACAMOLE_VERSION}.tar.gz -C /tmp \
     && rm /tmp/guacamole-server-${GUACAMOLE_VERSION}.tar.gz \
     && cd /tmp/guacamole-server-${GUACAMOLE_VERSION} \
