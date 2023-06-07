@@ -51,7 +51,7 @@ if [ ! -d "/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/" ]; then
         # CVMFS is not disabled
 
         # try to list the directory in case it's autofs mounted outside
-        ls /cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/ >> /dev/null && echo "CVMFS is ready" || echo "CVMFS directory not there. Trying internal fuse mount next."
+        ls /cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/ 2>/dev/null && echo "CVMFS is ready" || echo "CVMFS directory not there. Trying internal fuse mount next."
 
         if [ ! -d "/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/" ]; then
             # it is not available outside, so try mounting with fuse inside container
