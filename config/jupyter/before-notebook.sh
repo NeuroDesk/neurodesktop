@@ -6,30 +6,7 @@
 usermod --shell /bin/bash ${NB_USER}
 
 
-if [ ! -d "/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/" ]; then
-    # the cvmfs directory is not yet mounted
-    if [ -z "$CVMFS_DISABLE" ]; then
-        # CVMFS is not disabled
 
-        # try to list the directory in case it's autofs mounted outside
-        ls /cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/ >> /dev/null && echo "CVMFS is ready" || echo "CVMFS directory not there. Trying internal fuse mount next."
-
-        if [ ! -d "/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/" ]; then
-            # it is not available outside, so try mounting with fuse inside container
-            echo "\
-            ==================================================================
-            Mounting CVMFS"
-            mkdir -p /cvmfs/neurodesk.ardc.edu.au
-            mount -t cvmfs neurodesk.ardc.edu.au /cvmfs/neurodesk.ardc.edu.au
-
-            echo "\
-            ==================================================================
-            Testing which CVMFS server is fastest"
-            cvmfs_talk -i neurodesk.ardc.edu.au host probe
-            cvmfs_talk -i neurodesk.ardc.edu.au host info
-        fi
-    fi
-fi
 
 # Generate SSH keys
 if [ ! -f "/home/${NB_USER}/.ssh/guacamole_rsa" ]; then
@@ -58,6 +35,40 @@ sudo service ssh stop
 # Create a symlink in home if /data is mounted
 if mountpoint -q /data; then
     ln -s /data /home/${NB_USER}/data
+fi
+
+# check if we are connected to the internet:
+if curl --output /dev/null --silent --head --fail "https://neurodesk.org"; then
+  printf '%s\n' "https://neurodesk.org can be reached"
+else
+  printf '%s\n' "https://neurodesk.org cannot be reached! Disabling CVMFS! Try mounting it manually once the container is started!"
+  export CVMFS_DISABLE=True
+fi
+
+if [ ! -d "/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/" ]; then
+    # the cvmfs directory is not yet mounted
+    if [ -z "$CVMFS_DISABLE" ]; then
+        # CVMFS is not disabled
+
+        # try to list the directory in case it's autofs mounted outside
+        ls /cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/ 2>/dev/null && echo "CVMFS is ready" || echo "CVMFS directory not there. Trying internal fuse mount next."
+
+        if [ ! -d "/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/" ]; then
+            # it is not available outside, so try mounting with fuse inside container
+
+            echo "\
+            ==================================================================
+            Mounting CVMFS"
+            mkdir -p /cvmfs/neurodesk.ardc.edu.au
+            mount -t cvmfs neurodesk.ardc.edu.au /cvmfs/neurodesk.ardc.edu.au
+
+            echo "\
+            ==================================================================
+            Testing which CVMFS server is fastest"
+            cvmfs_talk -i neurodesk.ardc.edu.au host probe
+            cvmfs_talk -i neurodesk.ardc.edu.au host info
+        fi
+    fi
 fi
 
 source /opt/neurodesktop/environment_variables.sh
