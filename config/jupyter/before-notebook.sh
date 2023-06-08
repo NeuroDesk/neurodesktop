@@ -59,8 +59,10 @@ if [ ! -d "/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/" ]; then
             echo "\
             ==================================================================
             Mounting CVMFS"
+            service autofs stop
             mkdir -p /cvmfs/neurodesk.ardc.edu.au
             mount -t cvmfs neurodesk.ardc.edu.au /cvmfs/neurodesk.ardc.edu.au
+            ls /cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/ 2>/dev/null && echo "CVMFS is ready" || echo "CVMFS directory not there."
 
             echo "\
             ==================================================================
