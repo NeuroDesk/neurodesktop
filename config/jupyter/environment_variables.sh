@@ -1,4 +1,4 @@
-# This file is source once in before-notebook.sh and once in ~/.bashrc so we get the same environment variables in the jupyter and in the desktop environment
+# This file is sourced once in before-notebook.sh and once in ~/.bashrc so we get the same environment variables in the jupyter and in the desktop environment
 if [[ -z "$NB_USER" ]]; then
     NB_USER=$USER
 fi
