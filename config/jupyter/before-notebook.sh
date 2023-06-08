@@ -59,16 +59,22 @@ if [ ! -d "/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/" ]; then
             echo "\
             ==================================================================
             Mounting CVMFS"
-            service autofs stop
-            mkdir -p /cvmfs/neurodesk.ardc.edu.au
-            mount -t cvmfs neurodesk.ardc.edu.au /cvmfs/neurodesk.ardc.edu.au
-            ls /cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/ 2>/dev/null && echo "CVMFS is ready" || echo "CVMFS directory not there."
+            if ( service autofs status > /dev/null ); then
+                 echo "autofs is running - not attempting to mount manually"
+                 ls /cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/ 2>/dev/null && echo "CVMFS is ready after autofs mount" || echo "AutoFS not working!"
+            else
+                echo "autofs is NOT running - attempting to mount manually:"
+                mkdir -p /cvmfs/neurodesk.ardc.edu.au
+                mount -t cvmfs neurodesk.ardc.edu.au /cvmfs/neurodesk.ardc.edu.au
 
-            echo "\
-            ==================================================================
-            Testing which CVMFS server is fastest"
-            cvmfs_talk -i neurodesk.ardc.edu.au host probe
-            cvmfs_talk -i neurodesk.ardc.edu.au host info
+                ls /cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/ 2>/dev/null && echo "CVMFS is ready after manual mount" || echo "Manual CVMFS mount not successful"
+
+                echo "\
+                ==================================================================
+                Testing which CVMFS server is fastest"
+                cvmfs_talk -i neurodesk.ardc.edu.au host probe
+                cvmfs_talk -i neurodesk.ardc.edu.au host info
+            fi
         fi
     fi
 fi
