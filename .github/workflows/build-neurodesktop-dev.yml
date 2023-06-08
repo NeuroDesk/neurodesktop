@@ -68,8 +68,8 @@ jobs:
         # Push to GH Packages
         docker tag $IMAGEID:$SHORT_SHA $IMAGEID:$BUILDDATE
         docker tag $IMAGEID:$SHORT_SHA $IMAGEID:latest
-        docker push $IMAGEID:latest
         docker push $IMAGEID:$BUILDDATE
+        docker push $IMAGEID:latest
     - name: Push image to Docker Hub (if enabled & changes found)
       if: ${{ env.GITHUB_RATE_REMAINING > 0 && env.ROOTFS_NEW != env.ROOTFS_CACHE && env.DOCKERHUB_ORG != '' }}
       run: |
@@ -77,8 +77,17 @@ jobs:
         # Push to GH Packages
         docker tag $IMAGEID:$SHORT_SHA $DOCKERHUB_ORG/$IMAGENAME:$BUILDDATE
         docker tag $IMAGEID:$SHORT_SHA $DOCKERHUB_ORG/$IMAGENAME:latest
-        docker push $DOCKERHUB_ORG/$IMAGENAME:latest
         docker push $DOCKERHUB_ORG/$IMAGENAME:$BUILDDATE
+        docker push $DOCKERHUB_ORG/$IMAGENAME:latest
+    - name: Push image to Oracle Container Registry (if enabled & changes found)
+      if: ${{ env.GITHUB_RATE_REMAINING > 0 && env.ROOTFS_NEW != env.ROOTFS_CACHE && env.DOCKERHUB_ORG != '' }}
+      run: |
+        echo "${{ secrets.OCIR_PASSWORD }}" | docker login syd.ocir.io -u ${{ secrets.OCIR_USERNAME }} --password-stdin
+        # Push to GH Packages
+        docker tag $IMAGEID:$SHORT_SHA ${OCIR_REPO}/${IMAGENAME}:${BUILDDATE}
+        docker tag $IMAGEID:$SHORT_SHA ${OCIR_REPO}/${IMAGENAME}:latest
+        docker push ${OCIR_REPO}/${IMAGENAME}:${BUILDDATE}
+        docker push ${OCIR_REPO}/${IMAGENAME}:latest
     - name: Container image scan
       if: ${{ env.GITHUB_RATE_REMAINING > 0 }}
       uses: aquasecurity/trivy-action@0.8.0
