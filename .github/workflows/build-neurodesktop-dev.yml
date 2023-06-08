@@ -91,7 +91,7 @@ jobs:
         echo "${{ secrets.OCIR_PASSWORD }}" | docker login syd.ocir.io -u ${{ secrets.OCIR_USERNAME }} --password-stdin
         # Push to GH Packages
         echo ${OCIR_REPO}
-        docker tag $IMAGEID:$SHORT_SHA "${OCIR_REPO}/${IMAGENAME}:${BUILDDATE}""
+        docker tag $IMAGEID:$SHORT_SHA "${OCIR_REPO}/${IMAGENAME}:${BUILDDATE}"
         docker tag $IMAGEID:$SHORT_SHA "${OCIR_REPO}/${IMAGENAME}:latest"
         docker push "${OCIR_REPO}/${IMAGENAME}:${BUILDDATE}"
         docker push "${OCIR_REPO}/${IMAGENAME}:latest"
