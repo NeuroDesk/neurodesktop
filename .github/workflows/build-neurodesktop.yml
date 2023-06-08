@@ -8,11 +8,18 @@ name: Build neurodesktop
 
 on:
   workflow_dispatch:
+    inputs:
+      force_push:
+        description: 'Force push?'
+        type: boolean
+        required: true
+        default: false
   schedule:
     - cron:  '0 17 * * *'
     
 env:
-  DOCKERHUB_ORG: ${{ secrets.DOCKERHUB_ORG }}
+  DOCKERHUB_ORG: ${{ vars.DOCKERHUB_ORG }}
+  OCIR_REPO: ${{ vars.OCIR_REPO }}
 
 jobs:
   build-image:
@@ -63,22 +70,32 @@ jobs:
         ROOTFS_NEW=$(docker inspect --format='{{.RootFS}}' $IMAGEID:$SHORT_SHA)
         echo "ROOTFS_NEW=$ROOTFS_NEW" >> $GITHUB_ENV
     - name: Push image to GitHub packages (if changes found)
-      if: ${{ env.GITHUB_RATE_REMAINING > 0 && env.ROOTFS_NEW != env.ROOTFS_CACHE }}
+      if: ${{ github.event.inputs.force_push == 'true' || (env.GITHUB_RATE_REMAINING > 0 && env.ROOTFS_NEW != env.ROOTFS_CACHE && env.DOCKERHUB_ORG != '') }}
       run: |
         # Push to GH Packages
         docker tag $IMAGEID:$SHORT_SHA $IMAGEID:$BUILDDATE
         docker tag $IMAGEID:$SHORT_SHA $IMAGEID:latest
-        docker push $IMAGEID:latest
         docker push $IMAGEID:$BUILDDATE
+        docker push $IMAGEID:latest
     - name: Push image to Docker Hub (if enabled & changes found)
-      if: ${{ env.GITHUB_RATE_REMAINING > 0 && env.ROOTFS_NEW != env.ROOTFS_CACHE && env.DOCKERHUB_ORG != '' }}
+      if: ${{ github.event.inputs.force_push == 'true' || (env.GITHUB_RATE_REMAINING > 0 && env.ROOTFS_NEW != env.ROOTFS_CACHE && env.DOCKERHUB_ORG != '') }}
       run: |
         echo "${{ secrets.DOCKERHUB_PASSWORD }}" | docker login -u ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin
         # Push to GH Packages
         docker tag $IMAGEID:$SHORT_SHA $DOCKERHUB_ORG/$IMAGENAME:$BUILDDATE
         docker tag $IMAGEID:$SHORT_SHA $DOCKERHUB_ORG/$IMAGENAME:latest
-        docker push $DOCKERHUB_ORG/$IMAGENAME:latest
         docker push $DOCKERHUB_ORG/$IMAGENAME:$BUILDDATE
+        docker push $DOCKERHUB_ORG/$IMAGENAME:latest
+    - name: Push image to Oracle Container Registry (if enabled & changes found)
+      if: ${{ github.event.inputs.force_push == 'true' || (env.GITHUB_RATE_REMAINING > 0 && env.ROOTFS_NEW != env.ROOTFS_CACHE && env.OCIR_REPO != '') }}
+      run: |
+        echo "${{ secrets.OCIR_PASSWORD }}" | docker login syd.ocir.io -u ${{ secrets.OCIR_USERNAME }} --password-stdin
+        # Push to GH Packages
+        echo ${OCIR_REPO}
+        docker tag $IMAGEID:$SHORT_SHA "${OCIR_REPO}/${IMAGENAME}:${BUILDDATE}"
+        docker tag $IMAGEID:$SHORT_SHA "${OCIR_REPO}/${IMAGENAME}:latest"
+        docker push "${OCIR_REPO}/${IMAGENAME}:${BUILDDATE}"
+        docker push "${OCIR_REPO}/${IMAGENAME}:latest"
     - name: Container image scan
       if: ${{ env.GITHUB_RATE_REMAINING > 0 }}
       uses: aquasecurity/trivy-action@0.8.0
