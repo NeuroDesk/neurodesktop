@@ -2,4 +2,3 @@
 .DS_Store
 secret*
 build_and_push.sh
-binder
