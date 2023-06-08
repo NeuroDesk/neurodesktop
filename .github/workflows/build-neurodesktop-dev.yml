@@ -18,8 +18,8 @@ on:
   #   - cron:  '0 17 * * *'
     
 env:
-  DOCKERHUB_ORG: ${{ secrets.DOCKERHUB_ORG }}
-  OCIR_REPO: ${{ secrets.OCIR_REPO }}
+  DOCKERHUB_ORG: ${{ vars.DOCKERHUB_ORG }}
+  OCIR_REPO: ${{ vars.OCIR_REPO }}
 
 jobs:
   build-image:
