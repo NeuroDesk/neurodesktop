@@ -36,7 +36,7 @@ jobs:
         FORCE_PUSH="${{ github.event.inputs.force_push }}"
         echo "FORCE_PUSH=$FORCE_PUSH" >> $GITHUB_ENV
     - name: Test if force push enabled (if changes found)
-      if: ${{ github.event.inputs.force_push == 'true' }}
+      if: ${{ github.event.inputs.force_push == 'true' && false }}
       run: echo "Force push enabled"
     # - name: Checkout repository
     #   if: ${{ env.GITHUB_RATE_REMAINING > 0 }}
