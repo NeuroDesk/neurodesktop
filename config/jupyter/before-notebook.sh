@@ -37,14 +37,6 @@ if mountpoint -q /data; then
     ln -s /data /home/${NB_USER}/data
 fi
 
-# check if we are connected to the internet:
-if curl --output /dev/null --silent --head --fail "https://neurodesk.org"; then
-  printf '%s\n' "https://neurodesk.org can be reached"
-else
-  printf '%s\n' "https://neurodesk.org cannot be reached! Disabling CVMFS! Try mounting it manually once the container is started!"
-  export CVMFS_DISABLE=True
-fi
-
 if [ ! -d "/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/" ]; then
     # the cvmfs directory is not yet mounted
     if [ -z "$CVMFS_DISABLE" ]; then
@@ -60,7 +52,7 @@ if [ ! -d "/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/" ]; then
             ==================================================================
             Mounting CVMFS"
             if ( service autofs status > /dev/null ); then
-                 echo "autofs is running - not attempting to mount manually"
+                 echo "autofs is running - not attempting to mount manually:"
                  ls /cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/ 2>/dev/null && echo "CVMFS is ready after autofs mount" || echo "AutoFS not working!"
             else
                 echo "autofs is NOT running - attempting to mount manually:"
