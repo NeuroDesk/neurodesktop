@@ -19,6 +19,7 @@ on:
     
 env:
   DOCKERHUB_ORG: ${{ secrets.DOCKERHUB_ORG }}
+  OCIR_REPO: ${{ secrets.OCIR_REPO }}
 
 jobs:
   build-image:
@@ -86,7 +87,7 @@ jobs:
         docker push $DOCKERHUB_ORG/$IMAGENAME:$BUILDDATE
         docker push $DOCKERHUB_ORG/$IMAGENAME:latest
     - name: Push image to Oracle Container Registry (if enabled & changes found)
-      if: ${{ github.event.inputs.force_push == 'true' || (env.GITHUB_RATE_REMAINING > 0 && env.ROOTFS_NEW != env.ROOTFS_CACHE && env.DOCKERHUB_ORG != '') }}
+      if: ${{ github.event.inputs.force_push == 'true' || (env.GITHUB_RATE_REMAINING > 0 && env.ROOTFS_NEW != env.ROOTFS_CACHE && env.OCIR_REPO != '') }}
       run: |
         echo "${{ secrets.OCIR_PASSWORD }}" | docker login syd.ocir.io -u ${{ secrets.OCIR_USERNAME }} --password-stdin
         # Push to GH Packages
