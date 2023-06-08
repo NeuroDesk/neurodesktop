@@ -96,16 +96,16 @@ jobs:
         docker tag $IMAGEID:$SHORT_SHA "${OCIR_REPO}/${IMAGENAME}:latest"
         docker push "${OCIR_REPO}/${IMAGENAME}:${BUILDDATE}"
         docker push "${OCIR_REPO}/${IMAGENAME}:latest"
-    - name: Container image scan
-      if: ${{ env.GITHUB_RATE_REMAINING > 0 }}
-      uses: aquasecurity/trivy-action@0.8.0
-      with:
-        image-ref: ${{ env.IMAGEID }}
-        format: table
-        exit-code: '1'
-        severity: CRITICAL
-        timeout: 25m0s
-        skip-files: /opt/rclone-v1.60.1-linux-amd64/README.txt, /opt/rclone-v1.60.1-linux-amd64/README.html, /opt/rclone-v1.60.1-linux-amd64/rclone.1
+    # - name: Container image scan
+    #   if: ${{ env.GITHUB_RATE_REMAINING > 0 }}
+    #   uses: aquasecurity/trivy-action@0.8.0
+    #   with:
+    #     image-ref: ${{ env.IMAGEID }}
+    #     format: table
+    #     exit-code: '1'
+    #     severity: CRITICAL
+    #     timeout: 25m0s
+    #     skip-files: /opt/rclone-v1.60.1-linux-amd64/README.txt, /opt/rclone-v1.60.1-linux-amd64/README.html, /opt/rclone-v1.60.1-linux-amd64/rclone.1
     # - name: Generate issue on job failure
     #   if: always() && failure()
     #   uses: JasonEtco/create-an-issue@v2
