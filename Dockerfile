@@ -291,6 +291,7 @@ ENV LMOD_CMD /usr/share/lmod/lmod/libexec/lmod
 RUN su ${NB_USER} -c "/opt/conda/bin/pip install jupyter-server-proxy" \
     && su ${NB_USER} -c "/opt/conda/bin/jupyter labextension disable @jupyterlab/apputils-extension:announcements" \ 
     && su ${NB_USER} -c "/opt/conda/bin/pip install jupyterlmod" \ 
+    && su ${NB_USER} -c "/opt/conda/bin/pip install jupyterlab-git" \
     && rm -rf /home/${NB_USER}/.cache
     
 # Add notebook startup scripts
