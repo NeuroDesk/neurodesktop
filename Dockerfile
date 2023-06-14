@@ -126,6 +126,7 @@ RUN wget -q https://ecsft.cern.ch/dist/cvmfs/cvmfs-release/cvmfs-release-latest_
 # Install Tools and Libs
 RUN apt-get update --yes \
     && DEBIAN_FRONTEND=noninteractive apt install --yes --no-install-recommends \
+        acl \
         aria2 \
         code \
         cvmfs \
