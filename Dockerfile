@@ -1,4 +1,3 @@
-
 FROM jupyter/base-notebook:2023-05-01
 # FROM jupyter/base-notebook:python-3.10.10
 
@@ -7,6 +6,10 @@ FROM jupyter/base-notebook:2023-05-01
 # https://github.com/jupyter/docker-stacks/blob/86d42cadf4695b8e6fc3b3ead58e1f71067b765b/base-notebook/Dockerfile
 
 USER root
+
+#========================================#
+# Core services
+#========================================#
 
 # Install base image dependancies
 RUN apt-get update --yes \
@@ -46,6 +49,7 @@ RUN apt-get update --yes \
         # Destop Env
         lxde \
         # Installer tools
+        acl \
         wget \
         curl \
         dirmngr \ 
@@ -105,12 +109,22 @@ RUN wget -q "https://archive.apache.org/dist/guacamole/${GUACAMOLE_VERSION}/bina
     && ldconfig \
     && rm -r /tmp/guacamole-server-${GUACAMOLE_VERSION}
 
+# Set home directory default acls
+RUN chmod g+rwxs /home/${NB_USER}
+RUN setfacl -dRm u::rwX,g::rwX,o::0 /home/${NB_USER}
+
+#========================================#
+# Software
+#========================================#
+
 # Add Software sources
-RUN curl https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > microsoft.gpg \
-    && mv microsoft.gpg /etc/apt/trusted.gpg.d/microsoft.gpg \
+RUN curl https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > /tmp/microsoft.gpg \
+    && mv /tmp/microsoft.gpg /etc/apt/trusted.gpg.d/microsoft.gpg \
     && echo "deb [arch=amd64] http://packages.microsoft.com/repos/vscode stable main" | tee /etc/apt/sources.list.d/vs-code.list \
     # Nextcloud Client
     && add-apt-repository ppa:nextcloud-devs/client \
+    && chmod -R 770 /home/${NB_USER}/.launchpadlib \
+    && chown -R ${CHOWN_HOME_OPTS} ${NB_UID}:${NB_GID} /home/${NB_USER}/.launchpadlib \
     # Datalad
     && wget -q -O- http://neuro.debian.net/lists/focal.us-nh.full | sudo tee /etc/apt/sources.list.d/neurodebian.sources.list \
     && apt-key adv --recv-keys --keyserver hkps://keyserver.ubuntu.com 0xA5D32F012649A5A9 \
@@ -126,7 +140,6 @@ RUN wget -q https://ecsft.cern.ch/dist/cvmfs/cvmfs-release/cvmfs-release-latest_
 # Install Tools and Libs
 RUN apt-get update --yes \
     && DEBIAN_FRONTEND=noninteractive apt install --yes --no-install-recommends \
-        acl \
         aria2 \
         code \
         cvmfs \
@@ -190,6 +203,10 @@ RUN add-apt-repository ppa:mozillateam/ppa \
 COPY config/firefox/mozillateamppa /etc/apt/preferences.d/mozillateamppa
 COPY config/firefox/syspref.js /etc/firefox/syspref.js
 
+#========================================#
+# Configuration (as root user)
+#========================================#
+
 # Create cvmfs keys
 RUN mkdir -p /etc/cvmfs/keys/ardc.edu.au
 COPY config/cvmfs/neurodesk.ardc.edu.au.pub /etc/cvmfs/keys/ardc.edu.au/neurodesk.ardc.edu.au.pub
@@ -198,28 +215,17 @@ COPY config/cvmfs/default.local /etc/cvmfs/default.local
 # This causes conflicts with an external cvmfs setup that gets mounted
 # RUN cvmfs_config setup
 
-# # Customise logo, wallpaper, terminal, panel
+# # Customise logo, wallpaper, terminal
 COPY config/jupyter/neurodesk_brain_logo.svg /opt/neurodesk_brain_logo.svg
 COPY config/jupyter/neurodesk_brain_icon.svg /opt/neurodesk_brain_icon.svg
 
 COPY config/lxde/background.png /usr/share/lxde/wallpapers/desktop_wallpaper.png
 COPY config/lxde/pcmanfm.conf /etc/xdg/pcmanfm/LXDE/pcmanfm.conf
 COPY config/lxde/lxterminal.conf /usr/share/lxterminal/lxterminal.conf
-COPY config/lxde/panel /home/${NB_USER}/.config/lxpanel/LXDE/panels/panel
-
 COPY config/lmod/module.sh /usr/share/
-COPY config/lxde/.bashrc /home/${NB_USER}/tmp_bashrc
-RUN cat /home/${NB_USER}/tmp_bashrc >> /home/${NB_USER}/.bashrc \
-     && rm /home/${NB_USER}/tmp_bashrc
 
 # Configure tiling of windows SHIFT-ALT-CTR-{Left,right,top,Bottom} and other openbox desktop mods
 COPY ./config/lxde/rc.xml /etc/xdg/openbox
-
-# Configure ITKsnap
-RUN mkdir -p /home/${NB_USER}/.itksnap.org/ITK-SNAP \
-    && chown ${NB_USER} /home/${NB_USER}/.itksnap.org -R
-COPY ./config/itksnap/UserPreferences.xml /home/${NB_USER}/.itksnap.org
-COPY ./config/lxde/mimeapps.list /home/${NB_USER}/.config/mimeapps.list
 
 # Allow the root user to access the sshfs mount
 # https://github.com/NeuroDesk/neurodesk/issues/47
@@ -230,6 +236,48 @@ RUN mkdir -p `curl https://raw.githubusercontent.com/NeuroDesk/neurocontainers/m
 
 # Fix "No session for pid prompt"
 RUN rm /usr/bin/lxpolkit
+
+# enable rootless mounts: 
+RUN chmod +x /usr/bin/fusermount
+    
+# Add notebook startup scripts
+# https://jupyter-docker-stacks.readthedocs.io/en/latest/using/common.html
+RUN mkdir -p /usr/local/bin/start-notebook.d/ \
+    && mkdir -p /usr/local/bin/before-notebook.d/
+COPY config/jupyter/start-notebook.sh /usr/local/bin/start-notebook.d/
+COPY config/jupyter/before-notebook.sh /usr/local/bin/before-notebook.d/
+
+# Create Guacamole configurations (user-mapping.xml gets filled in the startup.sh script)
+RUN mkdir -p /etc/guacamole \
+    && echo -e "user-mapping: /etc/guacamole/user-mapping.xml\nguacd-hostname: 127.0.0.1" > /etc/guacamole/guacamole.properties \
+    && echo -e "[server]\nbind_host = 127.0.0.1\nbind_port = 4822" > /etc/guacamole/guacd.conf
+
+# Add NB_USER to sudoers
+RUN echo "${NB_USER} ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers.d/notebook \
+# The following apply to Singleuser mode only. See config/jupyter/before-notebook.sh for Notebook mode
+    && /usr/bin/printf '%s\n%s\n' 'password' 'password' | passwd ${NB_USER} \
+    && usermod --shell /bin/bash ${NB_USER}
+
+# Enable deletion of non-empty-directories in JupyterLab: https://github.com/jupyter/notebook/issues/4916
+RUN sed -i 's/c.FileContentsManager.delete_to_trash = False/c.FileContentsManager.always_delete_dir = True/g' /etc/jupyter/jupyter_server_config.py
+
+# Copy script to test_containers 
+COPY config/test_neurodesktop.sh /usr/share/test_neurodesktop.sh
+
+# Install version 1.1.1 of fix_bash.sh that is required for test_containers
+RUN chmod +x /usr/share/test_neurodesktop.sh \
+      && git clone https://github.com/civier/fix_bash.git /tmp/fix_bash \
+      && cd /tmp/fix_bash \
+      && git checkout tags/1.1.1 \
+      && cp /tmp/fix_bash/fix_bash.sh /usr/share \
+      && rm -Rf /tmp/fix_bash
+
+#========================================#
+# Configuration (as notebook user)
+#========================================#
+
+# Switch to notebook user
+USER ${NB_USER}
 
 ## Update conda / this will update pandoc and consume quite a bit of unnessary space
 # RUN conda update -n base conda \
@@ -242,6 +290,17 @@ RUN conda install -c conda-forge nipype pip nb_conda_kernels \
     && rm -rf /home/${NB_USER}/.cache
 RUN conda config --system --prepend envs_dirs '~/conda-environments'
 
+# Configure ITKsnap
+RUN mkdir -p /home/${NB_USER}/.itksnap.org/ITK-SNAP \
+    && chown ${NB_USER} /home/${NB_USER}/.itksnap.org -R
+COPY --chown=${NB_USER}:users ./config/itksnap/UserPreferences.xml /home/${NB_USER}/.itksnap.org
+COPY --chown=${NB_USER}:users ./config/lxde/mimeapps.list /home/${NB_USER}/.config/mimeapps.list
+
+COPY --chown=${NB_USER}:users config/lxde/panel /home/${NB_USER}/.config/lxpanel/LXDE/panels/panel
+COPY --chown=${NB_USER}:users config/lxde/.bashrc /home/${NB_USER}/tmp_bashrc
+RUN cat /home/${NB_USER}/tmp_bashrc >> /home/${NB_USER}/.bashrc \
+     && rm /home/${NB_USER}/tmp_bashrc
+
 # Setup git
 RUN git config --global user.email "user@neurodesk.org" \
     && git config --global user.name "Neurodesk User"
@@ -250,22 +309,6 @@ RUN git config --global user.email "user@neurodesk.org" \
 RUN mkdir -p /home/${NB_USER}/.config/matplotlib-mpldir \
     && chmod -R 700 /home/${NB_USER}/.config/matplotlib-mpldir \
     && chown -R ${NB_USER}:users /home/${NB_USER}/.config/matplotlib-mpldir
-
-# enable rootless mounts: 
-RUN chmod +x /usr/bin/fusermount
-
-# Create link to persistent storage on Desktop (This needs to happen before the users gets created!)
-# This currently doesn't work, because /neurodesktop-storage gets mounted in from outside
-# RUN mkdir -p /home/${NB_USER}/neurodesktop-storage/containers \
-#     && mkdir -p /home/${NB_USER}/Desktop/ /data \
-#     && ln -s /home/${NB_USER}/neurodesktop-storage/ /neurodesktop-storage \
-#     && ln -s /neurodesktop-storage /storage
-
-# In kubernetes we later have to put persistent storage to /neurodesktop-storage
-RUN mkdir -p /home/${NB_USER}/Desktop/ /data \
-    && ln -s /neurodesktop-storage/ /home/${NB_USER} \
-    && ln -s /neurodesktop-storage /storage \
-    && ln -s /data /home/${NB_USER}
 
 # # Add checkversion script
 # COPY ./config/checkversion.sh /usr/share/
@@ -281,7 +324,7 @@ COPY ./config/lxde/libfm.conf /home/${NB_USER}/.config/libfm
 RUN touch /home/${NB_USER}/.sudo_as_admin_successful
 
 # Add datalad-container datalad-osf osfclient ipyniivue to the conda environment
-RUN su ${NB_USER} -c "/opt/conda/bin/pip install datalad-container datalad-osf osfclient ipyniivue" \
+RUN /opt/conda/bin/pip install datalad-container datalad-osf osfclient ipyniivue \
     && rm -rf /home/${NB_USER}/.cache
 
 ENV DONT_PROMPT_WSL_INSTALL=1
@@ -289,59 +332,43 @@ ENV LMOD_CMD /usr/share/lmod/lmod/libexec/lmod
 
 # Install jupyter-server-proxy and disable announcements
 # Depracated: jupyter labextension install ..
-RUN su ${NB_USER} -c "/opt/conda/bin/pip install jupyter-server-proxy" \
-    && su ${NB_USER} -c "/opt/conda/bin/jupyter labextension disable @jupyterlab/apputils-extension:announcements" \ 
-    && su ${NB_USER} -c "/opt/conda/bin/pip install jupyterlmod" \ 
-    && su ${NB_USER} -c "/opt/conda/bin/pip install jupyterlab-git" \
+RUN /opt/conda/bin/pip install jupyter-server-proxy \
+    && /opt/conda/bin/jupyter labextension disable @jupyterlab/apputils-extension:announcements \ 
+    && /opt/conda/bin/pip install jupyterlmod \ 
+    && /opt/conda/bin/pip install jupyterlab-git \
     && rm -rf /home/${NB_USER}/.cache
-    
-# Add notebook startup scripts
-# https://jupyter-docker-stacks.readthedocs.io/en/latest/using/common.html
-RUN mkdir -p /usr/local/bin/start-notebook.d/ \
-    && mkdir -p /usr/local/bin/before-notebook.d/
-COPY config/jupyter/start-notebook.sh /usr/local/bin/start-notebook.d/
-COPY config/jupyter/before-notebook.sh /usr/local/bin/before-notebook.d/
-
-# Create Guacamole configurations (user-mapping.xml gets filled in the startup.sh script)
-RUN mkdir -p /etc/guacamole \
-    && echo -e "user-mapping: /etc/guacamole/user-mapping.xml\nguacd-hostname: 127.0.0.1" > /etc/guacamole/guacamole.properties \
-    && echo -e "[server]\nbind_host = 127.0.0.1\nbind_port = 4822" > /etc/guacamole/guacd.conf
 
 # Add startup and config files for neurodesktop, jupyter, guacamole, vnc
 RUN mkdir /home/${NB_USER}/.vnc \
     && chown ${NB_USER} /home/${NB_USER}/.vnc \
-    && /usr/bin/printf '%s\n%s\n%s\n' 'password' 'password' 'n' | su ${NB_USER} -c vncpasswd
+    && /usr/bin/printf '%s\n%s\n%s\n' 'password' 'password' 'n' | vncpasswd
 COPY --chown=${NB_USER}:users config/lxde/xstartup /home/${NB_USER}/.vnc
 COPY --chown=${NB_USER}:root config/guacamole/user-mapping.xml /etc/guacamole/user-mapping.xml
 COPY --chown=${NB_USER}:users config/guacamole/guacamole.sh /opt/neurodesktop/guacamole.sh
 COPY --chown=${NB_USER}:users config/jupyter/environment_variables.sh /opt/neurodesktop/environment_variables.sh
 COPY --chown=${NB_USER}:users config/jupyter/jupyter_notebook_config.py /home/${NB_USER}/.jupyter/jupyter_notebook_config.py
 COPY --chown=${NB_USER}:users config/ssh/sshd_config /home/${NB_USER}/.ssh/sshd_config
-COPY --chown=${NB_USER}:users config/k8s/postStart_setacl_homedir.sh /tmp/postStart_setacl_homedir.sh
-COPY --chown=${NB_USER}:users config/k8s/postStart_copy_homedir.sh /tmp/postStart_copy_homedir.sh
+COPY --chown=${NB_USER}:users config/k8s/k8s_postStart_copy_homedir.sh /tmp/k8s_postStart_copy_homedir.sh
 COPY --chown=${NB_USER}:users config/conda/conda-readme.md /home/${NB_USER}/
 RUN chmod +x /opt/neurodesktop/guacamole.sh \
     /home/${NB_USER}/.jupyter/jupyter_notebook_config.py \
     /home/${NB_USER}/.vnc/xstartup
 
-RUN echo "${NB_USER} ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers.d/notebook \
-# The following apply to Singleuser mode only. See config/jupyter/before-notebook.sh for Notebook mode
-    && /usr/bin/printf '%s\n%s\n' 'password' 'password' | passwd ${NB_USER} \
-    && usermod --shell /bin/bash ${NB_USER}
+# Set up working directories and symlinks
+RUN mkdir -p /home/${NB_USER}/Desktop/ \
+    && ln -s /neurodesktop-storage/ /home/${NB_USER} \
+    && ln -s /data /home/${NB_USER}
 
-# Enable deletion of non-empty-directories in JupyterLab: https://github.com/jupyter/notebook/issues/4916
-RUN sed -i 's/c.FileContentsManager.delete_to_trash = False/c.FileContentsManager.always_delete_dir = True/g' /etc/jupyter/jupyter_server_config.py
+#========================================#
+# Finalise build
+#========================================#
 
-# Copy script to test_containers 
-COPY config/test_neurodesktop.sh /usr/share/test_neurodesktop.sh
-RUN chmod +x /usr/share/test_neurodesktop.sh
+# Switch to root user
+USER root
 
-# Install version 1.1.1 of fix_bash.sh that is required for test_containers
-RUN git clone https://github.com/civier/fix_bash.git /tmp/fix_bash \
-      && cd /tmp/fix_bash \
-      && git checkout tags/1.1.1 \
-      && cp /tmp/fix_bash/fix_bash.sh /usr/share \
-      && rm -Rf /tmp/fix_bash
+# Set up working directories and symlinks
+RUN mkdir -p /data \
+    && ln -s /neurodesktop-storage /storage
 
 # Install neurocommand
 ADD "https://api.github.com/repos/neurodesk/neurocommand/git/refs/heads/main" /tmp/skipcache
@@ -350,11 +377,13 @@ RUN rm /tmp/skipcache \
     && cd /neurocommand \
     && bash build.sh --lxde --edit \
     && bash install.sh \
-    && ln -s /neurodesktop-storage/containers /neurocommand/local/containers 
+    && ln -s /neurodesktop-storage/containers /neurocommand/local/containers
 
 USER ${NB_UID}
 
 WORKDIR "${HOME}"
 
-# Add example notebooks
-RUN git clone --depth 1 https://github.com/NeuroDesk/example-notebooks
+# Install example notebooks
+ADD "https://api.github.com/repos/neurodesk/example-notebooks/git/refs/heads/main" /home/${NB_USER}/skipcache
+RUN rm /home/${NB_USER}/skipcache \
+    && git clone --depth 1 https://github.com/NeuroDesk/example-notebooks
