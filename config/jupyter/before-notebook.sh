@@ -5,9 +5,6 @@
 /usr/bin/printf '%s\n%s\n' 'password' 'password' | passwd ${NB_USER}
 usermod --shell /bin/bash ${NB_USER}
 
-
-
-
 # Generate SSH keys
 if [ ! -f "/home/${NB_USER}/.ssh/guacamole_rsa" ]; then
     ssh-keygen -t rsa -f /home/${NB_USER}/.ssh/guacamole_rsa -b 4096 -m PEM -N '' <<< n
