@@ -1,4 +1,5 @@
 /.vscode
 .DS_Store
 secret*
+vars.env
 build_and_push.sh
