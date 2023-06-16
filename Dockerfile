@@ -240,12 +240,12 @@ RUN rm /usr/bin/lxpolkit
 # enable rootless mounts: 
 RUN chmod +x /usr/bin/fusermount
     
-# Add notebook startup scripts
-# https://jupyter-docker-stacks.readthedocs.io/en/latest/using/common.html
-RUN mkdir -p /usr/local/bin/start-notebook.d/ \
-    && mkdir -p /usr/local/bin/before-notebook.d/
-COPY config/jupyter/start-notebook.sh /usr/local/bin/start-notebook.d/
-COPY config/jupyter/before-notebook.sh /usr/local/bin/before-notebook.d/
+# # Add notebook startup scripts
+# # https://jupyter-docker-stacks.readthedocs.io/en/latest/using/common.html
+# RUN mkdir -p /usr/local/bin/start-notebook.d/ \
+#     && mkdir -p /usr/local/bin/before-notebook.d/
+# COPY config/jupyter/start-notebook.sh /usr/local/bin/start-notebook.d/
+# COPY config/jupyter/before-notebook.sh /usr/local/bin/before-notebook.d/
 
 # Create Guacamole configurations (user-mapping.xml gets filled in the startup.sh script)
 RUN mkdir -p /etc/guacamole \
@@ -365,6 +365,13 @@ RUN mkdir -p /home/${NB_USER}/Desktop/ \
 
 # Switch to root user
 USER root
+
+# Add notebook startup scripts
+# https://jupyter-docker-stacks.readthedocs.io/en/latest/using/common.html
+RUN mkdir -p /usr/local/bin/start-notebook.d/ \
+    && mkdir -p /usr/local/bin/before-notebook.d/
+COPY config/jupyter/start-notebook.sh /usr/local/bin/start-notebook.d/
+COPY config/jupyter/before-notebook.sh /usr/local/bin/before-notebook.d/
 
 # Set up working directories and symlinks
 RUN mkdir -p /data \
