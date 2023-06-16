@@ -23,7 +23,7 @@ cat /home/${NB_USER}/.ssh/id_rsa.pub >> /home/${NB_USER}/.ssh/authorized_keys
 chmod -R 700 .ssh && chown -R ${NB_USER}:users .ssh
 
 # Insert guacamole private key into user-mapping for ssh/sftp support
-sed -i "/private-key/ r /home/${NB_USER}/.ssh/guacamole_rsa" /etc/guacamole/user-mapping.xml
+sudo sed -i "/private-key/ r /home/${NB_USER}/.ssh/guacamole_rsa" /etc/guacamole/user-mapping.xml
 
 # Start and stop SSH server to initialize host
 sudo service ssh restart
