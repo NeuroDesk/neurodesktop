@@ -5,22 +5,21 @@
 /usr/bin/printf '%s\n%s\n' 'password' 'password' | passwd ${NB_USER}
 usermod --shell /bin/bash ${NB_USER}
 
-# Generate SSH keys
-if [ ! -f "/home/${NB_USER}/.ssh/guacamole_rsa" ]; then
-    ssh-keygen -t rsa -f /home/${NB_USER}/.ssh/guacamole_rsa -b 4096 -m PEM -N '' <<< n
-fi
-if [ ! -f "/home/${NB_USER}/.ssh/id_rsa" ]; then
-    ssh-keygen -t rsa -f /home/${NB_USER}/.ssh/id_rsa -b 4096 -m PEM -N '' <<< n
-fi
-if [ ! -f "/home/${NB_USER}/.ssh/ssh_host_rsa_key" ]; then
-    ssh-keygen -t rsa -f /home/${NB_USER}/.ssh/ssh_host_rsa_key -N '' <<< n
-fi
+# # Generate SSH keys
+# if [ ! -f "/home/${NB_USER}/.ssh/guacamole_rsa" ]; then
+#     ssh-keygen -t rsa -f /home/${NB_USER}/.ssh/guacamole_rsa -b 4096 -m PEM -N '' <<< n
+#     cat /home/${NB_USER}/.ssh/guacamole_rsa.pub >> /home/${NB_USER}/.ssh/authorized_keys
+# fi
+# if [ ! -f "/home/${NB_USER}/.ssh/id_rsa" ]; then
+#     ssh-keygen -t rsa -f /home/${NB_USER}/.ssh/id_rsa -b 4096 -m PEM -N '' <<< n
+#     cat /home/${NB_USER}/.ssh/id_rsa.pub >> /home/${NB_USER}/.ssh/authorized_keys
+# fi
+# if [ ! -f "/home/${NB_USER}/.ssh/ssh_host_rsa_key" ]; then
+#     ssh-keygen -t rsa -f /home/${NB_USER}/.ssh/ssh_host_rsa_key -N '' <<< n
+# fi
 
-cat /home/${NB_USER}/.ssh/guacamole_rsa.pub >> /home/${NB_USER}/.ssh/authorized_keys
-cat /home/${NB_USER}/.ssh/id_rsa.pub >> /home/${NB_USER}/.ssh/authorized_keys
-
-# Set .ssh directory permissions
-chmod -R 700 .ssh && chown -R ${NB_USER}:users .ssh
+# # Set .ssh directory permissions
+# chmod -R 700 .ssh && chown -R ${NB_USER}:users .ssh
 
 # Insert guacamole private key into user-mapping for ssh/sftp support
 sudo sed -i "/private-key/ r /home/${NB_USER}/.ssh/guacamole_rsa" /etc/guacamole/user-mapping.xml
