@@ -1,4 +1,11 @@
 import os
+import time
+
+timestr = time.strftime("%Y%m%d-%H%M%S")
+f = open("/home/jovyan/"+timestr, "a")
+f.write(timestr)
+f.close()
+
 c.ServerProxy.servers = {
   'neurodesktop': {
     'command': ['/opt/neurodesktop/guacamole.sh'],
@@ -17,3 +24,4 @@ c.ServerProxy.servers = {
 c.ServerApp.root_dir = '/'
 c.ServerApp.preferred_dir = os.getcwd()
 c.FileContentsManager.allow_hidden = True
+
