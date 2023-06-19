@@ -1,10 +1,5 @@
 import os
-import time
-
-timestr = time.strftime("%Y%m%d-%H%M%S")
-f = open("/home/jovyan/"+timestr, "a")
-f.write(timestr)
-f.close()
+import subprocess
 
 c.ServerProxy.servers = {
   'neurodesktop': {
@@ -25,3 +20,4 @@ c.ServerApp.root_dir = '/'
 c.ServerApp.preferred_dir = os.getcwd()
 c.FileContentsManager.allow_hidden = True
 
+before_notebook = subprocess.call("/opt/neurodesktop/jupyterlab_startup.sh")

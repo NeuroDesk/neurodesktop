@@ -203,6 +203,12 @@ RUN add-apt-repository ppa:mozillateam/ppa \
 COPY config/firefox/mozillateamppa /etc/apt/preferences.d/mozillateamppa
 COPY config/firefox/syspref.js /etc/firefox/syspref.js
 
+## Install conda packages
+RUN conda install -c conda-forge nipype pip nb_conda_kernels \
+    && conda clean --all -f -y \
+    && rm -rf /home/${NB_USER}/.cache
+RUN conda config --system --prepend envs_dirs '~/conda-environments'
+
 #========================================#
 # Configuration (as root user)
 #========================================#
@@ -240,12 +246,12 @@ RUN rm /usr/bin/lxpolkit
 # enable rootless mounts: 
 RUN chmod +x /usr/bin/fusermount
     
-# # Add notebook startup scripts
-# # https://jupyter-docker-stacks.readthedocs.io/en/latest/using/common.html
-# RUN mkdir -p /usr/local/bin/start-notebook.d/ \
-#     && mkdir -p /usr/local/bin/before-notebook.d/
-# COPY config/jupyter/start-notebook.sh /usr/local/bin/start-notebook.d/
-# COPY config/jupyter/before-notebook.sh /usr/local/bin/before-notebook.d/
+# Add notebook startup scripts
+# https://jupyter-docker-stacks.readthedocs.io/en/latest/using/common.html
+RUN mkdir -p /usr/local/bin/start-notebook.d/ \
+    && mkdir -p /usr/local/bin/before-notebook.d/
+COPY config/jupyter/start_notebook.sh /usr/local/bin/start-notebook.d/
+COPY config/jupyter/before_notebook.sh /usr/local/bin/before-notebook.d/
 
 # Create Guacamole configurations (user-mapping.xml gets filled in the startup.sh script)
 RUN mkdir -p /etc/guacamole \
@@ -254,7 +260,7 @@ RUN mkdir -p /etc/guacamole \
 
 # Add NB_USER to sudoers
 RUN echo "${NB_USER} ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers.d/notebook \
-# The following apply to Singleuser mode only. See config/jupyter/before-notebook.sh for Notebook mode
+# The following apply to Singleuser mode only. See config/jupyter/before_notebook.sh for Notebook mode
     && /usr/bin/printf '%s\n%s\n' 'password' 'password' | passwd ${NB_USER} \
     && usermod --shell /bin/bash ${NB_USER}
 
@@ -283,12 +289,6 @@ USER ${NB_USER}
 # RUN conda update -n base conda \
 #     && conda clean --all -f -y \
 #     && rm -rf /home/${NB_USER}/.cache
-
-## Install conda packages
-RUN conda install -c conda-forge nipype pip nb_conda_kernels \
-    && conda clean --all -f -y \
-    && rm -rf /home/${NB_USER}/.cache
-RUN conda config --system --prepend envs_dirs '~/conda-environments'
 
 # Configure ITKsnap
 RUN mkdir -p /home/${NB_USER}/.itksnap.org/ITK-SNAP \
@@ -350,7 +350,9 @@ COPY --chown=${NB_USER}:users config/jupyter/jupyter_notebook_config.py /home/${
 COPY --chown=${NB_USER}:users config/ssh/sshd_config /home/${NB_USER}/.ssh/sshd_config
 COPY --chown=${NB_USER}:users config/k8s/k8s_postStart_copy_homedir.sh /tmp/k8s_postStart_copy_homedir.sh
 COPY --chown=${NB_USER}:users config/conda/conda-readme.md /home/${NB_USER}/
+COPY --chown=${NB_USER}:users config/jupyter/jupyterlab_startup.sh /opt/neurodesktop/jupyterlab_startup.sh
 RUN chmod +x /opt/neurodesktop/guacamole.sh \
+    /opt/neurodesktop/jupyterlab_startup.sh \
     /home/${NB_USER}/.jupyter/jupyter_notebook_config.py \
     /home/${NB_USER}/.vnc/xstartup
 

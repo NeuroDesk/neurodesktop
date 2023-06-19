@@ -1,5 +1,6 @@
-# This script runs in Notebook mode (e.g. docker run)
-# This script does NOT run in singleuser mode (e.g. kubernetes)
+# This script runs in local Jupyterlab only (e.g. Docker, Neurodeskapp)
+# This script does NOT run on stock JupterHub/BinderHub instances (e.g. kubernetes)
+# For global startup script, see ./config/jupyter/jupterlab_startup.sh
 
 # Overrides Dockerfile changes to NB_USER
 /usr/bin/printf '%s\n%s\n' 'password' 'password' | passwd ${NB_USER}
@@ -8,30 +9,31 @@ usermod --shell /bin/bash ${NB_USER}
 # # Generate SSH keys
 # if [ ! -f "/home/${NB_USER}/.ssh/guacamole_rsa" ]; then
 #     ssh-keygen -t rsa -f /home/${NB_USER}/.ssh/guacamole_rsa -b 4096 -m PEM -N '' <<< n
-#     cat /home/${NB_USER}/.ssh/guacamole_rsa.pub >> /home/${NB_USER}/.ssh/authorized_keys
 # fi
 # if [ ! -f "/home/${NB_USER}/.ssh/id_rsa" ]; then
 #     ssh-keygen -t rsa -f /home/${NB_USER}/.ssh/id_rsa -b 4096 -m PEM -N '' <<< n
-#     cat /home/${NB_USER}/.ssh/id_rsa.pub >> /home/${NB_USER}/.ssh/authorized_keys
 # fi
 # if [ ! -f "/home/${NB_USER}/.ssh/ssh_host_rsa_key" ]; then
 #     ssh-keygen -t rsa -f /home/${NB_USER}/.ssh/ssh_host_rsa_key -N '' <<< n
 # fi
 
+# cat /home/${NB_USER}/.ssh/guacamole_rsa.pub >> /home/${NB_USER}/.ssh/authorized_keys
+# cat /home/${NB_USER}/.ssh/id_rsa.pub >> /home/${NB_USER}/.ssh/authorized_keys
+
 # # Set .ssh directory permissions
 # chmod -R 700 .ssh && chown -R ${NB_USER}:users .ssh
 
-# Insert guacamole private key into user-mapping for ssh/sftp support
-sudo sed -i "/private-key/ r /home/${NB_USER}/.ssh/guacamole_rsa" /etc/guacamole/user-mapping.xml
+# # Insert guacamole private key into user-mapping for ssh/sftp support
+# sed -i "/private-key/ r /home/${NB_USER}/.ssh/guacamole_rsa" /etc/guacamole/user-mapping.xml
 
-# Start and stop SSH server to initialize host
-sudo service ssh restart
-sudo service ssh stop
+# # Start and stop SSH server to initialize host
+# sudo service ssh restart
+# sudo service ssh stop
 
-# Create a symlink in home if /data is mounted
-if mountpoint -q /data; then
-    ln -s /data /home/${NB_USER}/data
-fi
+# # Create a symlink in home if /data is mounted
+# if mountpoint -q /data; then
+#     ln -s /data /home/${NB_USER}/data
+# fi
 
 if [ ! -d "/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/" ]; then
     # the cvmfs directory is not yet mounted
@@ -67,7 +69,7 @@ if [ ! -d "/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/" ]; then
     fi
 fi
 
-source /opt/neurodesktop/environment_variables.sh
+# source /opt/neurodesktop/environment_variables.sh
 
 # # clean up old session files (they prevent the start of the next session):
 # echo "starting cleanup before if"
