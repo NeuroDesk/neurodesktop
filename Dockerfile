@@ -315,11 +315,11 @@ RUN mkdir -p /home/${NB_USER}/.config/matplotlib-mpldir \
 # # Add CheckVersion script
 # COPY ./config/CheckVersion.desktop /etc/skel/Desktop
 
-COPY config/vscode/settings.json /home/${NB_USER}/.config/Code/User/settings.json
+COPY --chown=${NB_USER}:users config/vscode/settings.json /home/${NB_USER}/.config/Code/User/settings.json
 
 # Add libfm script
 RUN mkdir -p /home/${NB_USER}/.config/libfm
-COPY ./config/lxde/libfm.conf /home/${NB_USER}/.config/libfm
+COPY --chown=${NB_USER}:users ./config/lxde/libfm.conf /home/${NB_USER}/.config/libfm
 
 RUN touch /home/${NB_USER}/.sudo_as_admin_successful
 
