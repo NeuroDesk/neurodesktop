@@ -348,7 +348,6 @@ COPY --chown=${NB_USER}:users config/guacamole/guacamole.sh /opt/neurodesktop/gu
 COPY --chown=${NB_USER}:users config/jupyter/environment_variables.sh /opt/neurodesktop/environment_variables.sh
 COPY --chown=${NB_USER}:users config/jupyter/jupyter_notebook_config.py /home/${NB_USER}/.jupyter/jupyter_notebook_config.py
 COPY --chown=${NB_USER}:users config/ssh/sshd_config /home/${NB_USER}/.ssh/sshd_config
-COPY --chown=${NB_USER}:users config/k8s/k8s_postStart_copy_homedir.sh /tmp/k8s_postStart_copy_homedir.sh
 COPY --chown=${NB_USER}:users config/conda/conda-readme.md /home/${NB_USER}/
 COPY --chown=${NB_USER}:users config/jupyter/jupyterlab_startup.sh /opt/neurodesktop/jupyterlab_startup.sh
 RUN chmod +x /opt/neurodesktop/guacamole.sh \
