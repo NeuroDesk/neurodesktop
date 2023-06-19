@@ -11,7 +11,7 @@ USER root
 # Core services
 #========================================#
 
-# Install base image dependancies
+# Install base image dependencies
 RUN apt-get update --yes \
     && DEBIAN_FRONTEND=noninteractive apt install --yes --no-install-recommends \
         # Singularity
@@ -46,7 +46,7 @@ RUN apt-get update --yes \
         ## RDP
         xorgxrdp \
         xrdp \
-        # Destop Env
+        # Desktop Env
         lxde \
         # Installer tools
         acl \
@@ -331,7 +331,7 @@ ENV DONT_PROMPT_WSL_INSTALL=1
 ENV LMOD_CMD /usr/share/lmod/lmod/libexec/lmod
 
 # Install jupyter-server-proxy and disable announcements
-# Depracated: jupyter labextension install ..
+# Deprecated: jupyter labextension install ..
 RUN /opt/conda/bin/pip install jupyter-server-proxy \
     && /opt/conda/bin/jupyter labextension disable @jupyterlab/apputils-extension:announcements \ 
     && /opt/conda/bin/pip install jupyterlmod \ 
