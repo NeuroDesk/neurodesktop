@@ -368,13 +368,6 @@ RUN mkdir -p /home/${NB_USER}/Desktop/ \
 # Switch to root user
 USER root
 
-# Add notebook startup scripts
-# https://jupyter-docker-stacks.readthedocs.io/en/latest/using/common.html
-RUN mkdir -p /usr/local/bin/start-notebook.d/ \
-    && mkdir -p /usr/local/bin/before-notebook.d/
-COPY config/jupyter/start-notebook.sh /usr/local/bin/start-notebook.d/
-COPY config/jupyter/before-notebook.sh /usr/local/bin/before-notebook.d/
-
 # Set up working directories and symlinks
 RUN mkdir -p /data \
     && ln -s /neurodesktop-storage /storage
