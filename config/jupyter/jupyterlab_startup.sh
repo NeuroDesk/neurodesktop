@@ -7,6 +7,28 @@
 # /usr/bin/printf '%s\n%s\n' 'password' 'password' | passwd ${NB_USER}
 # usermod --shell /bin/bash ${NB_USER}
 
+# If a home directory copy exists at /tmp/${NB_USER}, copy contents into homedir. Replaces k8s_postStart_copy_homedir
+if [ -d /tmp/${NB_USER} ]; then
+    # Copy homedirectory files if they don't exist yet. 
+    if [ ! -f "/home/${NB_USER}/.bashrc" ] 
+    then
+        cp -r /tmp/${NB_USER}/ /home/ 
+    fi
+
+    cp /tmp/${NB_USER}/.jupyter/jupyter_notebook_config.py /home/${NB_USER}/.jupyter/jupyter_notebook_config.py
+    cp /tmp/${NB_USER}/.bashrc /home/${NB_USER}/.bashrc
+    cp /tmp/README.md /home/${NB_USER}/README.md
+
+    # Generate SSH keys
+    ssh-keygen -t rsa -f /home/${NB_USER}/.ssh/guacamole_rsa -b 4096 -m PEM -N '' <<< n
+    ssh-keygen -t rsa -f /home/${NB_USER}/.ssh/id_rsa -b 4096 -m PEM -N '' <<< n
+    ssh-keygen -t rsa -f /home/${NB_USER}/.ssh/ssh_host_rsa_key -N '' <<< n
+    cat /home/${NB_USER}/.ssh/guacamole_rsa.pub >> /home/${NB_USER}/.ssh/authorized_keys
+    cat /home/${NB_USER}/.ssh/id_rsa.pub >> /home/${NB_USER}/.ssh/authorized_keys
+
+    # Set .ssh directory permissions
+    chmod -R 700 .ssh && chown -R ${NB_USER}:users .ssh
+fi
 
 # Generate SSH keys
 if [ ! -f "/home/${NB_USER}/.ssh/guacamole_rsa" ]; then
