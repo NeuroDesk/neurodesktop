@@ -40,11 +40,19 @@ fi
 if [ ! -f "/home/${NB_USER}/.ssh/ssh_host_rsa_key" ]; then
     ssh-keygen -t rsa -f /home/${NB_USER}/.ssh/ssh_host_rsa_key -N '' <<< n
 fi
+if ! grep "guacamole@sftp-server" /home/${NB_USER}/.ssh/authorized_keys
+then
+    cat /home/${NB_USER}/.ssh/guacamole_rsa.pub >> /home/${NB_USER}/.ssh/authorized_keys
+fi
+if ! grep "${NB_USER}@${HOSTNAME}" /home/${NB_USER}/.ssh/authorized_keys
+then
+    cat /home/${NB_USER}/.ssh/id_rsa.pub >> /home/${NB_USER}/.ssh/authorized_keys
+fi
 
-cat /home/${NB_USER}/.ssh/guacamole_rsa.pub >> /home/${NB_USER}/.ssh/authorized_keys
-cat /home/${NB_USER}/.ssh/id_rsa.pub >> /home/${NB_USER}/.ssh/authorized_keys
-# Remove duplicates from authorized_keys
-sort /home/${NB_USER}/.ssh/authorized_keys | uniq > /home/${NB_USER}/.ssh/authorized_keys
+# cat /home/${NB_USER}/.ssh/guacamole_rsa.pub >> /home/${NB_USER}/.ssh/authorized_keys
+# cat /home/${NB_USER}/.ssh/id_rsa.pub >> /home/${NB_USER}/.ssh/authorized_keys
+# # Remove duplicates from authorized_keys
+# sort /home/${NB_USER}/.ssh/authorized_keys | uniq > /home/${NB_USER}/.ssh/authorized_keys
 
 # # Set .ssh directory permissions
 # chmod -R 700 .ssh && chown -R ${NB_USER}:users .ssh
@@ -64,6 +72,8 @@ sudo service ssh stop
 if mountpoint -q /data; then
     ln -s /data /home/${NB_USER}/data
 fi
+
+source /opt/neurodesktop/environment_variables.sh
 
 # if [ ! -d "/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/" ]; then
 #     # the cvmfs directory is not yet mounted
@@ -98,8 +108,6 @@ fi
 #         fi
 #     fi
 # fi
-
-source /opt/neurodesktop/environment_variables.sh
 
 # # clean up old session files (they prevent the start of the next session):
 # echo "starting cleanup before if"
