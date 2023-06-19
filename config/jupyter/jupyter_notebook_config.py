@@ -1,4 +1,6 @@
 import os
+import subprocess
+
 c.ServerProxy.servers = {
   'neurodesktop': {
     'command': ['/opt/neurodesktop/guacamole.sh'],
@@ -17,3 +19,5 @@ c.ServerProxy.servers = {
 c.ServerApp.root_dir = '/'
 c.ServerApp.preferred_dir = os.getcwd()
 c.FileContentsManager.allow_hidden = True
+
+before_notebook = subprocess.call("/opt/neurodesktop/jupyterlab_startup.sh")
