@@ -124,7 +124,7 @@ RUN curl https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > /tm
     # Nextcloud Client
     && add-apt-repository ppa:nextcloud-devs/client \
     && chmod -R 770 /home/${NB_USER}/.launchpadlib \
-    && chown -R ${CHOWN_HOME_OPTS} ${NB_UID}:${NB_GID} /home/${NB_USER}/.launchpadlib \
+    && chown -R ${NB_UID}:${NB_GID} /home/${NB_USER}/.launchpadlib \
     # Datalad
     && wget -q -O- http://neuro.debian.net/lists/focal.us-nh.full | sudo tee /etc/apt/sources.list.d/neurodebian.sources.list \
     && apt-key adv --recv-keys --keyserver hkps://keyserver.ubuntu.com 0xA5D32F012649A5A9 \
