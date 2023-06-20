@@ -125,7 +125,7 @@ echo 'Failed test: '"$failed_test"' packages (search for "==> test_containers: F
 echo 'Notice: the containers tested are those returned by running ./containers.sh in /neurocommand'
 echo
 echo 'NEURODESKTOP TESTS'
-echo 'Testing the existance of /neurodesktop-storage ...'
+echo 'Testing the existence of /neurodesktop-storage ...'
 if [ -d /neurodesktop-storage ]
 then
 	echo 'Test passed'
