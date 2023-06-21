@@ -114,7 +114,7 @@ RUN chmod g+rwxs /home/${NB_USER}
 RUN setfacl -dRm u::rwX,g::rwX,o::0 /home/${NB_USER}
 
 #========================================#
-# Software
+# Software (as root user)
 #========================================#
 
 # Add Software sources
@@ -203,15 +203,40 @@ RUN add-apt-repository ppa:mozillateam/ppa \
 COPY config/firefox/mozillateamppa /etc/apt/preferences.d/mozillateamppa
 COPY config/firefox/syspref.js /etc/firefox/syspref.js
 
+#========================================#
+# Software (as notebook user)
+#========================================#
+
+USER ${NB_USER}
+
 ## Install conda packages
 RUN conda install -c conda-forge nipype pip nb_conda_kernels \
     && conda clean --all -f -y \
     && rm -rf /home/${NB_USER}/.cache
 RUN conda config --system --prepend envs_dirs '~/conda-environments'
 
+## Update conda / this will update pandoc and consume quite a bit of unnessary space
+# RUN conda update -n base conda \
+#     && conda clean --all -f -y \
+#     && rm -rf /home/${NB_USER}/.cache
+
+# Add datalad-container datalad-osf osfclient ipyniivue to the conda environment
+RUN /opt/conda/bin/pip install datalad-container datalad-osf osfclient ipyniivue \
+    && rm -rf /home/${NB_USER}/.cache
+
+# Install jupyter-server-proxy and disable announcements
+# Deprecated: jupyter labextension install ..
+RUN /opt/conda/bin/pip install jupyter-server-proxy \
+    && /opt/conda/bin/jupyter labextension disable @jupyterlab/apputils-extension:announcements \ 
+    && /opt/conda/bin/pip install jupyterlmod \ 
+    && /opt/conda/bin/pip install jupyterlab-git \
+    && rm -rf /home/${NB_USER}/.cache
+
 #========================================#
 # Configuration (as root user)
 #========================================#
+
+USER root
 
 # Create cvmfs keys
 RUN mkdir -p /etc/cvmfs/keys/ardc.edu.au
@@ -253,6 +278,13 @@ RUN mkdir -p /usr/local/bin/start-notebook.d/ \
 COPY config/jupyter/start_notebook.sh /usr/local/bin/start-notebook.d/
 COPY config/jupyter/before_notebook.sh /usr/local/bin/before-notebook.d/
 
+# Add jupyter notebook and startup scripts for system-wide configuration
+COPY --chown=root:users config/jupyter/jupyter_notebook_config.py /etc/jupyter/jupyter_notebook_config.py
+COPY --chown=${NB_USER}:users config/jupyter/jupyterlab_startup.sh /opt/neurodesktop/jupyterlab_startup.sh
+
+RUN chmod +x /etc/jupyter/jupyter_notebook_config.py \
+    /opt/neurodesktop/jupyterlab_startup.sh
+
 # Create Guacamole configurations (user-mapping.xml gets filled in the startup.sh script)
 RUN mkdir -p /etc/guacamole \
     && echo -e "user-mapping: /etc/guacamole/user-mapping.xml\nguacd-hostname: 127.0.0.1" > /etc/guacamole/guacamole.properties \
@@ -284,11 +316,6 @@ RUN chmod +x /usr/share/test_neurodesktop.sh \
 
 # Switch to notebook user
 USER ${NB_USER}
-
-## Update conda / this will update pandoc and consume quite a bit of unnessary space
-# RUN conda update -n base conda \
-#     && conda clean --all -f -y \
-#     && rm -rf /home/${NB_USER}/.cache
 
 # Configure ITKsnap
 RUN mkdir -p /home/${NB_USER}/.itksnap.org/ITK-SNAP \
@@ -323,20 +350,8 @@ COPY --chown=${NB_USER}:users ./config/lxde/libfm.conf /home/${NB_USER}/.config/
 
 RUN touch /home/${NB_USER}/.sudo_as_admin_successful
 
-# Add datalad-container datalad-osf osfclient ipyniivue to the conda environment
-RUN /opt/conda/bin/pip install datalad-container datalad-osf osfclient ipyniivue \
-    && rm -rf /home/${NB_USER}/.cache
-
 ENV DONT_PROMPT_WSL_INSTALL=1
 ENV LMOD_CMD /usr/share/lmod/lmod/libexec/lmod
-
-# Install jupyter-server-proxy and disable announcements
-# Deprecated: jupyter labextension install ..
-RUN /opt/conda/bin/pip install jupyter-server-proxy \
-    && /opt/conda/bin/jupyter labextension disable @jupyterlab/apputils-extension:announcements \ 
-    && /opt/conda/bin/pip install jupyterlmod \ 
-    && /opt/conda/bin/pip install jupyterlab-git \
-    && rm -rf /home/${NB_USER}/.cache
 
 # Add startup and config files for neurodesktop, jupyter, guacamole, vnc
 RUN mkdir /home/${NB_USER}/.vnc \
@@ -346,13 +361,11 @@ COPY --chown=${NB_USER}:users config/lxde/xstartup /home/${NB_USER}/.vnc
 COPY --chown=${NB_USER}:root config/guacamole/user-mapping.xml /etc/guacamole/user-mapping.xml
 COPY --chown=${NB_USER}:users config/guacamole/guacamole.sh /opt/neurodesktop/guacamole.sh
 COPY --chown=${NB_USER}:users config/jupyter/environment_variables.sh /opt/neurodesktop/environment_variables.sh
-COPY --chown=${NB_USER}:users config/jupyter/jupyter_notebook_config.py /home/${NB_USER}/.jupyter/jupyter_notebook_config.py
+# COPY --chown=${NB_USER}:users config/jupyter/jupyter_notebook_config.py /home/${NB_USER}/.jupyter/jupyter_notebook_config.py
 COPY --chown=${NB_USER}:users config/ssh/sshd_config /home/${NB_USER}/.ssh/sshd_config
 COPY --chown=${NB_USER}:users config/conda/conda-readme.md /home/${NB_USER}/
-COPY --chown=${NB_USER}:users config/jupyter/jupyterlab_startup.sh /opt/neurodesktop/jupyterlab_startup.sh
+
 RUN chmod +x /opt/neurodesktop/guacamole.sh \
-    /opt/neurodesktop/jupyterlab_startup.sh \
-    /home/${NB_USER}/.jupyter/jupyter_notebook_config.py \
     /home/${NB_USER}/.vnc/xstartup
 
 # Set up working directories and symlinks
@@ -366,6 +379,10 @@ RUN mkdir -p /home/${NB_USER}/Desktop/ \
 
 # Switch to root user
 USER root
+
+# Save a backup copy of startup home dir into /tmp
+# Used to restore home dir in persistent sessions
+RUN cp -rp /home/${NB_USER} /tmp/
 
 # Set up working directories and symlinks
 RUN mkdir -p /data \
@@ -389,4 +406,4 @@ ADD "https://api.github.com/repos/neurodesk/example-notebooks/git/refs/heads/mai
 RUN rm /home/${NB_USER}/skipcache \
     && git clone --depth 1 https://github.com/NeuroDesk/example-notebooks
 
-ENV MODULEPATH=/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/
+ENV MODULEPATH=/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/bids_apps:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/body:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/data_organisation:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/diffusion_imaging:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/electrophysiology:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/functional_imaging:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/hippocampus:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/image_reconstruction:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/image_registration:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/image_segmentation:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/machine_learning:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/molecular_biology:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/phase_processing:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/programming:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/quality_control:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/quantitative_imaging:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/rodent_imaging:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/shape_analysis:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/spectroscopy:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/spine:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/statistics:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/structural_imaging:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/visualization:/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/workflows
