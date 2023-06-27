@@ -8,9 +8,12 @@ fi
 if [ -z "$RESTARTABLE" ]; then
 export RESTARTABLE='yes'
 fi
-if [ -z "$CHOWN_HOME" ]; then
-export CHOWN_HOME='yes'
-fi
-if [ -z "$CHOWN_HOME_OPTS" ]; then
-export CHOWN_HOME_OPTS='-R'
+
+if [[ "$NB_UID" != "1000" || "$NB_GID" != "100" ]]; then
+    if [ -z "$CHOWN_HOME" ]; then
+    export CHOWN_HOME='yes'
+    fi
+    if [ -z "$CHOWN_HOME_OPTS" ]; then
+    export CHOWN_HOME_OPTS='-R'
+    fi
 fi

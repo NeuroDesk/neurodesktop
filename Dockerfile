@@ -280,7 +280,7 @@ COPY config/jupyter/before_notebook.sh /usr/local/bin/before-notebook.d/
 
 # Add jupyter notebook and startup scripts for system-wide configuration
 COPY --chown=root:users config/jupyter/jupyter_notebook_config.py /etc/jupyter/jupyter_notebook_config.py
-COPY --chown=${NB_USER}:users config/jupyter/jupyterlab_startup.sh /opt/neurodesktop/jupyterlab_startup.sh
+COPY --chown=${NB_UID}:${NB_GID} config/jupyter/jupyterlab_startup.sh /opt/neurodesktop/jupyterlab_startup.sh
 
 RUN chmod +x /etc/jupyter/jupyter_notebook_config.py \
     /opt/neurodesktop/jupyterlab_startup.sh
@@ -320,11 +320,11 @@ USER ${NB_USER}
 # Configure ITKsnap
 RUN mkdir -p /home/${NB_USER}/.itksnap.org/ITK-SNAP \
     && chown ${NB_USER} /home/${NB_USER}/.itksnap.org -R
-COPY --chown=${NB_USER}:users ./config/itksnap/UserPreferences.xml /home/${NB_USER}/.itksnap.org
-COPY --chown=${NB_USER}:users ./config/lxde/mimeapps.list /home/${NB_USER}/.config/mimeapps.list
+COPY --chown=${NB_UID}:${NB_GID} ./config/itksnap/UserPreferences.xml /home/${NB_USER}/.itksnap.org
+COPY --chown=${NB_UID}:${NB_GID} ./config/lxde/mimeapps.list /home/${NB_USER}/.config/mimeapps.list
 
-COPY --chown=${NB_USER}:users config/lxde/panel /home/${NB_USER}/.config/lxpanel/LXDE/panels/panel
-COPY --chown=${NB_USER}:users config/lxde/.bashrc /home/${NB_USER}/tmp_bashrc
+COPY --chown=${NB_UID}:${NB_GID} config/lxde/panel /home/${NB_USER}/.config/lxpanel/LXDE/panels/panel
+COPY --chown=${NB_UID}:${NB_GID} config/lxde/.bashrc /home/${NB_USER}/tmp_bashrc
 RUN cat /home/${NB_USER}/tmp_bashrc >> /home/${NB_USER}/.bashrc \
      && rm /home/${NB_USER}/tmp_bashrc
 
@@ -335,18 +335,18 @@ RUN git config --global user.email "user@neurodesk.org" \
 # Setup temp directory for matplotlib (required for fmriprep)
 RUN mkdir -p /home/${NB_USER}/.config/matplotlib-mpldir \
     && chmod -R 700 /home/${NB_USER}/.config/matplotlib-mpldir \
-    && chown -R ${NB_USER}:users /home/${NB_USER}/.config/matplotlib-mpldir
+    && chown -R ${NB_UID}:${NB_GID} /home/${NB_USER}/.config/matplotlib-mpldir
 
 # # Add checkversion script
 # COPY ./config/checkversion.sh /usr/share/
 # # Add CheckVersion script
 # COPY ./config/CheckVersion.desktop /etc/skel/Desktop
 
-COPY --chown=${NB_USER}:users config/vscode/settings.json /home/${NB_USER}/.config/Code/User/settings.json
+COPY --chown=${NB_UID}:${NB_GID} config/vscode/settings.json /home/${NB_USER}/.config/Code/User/settings.json
 
 # Add libfm script
 RUN mkdir -p /home/${NB_USER}/.config/libfm
-COPY --chown=${NB_USER}:users ./config/lxde/libfm.conf /home/${NB_USER}/.config/libfm
+COPY --chown=${NB_UID}:${NB_GID} ./config/lxde/libfm.conf /home/${NB_USER}/.config/libfm
 
 RUN touch /home/${NB_USER}/.sudo_as_admin_successful
 
@@ -357,13 +357,16 @@ ENV LMOD_CMD /usr/share/lmod/lmod/libexec/lmod
 RUN mkdir /home/${NB_USER}/.vnc \
     && chown ${NB_USER} /home/${NB_USER}/.vnc \
     && /usr/bin/printf '%s\n%s\n%s\n' 'password' 'password' 'n' | vncpasswd
-COPY --chown=${NB_USER}:users config/lxde/xstartup /home/${NB_USER}/.vnc
+COPY --chown=${NB_UID}:${NB_GID} config/lxde/xstartup /home/${NB_USER}/.vnc
 COPY --chown=${NB_USER}:root config/guacamole/user-mapping.xml /etc/guacamole/user-mapping.xml
-COPY --chown=${NB_USER}:users config/guacamole/guacamole.sh /opt/neurodesktop/guacamole.sh
-COPY --chown=${NB_USER}:users config/jupyter/environment_variables.sh /opt/neurodesktop/environment_variables.sh
-# COPY --chown=${NB_USER}:users config/jupyter/jupyter_notebook_config.py /home/${NB_USER}/.jupyter/jupyter_notebook_config.py
-COPY --chown=${NB_USER}:users config/ssh/sshd_config /home/${NB_USER}/.ssh/sshd_config
-COPY --chown=${NB_USER}:users config/conda/conda-readme.md /home/${NB_USER}/
+COPY --chown=${NB_UID}:${NB_GID} config/guacamole/guacamole.sh /opt/neurodesktop/guacamole.sh
+COPY --chown=${NB_UID}:${NB_GID} config/jupyter/environment_variables.sh /opt/neurodesktop/environment_variables.sh
+COPY --chown=${NB_UID}:${NB_GID} config/conda/conda-readme.md /home/${NB_USER}/
+
+RUN mkdir -p /home/${NB_USER}/.ssh \
+    && chmod -R 700 /home/${NB_USER}/.ssh \
+    && setfacl -dRm u::rwx,g::0,o::0 /home/${NB_USER}/.ssh
+COPY --chown=${NB_UID}:${NB_GID} config/ssh/sshd_config /home/${NB_USER}/.ssh/sshd_config
 
 RUN chmod +x /opt/neurodesktop/guacamole.sh \
     /home/${NB_USER}/.vnc/xstartup
