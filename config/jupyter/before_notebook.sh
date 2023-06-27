@@ -21,7 +21,7 @@ usermod --shell /bin/bash ${NB_USER}
 # cat /home/${NB_USER}/.ssh/id_rsa.pub >> /home/${NB_USER}/.ssh/authorized_keys
 
 # # Set .ssh directory permissions
-# chmod -R 700 .ssh && chown -R ${NB_USER}:users .ssh
+# chmod -R 700 .ssh && chown -R ${NB_UID}:${NB_GID} .ssh
 
 # # Insert guacamole private key into user-mapping for ssh/sftp support
 # sed -i "/private-key/ r /home/${NB_USER}/.ssh/guacamole_rsa" /etc/guacamole/user-mapping.xml

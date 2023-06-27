@@ -12,12 +12,12 @@
 if [ ! -f "/home/${NB_USER}/.bashrc" ] 
 then
     mkdir -p /home/${NB_USER}
-    chown ${NB_USER}:users -R /home/${NB_USER}
+    chown ${NB_UID}:${NB_GID} -R /home/${NB_USER}
     chmod g+rwxs /home/${NB_USER}
     setfacl -dRm u::rwX,g::rwX,o::0 /home/${NB_USER}
 
     sudo cp -rpn /tmp/${NB_USER}/ /home/
-    sudo chown ${NB_USER}:users -R /home/${NB_USER}
+    sudo chown ${NB_UID}:${NB_GID} -R /home/${NB_USER}
 fi
 
 # Overwrite jupyter_notebook_config and .bash with image backup copies
@@ -25,8 +25,9 @@ fi
 cp -p /tmp/${NB_USER}/.bashrc /home/${NB_USER}/.bashrc
 
 # Set .ssh directory permissions
-chmod -R 700 .ssh
-chown -R ${NB_USER}:users .ssh
+chmod -R 700 /home/${NB_USER}/.ssh
+chown -R ${NB_UID}:${NB_GID} /home/${NB_USER}/.ssh
+setfacl -dRm u::rwx,g::0,o::0 /home/${NB_USER}/.ssh
 
 # Generate SSH keys
 if [ ! -f "/home/${NB_USER}/.ssh/guacamole_rsa" ]; then
@@ -53,7 +54,7 @@ fi
 # sort /home/${NB_USER}/.ssh/authorized_keys | uniq > /home/${NB_USER}/.ssh/authorized_keys
 
 # # Set .ssh directory permissions
-# chmod -R 700 .ssh && chown -R ${NB_USER}:users .ssh
+# chmod -R 700 .ssh && chown -R ${NB_UID}:${NB_GID} .ssh
 
 # Insert guacamole private key into user-mapping for ssh/sftp support
 
