@@ -9,7 +9,7 @@ if [ -z "$RESTARTABLE" ]; then
 export RESTARTABLE='yes'
 fi
 
-if [[ "$NB_UID" != "1000" || "$NB_GID" != "1000" ]]; then
+if [[ "$NB_UID" != "1000" || "$NB_GID" != "100" ]]; then
     if [ -z "$CHOWN_HOME" ]; then
     export CHOWN_HOME='yes'
     fi
