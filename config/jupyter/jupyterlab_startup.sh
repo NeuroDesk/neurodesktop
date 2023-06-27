@@ -20,9 +20,9 @@ then
     sudo chown ${NB_UID}:${NB_GID} -R /home/${NB_USER}
 fi
 
-# Overwrite jupyter_notebook_config and .bash with image backup copies
-# Used in cases of persistent home directories
-cp -p /tmp/${NB_USER}/.bashrc /home/${NB_USER}/.bashrc
+# # Overwrite jupyter_notebook_config and .bash with image backup copies
+# # Used in cases of persistent home directories
+# cp -p /tmp/${NB_USER}/.bashrc /home/${NB_USER}/.bashrc
 
 # Set .ssh directory permissions
 chmod -R 700 /home/${NB_USER}/.ssh
