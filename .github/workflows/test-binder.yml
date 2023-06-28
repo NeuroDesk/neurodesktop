@@ -14,8 +14,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        server: ["https://playtest.neurodesk.org/build/gh", "https://play-sydney.neurodesk.org/build/gh"]
+        server: ["playtest.neurodesk.org", "play-sydney.neurodesk.org", "play-phoenix.neurodesk.org", "play-ashburn.neurodesk.org", "play-frankfurt.neurodesk.org"]
     steps:
     - uses: actions/checkout@v3
     - name: Build binder
-      run: curl "${{ matrix.server }}/$GITHUB_REPOSITORY/$GITHUB_REF_NAME"
+      run: curl "https://${{ matrix.server }}/build/gh/$GITHUB_REPOSITORY/$GITHUB_REF_NAME"
