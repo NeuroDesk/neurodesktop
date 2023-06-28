@@ -1,0 +1,27 @@
+name: Test binder
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - binder/Dockerfile
+    branches:
+      main
+
+jobs:
+  test_binder:
+    runs-on: ubuntu-22.04
+    strategy:
+      fail-fast: false
+      matrix:
+        server: [
+          "playtest.neurodesk.org",
+          "play-sydney.neurodesk.org",
+          "play-phoenix.neurodesk.org",
+          "play-ashburn.neurodesk.org",
+          "play-frankfurt.neurodesk.org"
+          ]
+    steps:
+    - uses: actions/checkout@v3
+    - name: Build binder
+      run: curl "https://${{ matrix.server }}/build/gh/$GITHUB_REPOSITORY/$GITHUB_REF_NAME"
