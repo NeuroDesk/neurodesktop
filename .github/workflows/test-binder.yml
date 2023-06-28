@@ -1,4 +1,4 @@
-name: Test Binder
+name: Test binder
 
 on:
   workflow_dispatch:
