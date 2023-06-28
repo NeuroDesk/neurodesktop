@@ -2,8 +2,6 @@ name: Test Binder
 
 on:
   workflow_dispatch:
-  schedule:
-    - cron: '0 17 * * *'
   push:
     paths:
       - binder/Dockerfile
@@ -22,4 +20,4 @@ jobs:
     - name: check if ${{ matrix.server }} is online and up-to-date
       run: |
         echo "${{ matrix.server }}"
-        echo "$GITHUB_REPOSITORY
+        echo "$GITHUB_REPOSITORY"
