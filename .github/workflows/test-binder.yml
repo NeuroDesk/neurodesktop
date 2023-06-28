@@ -1,0 +1,25 @@
+name: Test Binder
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 17 * * *'
+  push:
+    paths:
+      - binder/Dockerfile
+    branches:
+      main
+
+jobs:
+  test_binder:
+    runs-on: ubuntu-22.04
+    strategy:
+      fail-fast: false
+      matrix:
+        server: ["https://playtest.neurodesk.org/build/gh/"]
+    steps:
+    - uses: actions/checkout@v3
+    - name: check if ${{ matrix.server }} is online and up-to-date
+      run: |
+        echo "${{ matrix.server }}"
+        echo "$GITHUB_REPOSITORY
