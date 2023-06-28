@@ -21,3 +21,5 @@ jobs:
       run: |
         echo "${{ matrix.server }}"
         echo "$GITHUB_REPOSITORY"
+        echo "$GITHUB_REF_NAME"
+        echo "$GITHUB_REF"
