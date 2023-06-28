@@ -19,7 +19,5 @@ jobs:
     - uses: actions/checkout@v3
     - name: check if ${{ matrix.server }} is online and up-to-date
       run: |
-        echo "${{ matrix.server }}"
-        echo "$GITHUB_REPOSITORY"
-        echo "$GITHUB_REF_NAME"
-        echo "$GITHUB_REF"
+        echo "${{ matrix.server }}/$GITHUB_REPOSITORY/$GITHUB_REF_NAME"
+        curl "${{ matrix.server }}/$GITHUB_REPOSITORY/$GITHUB_REF_NAME"
