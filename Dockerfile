@@ -71,7 +71,7 @@ ENV LC_ALL ""
 # Install singularity
 RUN export VERSION=${GO_VERSION} OS=linux ARCH=amd64 \
     && wget https://go.dev/dl/go${VERSION}.${OS}-${ARCH}.tar.gz \
-    && sudo tar -C /usr/local -xzvf go$VERSION.$OS-$ARCH.tar.gz \
+    && tar -C /usr/local -xzvf go$VERSION.$OS-$ARCH.tar.gz \
     && rm go$VERSION.$OS-$ARCH.tar.gz \
     && export GOPATH=/opt/go \
     && export PATH=/usr/local/go/bin:${PATH}:${GOPATH}/bin \
@@ -126,7 +126,7 @@ RUN curl https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > /tm
     && chmod -R 770 /home/${NB_USER}/.launchpadlib \
     && chown -R ${NB_UID}:${NB_GID} /home/${NB_USER}/.launchpadlib \
     # Datalad
-    && wget -q -O- http://neuro.debian.net/lists/focal.us-nh.full | sudo tee /etc/apt/sources.list.d/neurodebian.sources.list \
+    && wget -q -O- http://neuro.debian.net/lists/focal.us-nh.full | tee /etc/apt/sources.list.d/neurodebian.sources.list \
     && apt-key adv --recv-keys --keyserver hkps://keyserver.ubuntu.com 0xA5D32F012649A5A9 \
     # NodeJS
     && curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
@@ -280,10 +280,15 @@ COPY config/jupyter/before_notebook.sh /usr/local/bin/before-notebook.d/
 
 # Add jupyter notebook and startup scripts for system-wide configuration
 COPY --chown=root:users config/jupyter/jupyter_notebook_config.py /etc/jupyter/jupyter_notebook_config.py
-COPY --chown=${NB_UID}:${NB_GID} config/jupyter/jupyterlab_startup.sh /opt/neurodesktop/jupyterlab_startup.sh
+COPY --chown=root:users config/jupyter/jupyterlab_startup.sh /opt/neurodesktop/jupyterlab_startup.sh
+COPY --chown=root:users config/guacamole/guacamole.sh /opt/neurodesktop/guacamole.sh
+COPY --chown=root:users config/jupyter/environment_variables.sh /opt/neurodesktop/environment_variables.sh
+COPY --chown=root:users config/guacamole/user-mapping.xml /etc/guacamole/user-mapping.xml
 
 RUN chmod +x /etc/jupyter/jupyter_notebook_config.py \
-    /opt/neurodesktop/jupyterlab_startup.sh
+    /opt/neurodesktop/jupyterlab_startup.sh \
+    /opt/neurodesktop/guacamole.sh \
+    /opt/neurodesktop/environment_variables.sh
 
 # Create Guacamole configurations (user-mapping.xml gets filled in the startup.sh script)
 RUN mkdir -p /etc/guacamole \
@@ -358,9 +363,6 @@ RUN mkdir /home/${NB_USER}/.vnc \
     && chown ${NB_USER} /home/${NB_USER}/.vnc \
     && /usr/bin/printf '%s\n%s\n%s\n' 'password' 'password' 'n' | vncpasswd
 COPY --chown=${NB_UID}:${NB_GID} config/lxde/xstartup /home/${NB_USER}/.vnc
-COPY --chown=${NB_USER}:root config/guacamole/user-mapping.xml /etc/guacamole/user-mapping.xml
-COPY --chown=${NB_UID}:${NB_GID} config/guacamole/guacamole.sh /opt/neurodesktop/guacamole.sh
-COPY --chown=${NB_UID}:${NB_GID} config/jupyter/environment_variables.sh /opt/neurodesktop/environment_variables.sh
 COPY --chown=${NB_UID}:${NB_GID} config/conda/conda-readme.md /home/${NB_USER}/
 
 RUN mkdir -p /home/${NB_USER}/.ssh \
@@ -368,8 +370,7 @@ RUN mkdir -p /home/${NB_USER}/.ssh \
     && setfacl -dRm u::rwx,g::0,o::0 /home/${NB_USER}/.ssh
 COPY --chown=${NB_UID}:${NB_GID} config/ssh/sshd_config /home/${NB_USER}/.ssh/sshd_config
 
-RUN chmod +x /opt/neurodesktop/guacamole.sh \
-    /home/${NB_USER}/.vnc/xstartup
+RUN chmod +x /home/${NB_USER}/.vnc/xstartup
 
 # Set up working directories and symlinks
 RUN mkdir -p /home/${NB_USER}/Desktop/ \
@@ -398,6 +399,7 @@ RUN rm /tmp/skipcache \
     && cd /neurocommand \
     && bash build.sh --lxde --edit \
     && bash install.sh \
+    && mkdir -p /neurodesktop-storage/containers \
     && ln -s /neurodesktop-storage/containers /neurocommand/local/containers
 
 USER ${NB_UID}
