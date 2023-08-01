@@ -19,6 +19,6 @@ c.ServerProxy.servers = {
 c.ServerApp.root_dir = '/'
 c.ServerApp.preferred_dir = os.getcwd()
 c.FileContentsManager.allow_hidden = True
-c.KubeSpawner.supplemental_gids = [101]
+c.KubeSpawner.supplemental_gids = [10000001]
 
 before_notebook = subprocess.call("/opt/neurodesktop/jupyterlab_startup.sh")
