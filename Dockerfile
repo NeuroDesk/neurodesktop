@@ -56,6 +56,7 @@ RUN apt-get update --yes \
         gpg \
         gpg-agent \
         software-properties-common \
+        apt-transport-https \
         && apt-get clean && rm -rf /var/lib/apt/lists/* 
 
 ARG GO_VERSION="1.20.4"
@@ -118,9 +119,10 @@ RUN setfacl -dRm u::rwX,g::rwX,o::0 /home/${NB_USER}
 # #========================================#
 
 # Add Software sources
-RUN curl https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > /tmp/microsoft.gpg \
-    && mv /tmp/microsoft.gpg /etc/apt/trusted.gpg.d/microsoft.gpg \
-    && echo "deb [arch=arm64] http://packages.microsoft.com/repos/vscode stable main" | tee /etc/apt/sources.list.d/vs-code.list \
+RUN wget -qO- https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > packages.microsoft.gpg \
+    && install -D -o root -g root -m 644 packages.microsoft.gpg /etc/apt/keyrings/packages.microsoft.gpg \
+    && sh -c 'echo "deb [arch=amd64,arm64,armhf signed-by=/etc/apt/keyrings/packages.microsoft.gpg] https://packages.microsoft.com/repos/code stable main" > /etc/apt/sources.list.d/vscode.list' \
+    && rm -f packages.microsoft.gpg \
     # Nextcloud Client
     && add-apt-repository ppa:nextcloud-devs/client \
     && chmod -R 770 /home/${NB_USER}/.launchpadlib \
@@ -141,7 +143,7 @@ RUN wget -q https://ecsft.cern.ch/dist/cvmfs/cvmfs-release/cvmfs-release-latest_
 RUN apt-get update --yes \
     && DEBIAN_FRONTEND=noninteractive apt install --yes --no-install-recommends \
         aria2 \
-        # code \
+        code \
         cvmfs \
         datalad \
         davfs2 \
