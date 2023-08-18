@@ -335,10 +335,6 @@ RUN mkdir -p /home/${NB_USER}/.config/matplotlib-mpldir \
     && chmod -R 700 /home/${NB_USER}/.config/matplotlib-mpldir \
     && chown -R ${NB_UID}:${NB_GID} /home/${NB_USER}/.config/matplotlib-mpldir
 
-# # Add checkversion script
-# COPY ./config/checkversion.sh /usr/share/
-# # Add CheckVersion script
-# COPY ./config/CheckVersion.desktop /etc/skel/Desktop
 
 COPY --chown=${NB_UID}:${NB_GID} config/vscode/settings.json /home/${NB_USER}/.config/Code/User/settings.json
 
