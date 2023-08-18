@@ -69,7 +69,7 @@ ENV LANGUAGE ""
 ENV LC_ALL ""
 
 # Install singularity
-RUN export VERSION=${GO_VERSION} OS=linux ARCH=amd64 \
+RUN export VERSION=${GO_VERSION} OS=linux ARCH=arm64 \
     && wget https://go.dev/dl/go${VERSION}.${OS}-${ARCH}.tar.gz \
     && tar -C /usr/local -xzvf go$VERSION.$OS-$ARCH.tar.gz \
     && rm go$VERSION.$OS-$ARCH.tar.gz \
@@ -113,14 +113,14 @@ RUN wget -q "https://archive.apache.org/dist/guacamole/${GUACAMOLE_VERSION}/bina
 RUN chmod g+rwxs /home/${NB_USER}
 RUN setfacl -dRm u::rwX,g::rwX,o::0 /home/${NB_USER}
 
-#========================================#
-# Software (as root user)
-#========================================#
+# #========================================#
+# # Software (as root user)
+# #========================================#
 
 # Add Software sources
 RUN curl https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > /tmp/microsoft.gpg \
     && mv /tmp/microsoft.gpg /etc/apt/trusted.gpg.d/microsoft.gpg \
-    && echo "deb [arch=amd64] http://packages.microsoft.com/repos/vscode stable main" | tee /etc/apt/sources.list.d/vs-code.list \
+    && echo "deb [arch=arm64] http://packages.microsoft.com/repos/vscode stable main" | tee /etc/apt/sources.list.d/vs-code.list \
     # Nextcloud Client
     && add-apt-repository ppa:nextcloud-devs/client \
     && chmod -R 770 /home/${NB_USER}/.launchpadlib \
@@ -141,9 +141,9 @@ RUN wget -q https://ecsft.cern.ch/dist/cvmfs/cvmfs-release/cvmfs-release-latest_
 RUN apt-get update --yes \
     && DEBIAN_FRONTEND=noninteractive apt install --yes --no-install-recommends \
         aria2 \
-        code \
+        # code \
         cvmfs \
-        datalad \
+        # datalad \
         davfs2 \
         debootstrap \
         emacs \
@@ -194,14 +194,14 @@ RUN apt-get update --yes \
         zip \
         && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Install firefox
-RUN add-apt-repository ppa:mozillateam/ppa \
-    && apt-get update --yes \
-    && DEBIAN_FRONTEND=noninteractive apt install --yes --no-install-recommends \
-        --target-release 'o=LP-PPA-mozillateam' firefox \
-    && apt-get clean && rm -rf /var/lib/apt/lists/*
-COPY config/firefox/mozillateamppa /etc/apt/preferences.d/mozillateamppa
-COPY config/firefox/syspref.js /etc/firefox/syspref.js
+# # Install firefox
+# RUN add-apt-repository ppa:mozillateam/ppa \
+#     && apt-get update --yes \
+#     && DEBIAN_FRONTEND=noninteractive apt install --yes --no-install-recommends \
+#         --target-release 'o=LP-PPA-mozillateam' firefox \
+#     && apt-get clean && rm -rf /var/lib/apt/lists/*
+# COPY config/firefox/mozillateamppa /etc/apt/preferences.d/mozillateamppa
+# COPY config/firefox/syspref.js /etc/firefox/syspref.js
 
 #========================================#
 # Software (as notebook user)
@@ -210,19 +210,19 @@ COPY config/firefox/syspref.js /etc/firefox/syspref.js
 USER ${NB_USER}
 
 ## Install conda packages
-RUN conda install -c conda-forge nipype pip nb_conda_kernels \
-    && conda clean --all -f -y \
-    && rm -rf /home/${NB_USER}/.cache
-RUN conda config --system --prepend envs_dirs '~/conda-environments'
+# RUN conda install -c conda-forge nipype pip nb_conda_kernels \
+#     && conda clean --all -f -y \
+#     && rm -rf /home/${NB_USER}/.cache
+# RUN conda config --system --prepend envs_dirs '~/conda-environments'
 
 ## Update conda / this will update pandoc and consume quite a bit of unnessary space
 # RUN conda update -n base conda \
 #     && conda clean --all -f -y \
 #     && rm -rf /home/${NB_USER}/.cache
 
-# Add datalad-container datalad-osf osfclient ipyniivue to the conda environment
-RUN /opt/conda/bin/pip install datalad-container datalad-osf osfclient ipyniivue \
-    && rm -rf /home/${NB_USER}/.cache
+# # Add datalad-container datalad-osf osfclient ipyniivue to the conda environment
+# RUN /opt/conda/bin/pip install datalad-container datalad-osf osfclient ipyniivue \
+#     && rm -rf /home/${NB_USER}/.cache
 
 # Install jupyter-server-proxy and disable announcements
 # Deprecated: jupyter labextension install ..
