@@ -215,11 +215,6 @@ RUN conda install -c conda-forge nb_conda_kernels \
     && rm -rf /home/${NB_USER}/.cache
 RUN conda config --system --prepend envs_dirs '~/conda-environments'
 
-## Update conda / this will update pandoc and consume quite a bit of unnessary space
-# RUN conda update -n base conda \
-#     && conda clean --all -f -y \
-#     && rm -rf /home/${NB_USER}/.cache
-
 # Add datalad-container datalad-osf osfclient ipyniivue to the conda environment
 RUN /opt/conda/bin/pip install nipype matplotlib datalad-container datalad-osf osfclient ipyniivue \
     && rm -rf /home/${NB_USER}/.cache
