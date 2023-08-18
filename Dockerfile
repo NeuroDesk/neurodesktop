@@ -1,6 +1,7 @@
 FROM jupyter/base-notebook:2023-05-01
 # FROM jupyter/base-notebook:python-3.10.10
 
+ARG BUILDPLATFORM
 # Parent image source
 # https://github.com/jupyter/docker-stacks/blob/86d42cadf4695b8e6fc3b3ead58e1f71067b765b/docker-stacks-foundation/Dockerfile
 # https://github.com/jupyter/docker-stacks/blob/86d42cadf4695b8e6fc3b3ead58e1f71067b765b/base-notebook/Dockerfile
@@ -70,7 +71,7 @@ ENV LANGUAGE ""
 ENV LC_ALL ""
 
 # Install singularity
-RUN export VERSION=${GO_VERSION} OS=linux ARCH=arm64 \
+RUN export VERSION=${GO_VERSION} OS=linux ARCH=$BUILDPLATFORM \
     && wget https://go.dev/dl/go${VERSION}.${OS}-${ARCH}.tar.gz \
     && tar -C /usr/local -xzvf go$VERSION.$OS-$ARCH.tar.gz \
     && rm go$VERSION.$OS-$ARCH.tar.gz \
