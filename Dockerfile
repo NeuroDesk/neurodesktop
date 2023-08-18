@@ -209,12 +209,6 @@ COPY config/firefox/syspref.js /etc/firefox/syspref.js
 
 USER ${NB_USER}
 
-## Install conda packages
-# RUN conda install -c conda-forge nipype pip nb_conda_kernels \
-#     && conda clean --all -f -y \
-#     && rm -rf /home/${NB_USER}/.cache
-# RUN conda config --system --prepend envs_dirs '~/conda-environments'
-
 # Install conda packages
 RUN conda install -c conda-forge nb_conda_kernels \
     && conda clean --all -f -y \
