@@ -402,6 +402,8 @@ RUN rm /tmp/skipcache \
     && mkdir -p /neurodesktop-storage/containers \
     && ln -s /neurodesktop-storage/containers /neurocommand/local/containers
 
+RUN chmod -R 777 /home/${NB_USER}
+
 USER ${NB_UID}
 
 WORKDIR "${HOME}"
