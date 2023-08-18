@@ -194,14 +194,14 @@ RUN apt-get update --yes \
         zip \
         && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# # Install firefox
-# RUN add-apt-repository ppa:mozillateam/ppa \
-#     && apt-get update --yes \
-#     && DEBIAN_FRONTEND=noninteractive apt install --yes --no-install-recommends \
-#         --target-release 'o=LP-PPA-mozillateam' firefox \
-#     && apt-get clean && rm -rf /var/lib/apt/lists/*
-# COPY config/firefox/mozillateamppa /etc/apt/preferences.d/mozillateamppa
-# COPY config/firefox/syspref.js /etc/firefox/syspref.js
+# Install firefox
+RUN add-apt-repository ppa:mozillateam/ppa \
+    && apt-get update --yes \
+    && DEBIAN_FRONTEND=noninteractive apt install --yes --no-install-recommends \
+        --target-release 'o=LP-PPA-mozillateam' firefox \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
+COPY config/firefox/mozillateamppa /etc/apt/preferences.d/mozillateamppa
+COPY config/firefox/syspref.js /etc/firefox/syspref.js
 
 #========================================#
 # Software (as notebook user)
@@ -215,14 +215,20 @@ USER ${NB_USER}
 #     && rm -rf /home/${NB_USER}/.cache
 # RUN conda config --system --prepend envs_dirs '~/conda-environments'
 
+# Install conda packages
+RUN conda install -c conda-forge nb_conda_kernels \
+    && conda clean --all -f -y \
+    && rm -rf /home/${NB_USER}/.cache
+RUN conda config --system --prepend envs_dirs '~/conda-environments'
+
 ## Update conda / this will update pandoc and consume quite a bit of unnessary space
 # RUN conda update -n base conda \
 #     && conda clean --all -f -y \
 #     && rm -rf /home/${NB_USER}/.cache
 
-# # Add datalad-container datalad-osf osfclient ipyniivue to the conda environment
-# RUN /opt/conda/bin/pip install datalad-container datalad-osf osfclient ipyniivue \
-#     && rm -rf /home/${NB_USER}/.cache
+# Add datalad-container datalad-osf osfclient ipyniivue to the conda environment
+RUN /opt/conda/bin/pip install nipype matplotlib datalad-container datalad-osf osfclient ipyniivue \
+    && rm -rf /home/${NB_USER}/.cache
 
 # Install jupyter-server-proxy and disable announcements
 # Deprecated: jupyter labextension install ..
