@@ -238,8 +238,6 @@ RUN mkdir -p /etc/cvmfs/keys/ardc.edu.au
 COPY config/cvmfs/neurodesk.ardc.edu.au.pub /etc/cvmfs/keys/ardc.edu.au/neurodesk.ardc.edu.au.pub
 COPY config/cvmfs/neurodesk.ardc.edu.au.conf /etc/cvmfs/config.d/neurodesk.ardc.edu.au.conf
 COPY config/cvmfs/default.local /etc/cvmfs/default.local
-# This causes conflicts with an external cvmfs setup that gets mounted
-# RUN cvmfs_config setup
 
 # # Customise logo, wallpaper, terminal
 COPY config/jupyter/neurodesk_brain_logo.svg /opt/neurodesk_brain_logo.svg
