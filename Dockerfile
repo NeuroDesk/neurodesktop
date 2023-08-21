@@ -1,6 +1,7 @@
 FROM jupyter/base-notebook:2023-05-01
 # FROM jupyter/base-notebook:python-3.10.10
 
+ARG BUILDPLATFORM
 # Parent image source
 # https://github.com/jupyter/docker-stacks/blob/86d42cadf4695b8e6fc3b3ead58e1f71067b765b/docker-stacks-foundation/Dockerfile
 # https://github.com/jupyter/docker-stacks/blob/86d42cadf4695b8e6fc3b3ead58e1f71067b765b/base-notebook/Dockerfile
@@ -56,6 +57,7 @@ RUN apt-get update --yes \
         gpg \
         gpg-agent \
         software-properties-common \
+        apt-transport-https \
         && apt-get clean && rm -rf /var/lib/apt/lists/* 
 
 ARG GO_VERSION="1.20.4"
@@ -69,7 +71,7 @@ ENV LANGUAGE ""
 ENV LC_ALL ""
 
 # Install singularity
-RUN export VERSION=${GO_VERSION} OS=linux ARCH=amd64 \
+RUN export VERSION=${GO_VERSION} OS=${BUILDPLATFORM%/*} ARCH=${BUILDPLATFORM#*/} \
     && wget https://go.dev/dl/go${VERSION}.${OS}-${ARCH}.tar.gz \
     && tar -C /usr/local -xzvf go$VERSION.$OS-$ARCH.tar.gz \
     && rm go$VERSION.$OS-$ARCH.tar.gz \
@@ -113,21 +115,19 @@ RUN wget -q "https://archive.apache.org/dist/guacamole/${GUACAMOLE_VERSION}/bina
 RUN chmod g+rwxs /home/${NB_USER}
 RUN setfacl -dRm u::rwX,g::rwX,o::0 /home/${NB_USER}
 
-#========================================#
-# Software (as root user)
-#========================================#
+# #========================================#
+# # Software (as root user)
+# #========================================#
 
 # Add Software sources
-RUN curl https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > /tmp/microsoft.gpg \
-    && mv /tmp/microsoft.gpg /etc/apt/trusted.gpg.d/microsoft.gpg \
-    && echo "deb [arch=amd64] http://packages.microsoft.com/repos/vscode stable main" | tee /etc/apt/sources.list.d/vs-code.list \
+RUN wget -qO- https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > packages.microsoft.gpg \
+    && install -D -o root -g root -m 644 packages.microsoft.gpg /etc/apt/keyrings/packages.microsoft.gpg \
+    && sh -c 'echo "deb [arch=amd64,arm64,armhf signed-by=/etc/apt/keyrings/packages.microsoft.gpg] https://packages.microsoft.com/repos/code stable main" > /etc/apt/sources.list.d/vscode.list' \
+    && rm -f packages.microsoft.gpg \
     # Nextcloud Client
     && add-apt-repository ppa:nextcloud-devs/client \
     && chmod -R 770 /home/${NB_USER}/.launchpadlib \
     && chown -R ${NB_UID}:${NB_GID} /home/${NB_USER}/.launchpadlib \
-    # Datalad
-    && wget -q -O- http://neuro.debian.net/lists/focal.us-nh.full | tee /etc/apt/sources.list.d/neurodebian.sources.list \
-    && apt-key adv --recv-keys --keyserver hkps://keyserver.ubuntu.com 0xA5D32F012649A5A9 \
     # NodeJS
     && curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
@@ -209,19 +209,14 @@ COPY config/firefox/syspref.js /etc/firefox/syspref.js
 
 USER ${NB_USER}
 
-## Install conda packages
-RUN conda install -c conda-forge nipype pip nb_conda_kernels \
+# Install conda packages
+RUN conda install -c conda-forge nb_conda_kernels \
     && conda clean --all -f -y \
     && rm -rf /home/${NB_USER}/.cache
 RUN conda config --system --prepend envs_dirs '~/conda-environments'
 
-## Update conda / this will update pandoc and consume quite a bit of unnessary space
-# RUN conda update -n base conda \
-#     && conda clean --all -f -y \
-#     && rm -rf /home/${NB_USER}/.cache
-
 # Add datalad-container datalad-osf osfclient ipyniivue to the conda environment
-RUN /opt/conda/bin/pip install datalad-container datalad-osf osfclient ipyniivue \
+RUN /opt/conda/bin/pip install nipype matplotlib datalad-container datalad-osf osfclient ipyniivue \
     && rm -rf /home/${NB_USER}/.cache
 
 # Install jupyter-server-proxy and disable announcements
@@ -243,8 +238,6 @@ RUN mkdir -p /etc/cvmfs/keys/ardc.edu.au
 COPY config/cvmfs/neurodesk.ardc.edu.au.pub /etc/cvmfs/keys/ardc.edu.au/neurodesk.ardc.edu.au.pub
 COPY config/cvmfs/neurodesk.ardc.edu.au.conf /etc/cvmfs/config.d/neurodesk.ardc.edu.au.conf
 COPY config/cvmfs/default.local /etc/cvmfs/default.local
-# This causes conflicts with an external cvmfs setup that gets mounted
-# RUN cvmfs_config setup
 
 # # Customise logo, wallpaper, terminal
 COPY config/jupyter/neurodesk_brain_logo.svg /opt/neurodesk_brain_logo.svg
@@ -342,10 +335,6 @@ RUN mkdir -p /home/${NB_USER}/.config/matplotlib-mpldir \
     && chmod -R 700 /home/${NB_USER}/.config/matplotlib-mpldir \
     && chown -R ${NB_UID}:${NB_GID} /home/${NB_USER}/.config/matplotlib-mpldir
 
-# # Add checkversion script
-# COPY ./config/checkversion.sh /usr/share/
-# # Add CheckVersion script
-# COPY ./config/CheckVersion.desktop /etc/skel/Desktop
 
 COPY --chown=${NB_UID}:${NB_GID} config/vscode/settings.json /home/${NB_USER}/.config/Code/User/settings.json
 
