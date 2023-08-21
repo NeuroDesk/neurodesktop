@@ -39,10 +39,11 @@ jobs:
       if: ${{ env.GITHUB_RATE_REMAINING > 0 }}
       run: |
         IMAGENAME="neurodesktop"
-        BUILDDATE=`date +%Y%m%d`
+        BUILDDATE=`date +%Y%m%dT%H%M`
         SHORT_SHA=$(git rev-parse --short $GITHUB_SHA)
         IMAGEID=ghcr.io/$GITHUB_REPOSITORY/$IMAGENAME
         IMAGEID=$(echo $IMAGEID | tr '[A-Z]' '[a-z]')
+        echo "BUILDDATE=$BUILDDATE"
         echo "BUILDDATE=$BUILDDATE" >> $GITHUB_ENV
         echo "SHORT_SHA=$SHORT_SHA" >> $GITHUB_ENV
         echo "IMAGEID=$IMAGEID" >> $GITHUB_ENV
