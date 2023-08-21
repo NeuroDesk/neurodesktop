@@ -13,7 +13,7 @@ docker build . -t neurodesktop:latest
 docker run --shm-size=1gb -it --cap-add SYS_ADMIN --security-opt apparmor:unconfined \
     --device=/dev/fuse --name neurodesktop -v ~/neurodesktop-storage:/neurodesktop-storage \
     -p 8888:8888 \
-    --user=root -e NB_UID="$(id -u)" -e NB_GID="$(id -g)" \
+    --user=1001080000:0 \
     neurodesktop:latest
 
 # Run with external CVMFS:
