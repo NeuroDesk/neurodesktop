@@ -67,8 +67,9 @@ jobs:
     - name: Build new image
       if: ${{ env.GITHUB_RATE_REMAINING > 0 }}
       run: |
-        docker buildx create --use --name mybuild node-amd64
-        docker buildx create --append --name mybuild node-arm64
+        docker buildx ls
+        docker buildx create --name mybuilder
+        docker buildx use mybuilder
         docker buildx build --platform linux/amd64,linux/arm64 . --file Dockerfile --tag $IMAGEID:$SHORT_SHA --cache-from $IMAGEID --label "GITHUB_REPOSITORY=$GITHUB_REPOSITORY" --label "GITHUB_SHA=$GITHUB_SHA"
         ROOTFS_NEW=$(docker inspect --format='{{.RootFS}}' $IMAGEID:$SHORT_SHA)
         echo "ROOTFS_NEW=$ROOTFS_NEW" >> $GITHUB_ENV
