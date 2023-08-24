@@ -1,7 +1,6 @@
 FROM jupyter/base-notebook:2023-05-01
 # FROM jupyter/base-notebook:python-3.10.10
 
-ARG BUILDPLATFORM
 # Parent image source
 # https://github.com/jupyter/docker-stacks/blob/86d42cadf4695b8e6fc3b3ead58e1f71067b765b/docker-stacks-foundation/Dockerfile
 # https://github.com/jupyter/docker-stacks/blob/86d42cadf4695b8e6fc3b3ead58e1f71067b765b/base-notebook/Dockerfile
@@ -71,13 +70,15 @@ ENV LANGUAGE ""
 ENV LC_ALL ""
 
 # Install singularity
-RUN export VERSION=${GO_VERSION} OS=${BUILDPLATFORM%/*} ARCH=${BUILDPLATFORM#*/} \
-    && echo "trying to download https://go.dev/dl/go${VERSION}.${OS}-${ARCH}.tar.gz" \
-    && wget https://go.dev/dl/go${VERSION}.${OS}-${ARCH}.tar.gz \
+RUN export VERSION=${GO_VERSION} \
+    && ARCH=`uname -m` \
+    && echo "trying to download https://go.dev/dl/go${VERSION}.linux-${ARCH}.tar.gz" \
+    && wget https://go.dev/dl/go${VERSION}.linux-${ARCH}.tar.gz \
     && tar -C /usr/local -xzvf go$VERSION.$OS-$ARCH.tar.gz \
     && rm go$VERSION.$OS-$ARCH.tar.gz \
     && export GOPATH=/opt/go \
     && export PATH=/usr/local/go/bin:${PATH}:${GOPATH}/bin \
+    && which go \
     && mkdir -p $GOPATH/src/github.com/sylabs \
     && cd $GOPATH/src/github.com/sylabs \
     && wget https://github.com/sylabs/singularity/releases/download/v${SINGULARITY_VERSION}/singularity-ce-${SINGULARITY_VERSION}.tar.gz \
