@@ -1,4 +1,4 @@
-name: Build neurodesktop-dev
+name: Build neurodesktop-multiarch
 
 # Scheduled production builds at 17:00 UTC every day.
 # Build manually from here: https://github.com/NeuroDesk/neurodesktop/actions/workflows/build-neurodesktop.yml
