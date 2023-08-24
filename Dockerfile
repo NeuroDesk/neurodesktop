@@ -71,11 +71,11 @@ ENV LC_ALL ""
 
 # Install singularity
 RUN export VERSION=${GO_VERSION} \
-    && ARCH=`uname -m` \
+    && [[ $(uname -m) == "x86_64" ]] && ARCH="amd64" || [[ $(uname -m) == "aarch64" ]] && ARCH="arm64" \
     && echo "trying to download https://go.dev/dl/go${VERSION}.linux-${ARCH}.tar.gz" \
     && wget https://go.dev/dl/go${VERSION}.linux-${ARCH}.tar.gz \
-    && tar -C /usr/local -xzvf go$VERSION.$OS-$ARCH.tar.gz \
-    && rm go$VERSION.$OS-$ARCH.tar.gz \
+    && tar -C /usr/local -xzvf go$VERSION.linux-$ARCH.tar.gz \
+    && rm go$VERSION.linux-$ARCH.tar.gz \
     && export GOPATH=/opt/go \
     && export PATH=/usr/local/go/bin:${PATH}:${GOPATH}/bin \
     && which go \
