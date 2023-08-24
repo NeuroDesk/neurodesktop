@@ -72,6 +72,7 @@ ENV LC_ALL ""
 
 # Install singularity
 RUN export VERSION=${GO_VERSION} OS=${BUILDPLATFORM%/*} ARCH=${BUILDPLATFORM#*/} \
+    && echo "trying to download https://go.dev/dl/go${VERSION}.${OS}-${ARCH}.tar.gz" \
     && wget https://go.dev/dl/go${VERSION}.${OS}-${ARCH}.tar.gz \
     && tar -C /usr/local -xzvf go$VERSION.$OS-$ARCH.tar.gz \
     && rm go$VERSION.$OS-$ARCH.tar.gz \
