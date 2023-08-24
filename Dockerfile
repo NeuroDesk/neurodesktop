@@ -71,8 +71,7 @@ ENV LC_ALL ""
 
 # Install singularity
 RUN export VERSION=${GO_VERSION} \
-    && [[ $(uname -m) == "x86_64" ]] && ARCH="amd64"  \
-    && [[ $(uname -m) == "aarch64" ]] && ARCH="arm64" \
+    && ARCH=$(if [[ $(uname -m) == "aarch64" ]]; then echo "arm64"; else echo "amd64"; fi) \
     && echo "trying to download https://go.dev/dl/go${VERSION}.linux-${ARCH}.tar.gz" \
     && wget https://go.dev/dl/go${VERSION}.linux-${ARCH}.tar.gz \
     && tar -C /usr/local -xzvf go$VERSION.linux-$ARCH.tar.gz \
