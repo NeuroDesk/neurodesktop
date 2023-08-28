@@ -87,7 +87,7 @@ jobs:
         # ROOTFS_NEW=$(docker inspect --format='{{.RootFS}}' $IMAGEID:$SHORT_SHA)
         echo "ROOTFS_NEW=$ROOTFS_NEW" >> $GITHUB_ENV
     - name: Push image to GitHub packages (if changes found)
-      if: ${{ github.event.inputs.force_push == 'true' || (env.GITHUB_RATE_REMAINING > 0 && env.ROOTFS_NEW != env.ROOTFS_CACHE && env.DOCKERHUB_ORG != '') }}
+      if: ${{ github.event.inputs.force_push == 'true' || (env.GITHUB_RATE_REMAINING > 0 && env.ROOTFS_NEW != env.ROOTFS_CACHE) }}
       run: |
         # Push to GH Packages
         docker tag $IMAGEID:$SHORT_SHA $IMAGEID:$BUILDDATE
@@ -104,6 +104,7 @@ jobs:
         docker push $DOCKERHUB_ORG/$IMAGENAME:$BUILDDATE
         docker push $DOCKERHUB_ORG/$IMAGENAME:latest
     - name: Push image to Oracle Container Registry (if enabled & changes found)
+      if: ${{ github.event.inputs.force_push == 'true' || (env.GITHUB_RATE_REMAINING > 0 && env.ROOTFS_NEW != env.ROOTFS_CACHE && env.OCIR_REPO != '') }}
       run: |
         echo "${{ secrets.OCIR_PASSWORD }}" | docker login syd.ocir.io -u ${{ secrets.OCIR_USERNAME }} --password-stdin
         # Push to GH Packages
