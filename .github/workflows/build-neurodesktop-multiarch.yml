@@ -57,7 +57,9 @@ jobs:
           docker pull $IMAGEID:latest \
             && ROOTFS_CACHE=$(docker inspect --format='{{.RootFS}}' $IMAGEID:latest) \
             && echo "ROOTFS_CACHE=$ROOTFS_CACHE" >> $GITHUB_ENV
+          CACHE_CMD="--cache-from $IMAGEID"
         } || echo "$IMAGEID not found. Resuming build..."
+        echo "CACHE_CMD=$CACHE_CMD" >> $GITHUB_ENV
     # - name: Modify Dockerfile for CI build
     #   if: ${{ env.GITHUB_RATE_REMAINING > 0 }}
     #   run: |
@@ -81,7 +83,7 @@ jobs:
         # docker buildx build --platform linux/arm64 . --file Dockerfile
         # docker buildx build --platform linux/amd64,linux/arm64 . --file Dockerfile --tag $IMAGEID:$SHORT_SHA --cache-from $IMAGEID --label "GITHUB_REPOSITORY=$GITHUB_REPOSITORY" --label "GITHUB_SHA=$GITHUB_SHA"
         # ROOTFS_NEW=$(docker inspect --format='{{.RootFS}}' $IMAGEID:$SHORT_SHA)
-        docker buildx build -o type=image --platform linux/amd64 . --file Dockerfile --tag $IMAGEID:$SHORT_SHA --cache-from $IMAGEID --label "GITHUB_REPOSITORY=$GITHUB_REPOSITORY" --label "GITHUB_SHA=$GITHUB_SHA"
+        docker buildx build -o type=image --platform linux/amd64 . --file Dockerfile --tag $IMAGEID:$SHORT_SHA $CACHE_CMD --label "GITHUB_REPOSITORY=$GITHUB_REPOSITORY" --label "GITHUB_SHA=$GITHUB_SHA"
         ROOTFS_NEW=$(docker inspect --format='{{.RootFS}}' $IMAGEID:$SHORT_SHA)
         # docker buildx build --platform linux/arm64 . --file Dockerfile --tag $IMAGEID:$SHORT_SHA --cache-from $IMAGEID --label "GITHUB_REPOSITORY=$GITHUB_REPOSITORY" --label "GITHUB_SHA=$GITHUB_SHA"
         # ROOTFS_NEW=$(docker inspect --format='{{.RootFS}}' $IMAGEID:$SHORT_SHA)
