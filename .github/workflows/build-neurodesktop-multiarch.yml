@@ -83,7 +83,7 @@ jobs:
         # docker buildx build --platform linux/arm64 . --file Dockerfile
         # docker buildx build --platform linux/amd64,linux/arm64 . --file Dockerfile --tag $IMAGEID:$SHORT_SHA --cache-from $IMAGEID --label "GITHUB_REPOSITORY=$GITHUB_REPOSITORY" --label "GITHUB_SHA=$GITHUB_SHA"
         # ROOTFS_NEW=$(docker inspect --format='{{.RootFS}}' $IMAGEID:$SHORT_SHA)
-        docker buildx build --load --platform linux/amd64 . --file Dockerfile --tag $IMAGEID:$SHORT_SHA $CACHE_CMD --label "GITHUB_REPOSITORY=$GITHUB_REPOSITORY" --label "GITHUB_SHA=$GITHUB_SHA"
+        docker buildx build --load --platform linux/amd64,linux/arm64 . --file Dockerfile --tag $IMAGEID:$SHORT_SHA $CACHE_CMD --label "GITHUB_REPOSITORY=$GITHUB_REPOSITORY" --label "GITHUB_SHA=$GITHUB_SHA"
         ROOTFS_NEW=$(docker inspect --format='{{.RootFS}}' $IMAGEID:$SHORT_SHA)
         # docker buildx build --platform linux/amd64,linux/arm64 . --file Dockerfile --tag $IMAGEID:$SHORT_SHA --cache-from $IMAGEID --label "GITHUB_REPOSITORY=$GITHUB_REPOSITORY" --label "GITHUB_SHA=$GITHUB_SHA"
         # ROOTFS_NEW=$(docker inspect --format='{{.RootFS}}' $IMAGEID:$SHORT_SHA)
