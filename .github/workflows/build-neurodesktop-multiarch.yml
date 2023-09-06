@@ -48,6 +48,17 @@ jobs:
         echo "SHORT_SHA=$SHORT_SHA" >> $GITHUB_ENV
         echo "IMAGEID=$IMAGEID" >> $GITHUB_ENV
         echo "IMAGENAME=$IMAGENAME" >> $GITHUB_ENV
+    - name: Set up QEMU
+      uses: docker/setup-qemu-action@v2
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v2
+    - name: Login to GHCR
+      uses: docker/login-action@v2
+      with:
+        registry: ghcr.io
+        username: ${{ github.repository_owner }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+
     # - name: Pull latest image from GitHub packages
     #   if: ${{ env.GITHUB_RATE_REMAINING > 0 }}
     #   run: |
@@ -60,35 +71,35 @@ jobs:
     #       CACHE_CMD="--cache-from $IMAGEID"
     #     } || echo "$IMAGEID not found. Resuming build..."
     #     echo "CACHE_CMD=$CACHE_CMD" >> $GITHUB_ENV
-    - name: Set up QEMU
-      id: qemu
-      uses: docker/setup-qemu-action@v1
-      with:
-        image: tonistiigi/binfmt:latest
-        platforms: all
-    - name: Build new image
-      if: ${{ env.GITHUB_RATE_REMAINING > 0 }}
-      run: |
-        # docker run --privileged --rm tonistiigi/binfmt --install all
-        docker buildx ls
-        docker buildx create --name mybuilder
-        docker buildx use mybuilder
-        docker buildx build --load --platform linux/amd64,linux/arm64 . --file Dockerfile --tag $IMAGEID:$SHORT_SHA --label "GITHUB_REPOSITORY=$GITHUB_REPOSITORY" --label "GITHUB_SHA=$GITHUB_SHA"
-        # ROOTFS_NEW=$(docker inspect --format='{{.RootFS}}' $IMAGEID:$SHORT_SHA)
-        # echo "ROOTFS_NEW=$ROOTFS_NEW" >> $GITHUB_ENV
-    - name: Push image to GitHub packages (if changes found)
-      # if: ${{ github.event.inputs.force_push == 'true' || (env.GITHUB_RATE_REMAINING > 0 && env.ROOTFS_NEW != env.ROOTFS_CACHE) }}
-      run: |
-        echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u $GITHUB_ACTOR --password-stdin
+    # - name: Set up QEMU
+    #   id: qemu
+    #   uses: docker/setup-qemu-action@v1
+    #   with:
+    #     image: tonistiigi/binfmt:latest
+    #     platforms: all
+    # - name: Build new image
+    #   if: ${{ env.GITHUB_RATE_REMAINING > 0 }}
+    #   run: |
+    #     # docker run --privileged --rm tonistiigi/binfmt --install all
+    #     docker buildx ls
+    #     docker buildx create --name mybuilder
+    #     docker buildx use mybuilder
+    #     docker buildx build --load --platform linux/amd64,linux/arm64 . --file Dockerfile --tag $IMAGEID:$SHORT_SHA --label "GITHUB_REPOSITORY=$GITHUB_REPOSITORY" --label "GITHUB_SHA=$GITHUB_SHA"
+    #     # ROOTFS_NEW=$(docker inspect --format='{{.RootFS}}' $IMAGEID:$SHORT_SHA)
+    #     # echo "ROOTFS_NEW=$ROOTFS_NEW" >> $GITHUB_ENV
+    # - name: Push image to GitHub packages (if changes found)
+    #   # if: ${{ github.event.inputs.force_push == 'true' || (env.GITHUB_RATE_REMAINING > 0 && env.ROOTFS_NEW != env.ROOTFS_CACHE) }}
+    #   run: |
+    #     echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u $GITHUB_ACTOR --password-stdin
 
-        docker pull ghcr.io/$GITHUB_REPOSITORY/neurodesktop:latest
-        docker tag ghcr.io/$GITHUB_REPOSITORY/neurodesktop:latest ghcr.io/$GITHUB_REPOSITORY/neurodesktop-multiarch:$SHORT_SHA
+    #     docker pull ghcr.io/$GITHUB_REPOSITORY/neurodesktop:latest
+    #     docker tag ghcr.io/$GITHUB_REPOSITORY/neurodesktop:latest ghcr.io/$GITHUB_REPOSITORY/neurodesktop-multiarch:$SHORT_SHA
 
-        # Push to GH Packages
-        docker tag $IMAGEID:$SHORT_SHA $IMAGEID:$BUILDDATE
-        docker tag $IMAGEID:$SHORT_SHA $IMAGEID:latest
-        docker push $IMAGEID:$BUILDDATE
-        docker push $IMAGEID:latest
+    #     # Push to GH Packages
+    #     docker tag $IMAGEID:$SHORT_SHA $IMAGEID:$BUILDDATE
+    #     docker tag $IMAGEID:$SHORT_SHA $IMAGEID:latest
+    #     docker push $IMAGEID:$BUILDDATE
+    #     docker push $IMAGEID:latest
     # - name: Push image to Docker Hub (if enabled & changes found)
     #   if: ${{ github.event.inputs.force_push == 'true' || (env.GITHUB_RATE_REMAINING > 0 && env.ROOTFS_NEW != env.ROOTFS_CACHE && env.DOCKERHUB_ORG != '') }}
     #   run: |
