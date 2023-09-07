@@ -67,6 +67,8 @@ jobs:
           tags: | 
             ${{ env.IMAGEID}}:${{ env.BUILDDATE }}
             ${{ env.IMAGEID}}:latest
+          cache-from: type=registry,ref=${{ env.IMAGEID}}:latest
+          cache-to: type=inline
 
     # - name: Pull latest image from GitHub packages
     #   if: ${{ env.GITHUB_RATE_REMAINING > 0 }}
