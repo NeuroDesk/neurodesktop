@@ -73,8 +73,7 @@ jobs:
       with:
           context: .
           load: true
-          tags: | 
-            ${{ env.IMAGEID}}:${{ env.SHORT_SHA }}
+          tags: ${{ env.IMAGEID}}:${{ env.SHORT_SHA }}
           cache-from: type=registry,ref=${{ env.IMAGEID}}:latest
           cache-to: type=inline
     - name: Fetch new image digest
@@ -87,7 +86,7 @@ jobs:
       with:
           context: .
           platforms: linux/amd64,linux/arm64
-          provenance: false
+          provenance: false # fixes unknown/unknown arch builds
           push: true
           tags: | 
             ${{ env.IMAGEID}}:${{ env.BUILDDATE }}
