@@ -43,11 +43,57 @@ jobs:
         SHORT_SHA=$(git rev-parse --short $GITHUB_SHA)
         IMAGEID=ghcr.io/$GITHUB_REPOSITORY/$IMAGENAME
         IMAGEID=$(echo $IMAGEID | tr '[A-Z]' '[a-z]')
+
         echo "BUILDDATE=$BUILDDATE"
+        echo "SHORT_SHA=$SHORT_SHA"
+        echo "IMAGEID=$IMAGEID"
+        echo "IMAGENAME=$IMAGENAME"
+
         echo "BUILDDATE=$BUILDDATE" >> $GITHUB_ENV
         echo "SHORT_SHA=$SHORT_SHA" >> $GITHUB_ENV
         echo "IMAGEID=$IMAGEID" >> $GITHUB_ENV
         echo "IMAGENAME=$IMAGENAME" >> $GITHUB_ENV
+    - name: Set up QEMU
+      uses: docker/setup-qemu-action@v2
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v2
+    - name: Login to GHCR
+      uses: docker/login-action@v2
+      with:
+        registry: ghcr.io
+        username: ${{ github.repository_owner }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+    - name: Pull latest image
+      run: |
+        docker pull $IMAGEID:latest || (docker pull hello-world:latest && docker tag hello-world:latest $IMAGEID:latest)
+        DIGEST_CACHE=$(docker inspect --format='{{.RepoDigests}}' $IMAGEID:latest)
+        echo "DIGEST_CACHE=$DIGEST_CACHE" >> $GITHUB_ENV
+    - name: Build image
+      uses: docker/build-push-action@v4
+      with:
+          context: .
+          load: true
+          tags: ${{ env.IMAGEID}}:${{ env.SHORT_SHA }}
+          cache-from: type=registry,ref=${{ env.IMAGEID}}:latest
+          cache-to: type=inline
+    - name: Fetch new image digest
+      run: |
+        DIGEST_NEW=$(docker inspect --format='{{.RepoDigests}}' $IMAGEID:$SHORT_SHA)
+        echo "DIGEST_NEW=$DIGEST_NEW" >> $GITHUB_ENV
+    - name: Push image
+      if: ${{ github.event.inputs.force_push == 'true' || (env.DIGEST_NEW != env.DIGEST_CACHE) }}
+      uses: docker/build-push-action@v4
+      with:
+          context: .
+          platforms: linux/amd64,linux/arm64
+          provenance: false # fixes unknown/unknown arch builds
+          push: true
+          tags: | 
+            ${{ env.IMAGEID}}:${{ env.BUILDDATE }}
+            ${{ env.IMAGEID}}:latest
+          cache-from: type=registry,ref=${{ env.IMAGEID}}:latest
+          cache-to: type=inline
+
     # - name: Pull latest image from GitHub packages
     #   if: ${{ env.GITHUB_RATE_REMAINING > 0 }}
     #   run: |
@@ -73,22 +119,22 @@ jobs:
     #     docker buildx ls
     #     docker buildx create --name mybuilder
     #     docker buildx use mybuilder
-    #     docker buildx build --load --platform linux/arm64 . --file Dockerfile --tag $IMAGEID:$SHORT_SHA --label "GITHUB_REPOSITORY=$GITHUB_REPOSITORY" --label "GITHUB_SHA=$GITHUB_SHA"
+    #     docker buildx build --load --platform linux/amd64,linux/arm64 . --file Dockerfile --tag $IMAGEID:$SHORT_SHA --label "GITHUB_REPOSITORY=$GITHUB_REPOSITORY" --label "GITHUB_SHA=$GITHUB_SHA"
     #     # ROOTFS_NEW=$(docker inspect --format='{{.RootFS}}' $IMAGEID:$SHORT_SHA)
     #     # echo "ROOTFS_NEW=$ROOTFS_NEW" >> $GITHUB_ENV
-    - name: Push image to GitHub packages (if changes found)
-      # if: ${{ github.event.inputs.force_push == 'true' || (env.GITHUB_RATE_REMAINING > 0 && env.ROOTFS_NEW != env.ROOTFS_CACHE) }}
-      run: |
-        echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u $GITHUB_ACTOR --password-stdin
+    # - name: Push image to GitHub packages (if changes found)
+    #   # if: ${{ github.event.inputs.force_push == 'true' || (env.GITHUB_RATE_REMAINING > 0 && env.ROOTFS_NEW != env.ROOTFS_CACHE) }}
+    #   run: |
+    #     echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u $GITHUB_ACTOR --password-stdin
 
-        docker pull ghcr.io/$GITHUB_REPOSITORY/neurodesktop:latest
-        docker tag ghcr.io/$GITHUB_REPOSITORY/neurodesktop:latest ghcr.io/$GITHUB_REPOSITORY/neurodesktop-multiarch:$SHORT_SHA
+    #     docker pull ghcr.io/$GITHUB_REPOSITORY/neurodesktop:latest
+    #     docker tag ghcr.io/$GITHUB_REPOSITORY/neurodesktop:latest ghcr.io/$GITHUB_REPOSITORY/neurodesktop-multiarch:$SHORT_SHA
 
-        # Push to GH Packages
-        docker tag $IMAGEID:$SHORT_SHA $IMAGEID:$BUILDDATE
-        docker tag $IMAGEID:$SHORT_SHA $IMAGEID:latest
-        docker push $IMAGEID:$BUILDDATE
-        docker push $IMAGEID:latest
+    #     # Push to GH Packages
+    #     docker tag $IMAGEID:$SHORT_SHA $IMAGEID:$BUILDDATE
+    #     docker tag $IMAGEID:$SHORT_SHA $IMAGEID:latest
+    #     docker push $IMAGEID:$BUILDDATE
+    #     docker push $IMAGEID:latest
     # - name: Push image to Docker Hub (if enabled & changes found)
     #   if: ${{ github.event.inputs.force_push == 'true' || (env.GITHUB_RATE_REMAINING > 0 && env.ROOTFS_NEW != env.ROOTFS_CACHE && env.DOCKERHUB_ORG != '') }}
     #   run: |
