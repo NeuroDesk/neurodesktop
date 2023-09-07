@@ -1,11 +1,11 @@
 FROM jupyter/base-notebook:2023-05-01
-# # FROM jupyter/base-notebook:python-3.10.10
+# FROM jupyter/base-notebook:python-3.10.10
 
-# # Parent image source
-# # https://github.com/jupyter/docker-stacks/blob/86d42cadf4695b8e6fc3b3ead58e1f71067b765b/docker-stacks-foundation/Dockerfile
-# # https://github.com/jupyter/docker-stacks/blob/86d42cadf4695b8e6fc3b3ead58e1f71067b765b/base-notebook/Dockerfile
+# Parent image source
+# https://github.com/jupyter/docker-stacks/blob/86d42cadf4695b8e6fc3b3ead58e1f71067b765b/docker-stacks-foundation/Dockerfile
+# https://github.com/jupyter/docker-stacks/blob/86d42cadf4695b8e6fc3b3ead58e1f71067b765b/base-notebook/Dockerfile
 
-# USER root
+USER root
 
 # #========================================#
 # # Core services
