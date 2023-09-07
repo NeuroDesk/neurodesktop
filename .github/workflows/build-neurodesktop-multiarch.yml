@@ -70,6 +70,7 @@ jobs:
     - name: Check for changes in image
       run: |
         docker pull $IMAGEID:latest
+        docker images -a
         ROOTFS_CACHE=$(docker inspect --format='{{.RootFS}}' $IMAGEID:latest)
         ROOTFS_NEW=$(docker inspect --format='{{.RootFS}}' $IMAGEID:$SHORT_SHA)
         echo "ROOTFS_CACHE=$ROOTFS_CACHE" >> $GITHUB_ENV
