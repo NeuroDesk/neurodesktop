@@ -63,6 +63,11 @@ jobs:
         registry: ghcr.io
         username: ${{ github.repository_owner }}
         password: ${{ secrets.GITHUB_TOKEN }}
+    - name: Pull latest image
+      run: |
+        docker pull $IMAGEID:latest
+        DIGEST_CACHE=$(docker inspect --format='{{.RepoDigests}}' $IMAGEID:latest)
+        echo "DIGEST_CACHE=$DIGEST_CACHE" >> $GITHUB_ENV
     - name: Build image
       uses: docker/build-push-action@v4
       with:
@@ -72,13 +77,9 @@ jobs:
             ${{ env.IMAGEID}}:${{ env.SHORT_SHA }}
           cache-from: type=registry,ref=${{ env.IMAGEID}}:latest
           cache-to: type=inline
-    - name: Check for changes in image
+    - name: Fetch new image digest
       run: |
-        docker pull $IMAGEID:latest
-        docker images -a
-        DIGEST_CACHE=$(docker inspect --format='{{.RepoDigests}}' $IMAGEID:latest)
         DIGEST_NEW=$(docker inspect --format='{{.RepoDigests}}' $IMAGEID:$SHORT_SHA)
-        echo "DIGEST_CACHE=$DIGEST_CACHE" >> $GITHUB_ENV
         echo "DIGEST_NEW=$DIGEST_NEW" >> $GITHUB_ENV
     - name: Push image
       if: ${{ github.event.inputs.force_push == 'true' || (env.DIGEST_NEW != env.DIGEST_CACHE) }}
