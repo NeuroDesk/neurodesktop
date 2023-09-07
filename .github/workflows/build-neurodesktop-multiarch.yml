@@ -44,10 +44,15 @@ jobs:
         IMAGEID=ghcr.io/$GITHUB_REPOSITORY/$IMAGENAME
         IMAGEID=$(echo $IMAGEID | tr '[A-Z]' '[a-z]')
 
-        echo "BUILDDATE=$BUILDDATE" | tee $GITHUB_ENV
-        echo "SHORT_SHA=$SHORT_SHA" | tee $GITHUB_ENV
-        echo "IMAGEID=$IMAGEID" | tee $GITHUB_ENV
-        echo "IMAGENAME=$IMAGENAME" | tee $GITHUB_ENV
+        echo "BUILDDATE=$BUILDDATE"
+        echo "SHORT_SHA=$SHORT_SHA"
+        echo "IMAGEID=$IMAGEID"
+        echo "IMAGENAME=$IMAGENAME"
+
+        echo "BUILDDATE=$BUILDDATE" >> $GITHUB_ENV
+        echo "SHORT_SHA=$SHORT_SHA" >> $GITHUB_ENV
+        echo "IMAGEID=$IMAGEID" >> $GITHUB_ENV
+        echo "IMAGENAME=$IMAGENAME" >> $GITHUB_ENV
     - name: Set up QEMU
       uses: docker/setup-qemu-action@v2
     - name: Set up Docker Buildx
