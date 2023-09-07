@@ -64,7 +64,7 @@ jobs:
           context: .
           platforms: linux/amd64,linux/arm64
           push: true
-          tags: ${{ env.IMAGEID}}:latest
+          tags: ${{ env.IMAGEID}}:$BUILDDATE
 
     # - name: Pull latest image from GitHub packages
     #   if: ${{ env.GITHUB_RATE_REMAINING > 0 }}
