@@ -402,4 +402,4 @@ FROM jupyter/base-notebook:2023-05-01
 # RUN rm /home/${NB_USER}/skipcache \
 #     && git clone --depth 1 https://github.com/NeuroDesk/example-notebooks
 
-ENV MODULEPATH=/cvmfs/neurodesk.ardc.edu.au/containers/modules/
+# ENV MODULEPATH=/cvmfs/neurodesk.ardc.edu.au/containers/modules/
