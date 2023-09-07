@@ -58,7 +58,23 @@ jobs:
         registry: ghcr.io
         username: ${{ github.repository_owner }}
         password: ${{ secrets.GITHUB_TOKEN }}
+    - name: Build
+      uses: docker/build-push-action@v4
+      with:
+          context: .
+          load: true
+          tags: | 
+            ${{ env.IMAGEID}}:${{ env.SHORT_SHA }}
+          cache-from: type=registry,ref=${{ env.IMAGEID}}:latest
+          cache-to: type=inline
+    - name: Build new image
+      run: |
+        ROOTFS_CACHE=$(docker inspect --format='{{.RootFS}}' $IMAGEID:latest)
+        ROOTFS_NEW=$(docker inspect --format='{{.RootFS}}' $IMAGEID:$SHORT_SHA)
+        echo "ROOTFS_CACHE=$ROOTFS_CACHE" >> $GITHUB_ENV
+        echo "ROOTFS_NEW=$ROOTFS_NEW" >> $GITHUB_ENV
     - name: Build and push
+      if: ${{ github.event.inputs.force_push == 'true' || (env.ROOTFS_NEW != env.ROOTFS_CACHE) }}
       uses: docker/build-push-action@v4
       with:
           context: .
