@@ -5,7 +5,7 @@ FROM jupyter/base-notebook:2023-05-01
 # https://github.com/jupyter/docker-stacks/blob/86d42cadf4695b8e6fc3b3ead58e1f71067b765b/docker-stacks-foundation/Dockerfile
 # https://github.com/jupyter/docker-stacks/blob/86d42cadf4695b8e6fc3b3ead58e1f71067b765b/base-notebook/Dockerfile
 
-USER root
+# USER root
 
 # #========================================#
 # # Core services
@@ -402,4 +402,4 @@ USER root
 # RUN rm /home/${NB_USER}/skipcache \
 #     && git clone --depth 1 https://github.com/NeuroDesk/example-notebooks
 
-# ENV MODULEPATH=/cvmfs/neurodesk.ardc.edu.au/containers/modules/
+ENV MODULEPATH=/cvmfs/neurodesk.ardc.edu.au/containers/modules/
