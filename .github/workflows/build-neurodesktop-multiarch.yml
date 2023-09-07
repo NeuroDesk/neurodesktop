@@ -69,6 +69,7 @@ jobs:
           cache-to: type=inline
     - name: Build new image
       run: |
+        docker pull $IMAGEID:latest
         ROOTFS_CACHE=$(docker inspect --format='{{.RootFS}}' $IMAGEID:latest)
         ROOTFS_NEW=$(docker inspect --format='{{.RootFS}}' $IMAGEID:$SHORT_SHA)
         echo "ROOTFS_CACHE=$ROOTFS_CACHE" >> $GITHUB_ENV
