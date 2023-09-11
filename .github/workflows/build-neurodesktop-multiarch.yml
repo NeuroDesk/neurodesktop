@@ -65,7 +65,7 @@ jobs:
         password: ${{ secrets.GITHUB_TOKEN }}
     - name: Pull latest image
       run: |
-        docker pull $IMAGEID:latest || (docker pull hello-world:latest && docker tag hello-world:latest $IMAGEID:latest)
+        docker pull $IMAGEID:testing || (docker pull hello-world:latest && docker tag hello-world:latest $IMAGEID:latest)
         DIGEST_CACHE=$(docker inspect --format='{{.RepoDigests}}' $IMAGEID:latest)
         echo "DIGEST_CACHE=$DIGEST_CACHE" >> $GITHUB_ENV
     - name: Build image
