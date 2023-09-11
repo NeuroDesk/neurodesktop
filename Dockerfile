@@ -1,5 +1,8 @@
-FROM jupyter/base-notebook:2023-05-01
-# FROM jupyter/base-notebook:python-3.10.10
+# FROM jupyter/base-notebook:2023-05-01
+# # FROM jupyter/base-notebook:python-3.10.10
+
+FROM jupyter/base-notebook:2023-09-04
+# FROM jupyter/base-notebook:python-3.11.5
 
 # Parent image source
 # https://github.com/jupyter/docker-stacks/blob/86d42cadf4695b8e6fc3b3ead58e1f71067b765b/docker-stacks-foundation/Dockerfile
@@ -59,11 +62,11 @@ RUN apt-get update --yes \
         apt-transport-https \
         && apt-get clean && rm -rf /var/lib/apt/lists/* 
 
-ARG GO_VERSION="1.20.4"
-ARG SINGULARITY_VERSION="3.11.3"
+ARG GO_VERSION="1.21.1"
+ARG SINGULARITY_VERSION="3.11.4"
 ARG TOMCAT_REL="9"
-ARG TOMCAT_VERSION="9.0.75"
-ARG GUACAMOLE_VERSION="1.5.2"
+ARG TOMCAT_VERSION="9.0.80"
+ARG GUACAMOLE_VERSION="1.5.3"
 
 ENV LANG ""
 ENV LANGUAGE ""
