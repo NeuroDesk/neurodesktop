@@ -76,8 +76,8 @@ jobs:
         password: ${{ secrets.GITHUB_TOKEN }}
     - name: Pull latest image
       run: |
-        docker pull $IMAGEID:testing || (docker pull hello-world:latest && docker tag hello-world:latest $IMAGEID:latest)
-        DIGEST_CACHE=$(docker inspect --format='{{.RepoDigests}}' $IMAGEID:latest)
+        docker pull $IMAGEID:testing || (docker pull hello-world:latest && docker tag hello-world:latest $IMAGEID:testing)
+        DIGEST_CACHE=$(docker inspect --format='{{.RepoDigests}}' $IMAGEID:testing)
         echo "DIGEST_CACHE=$DIGEST_CACHE" >> $GITHUB_ENV
     - name: Build image
       uses: docker/build-push-action@v4
@@ -85,7 +85,7 @@ jobs:
           context: .
           load: true
           tags: ${{ env.IMAGEID}}:${{ env.SHORT_SHA }}
-          cache-from: type=registry,ref=${{ env.IMAGEID}}:latest
+          cache-from: type=registry,ref=${{ env.IMAGEID}}:testing
           cache-to: type=inline
     - name: Fetch new image digest
       run: |
