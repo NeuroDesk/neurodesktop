@@ -89,6 +89,8 @@ jobs:
           cache-to: type=inline
     - name: Get new image digest
       run: |
+        docker images
+        echo "$IMAGEID:$SHORT_SHA"
         DIGEST_NEW=$(docker inspect --format='{{.RepoDigests}}' $IMAGEID:$SHORT_SHA)
         echo "DIGEST_NEW=$DIGEST_NEW"
         echo "DIGEST_NEW=$DIGEST_NEW" >> $GITHUB_ENV
