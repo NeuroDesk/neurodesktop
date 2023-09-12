@@ -93,6 +93,7 @@ jobs:
         echo "$IMAGEID:$SHORT_SHA"
         DIGEST_NEW=$(docker inspect --format='{{.RepoDigests}}' $IMAGEID:$SHORT_SHA)
         echo "DIGEST_NEW=$DIGEST_NEW"
+        docker inspect $IMAGEID:$SHORT_SHA
         echo "DIGEST_NEW=$DIGEST_NEW" >> $GITHUB_ENV
     - name: Push image (if changes found)
       if: ${{ github.event.inputs.force_push == 'true' || (env.DIGEST_NEW != env.DIGEST_CACHE) }}
