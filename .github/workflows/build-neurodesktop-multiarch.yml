@@ -102,7 +102,7 @@ jobs:
           tags: | 
             ${{ env.IMAGEID}}:${{ env.BUILDDATE }}
             ${{ env.IMAGEID}}:latest
-          cache-from: type=registry,ref=${{ env.IMAGEID}}:latest
+          cache-from: type=registry,ref=${{ env.IMAGEID}}:testing
           cache-to: type=inline
 
     # - name: Pull latest image from GitHub packages
