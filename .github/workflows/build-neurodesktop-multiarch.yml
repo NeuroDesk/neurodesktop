@@ -77,6 +77,7 @@ jobs:
     - name: Get cached image digest
       run: |
         docker pull $IMAGEID:latest && DIGEST_CACHE=$(docker inspect --format='{{.RepoDigests}}' $IMAGEID:latest) && docker rmi $IMAGEID:latest || true
+        echo "DIGEST_CACHE=$DIGEST_CACHE"
         echo "DIGEST_CACHE=$DIGEST_CACHE" >> $GITHUB_ENV
     - name: Build new image
       uses: docker/build-push-action@v4
@@ -89,6 +90,7 @@ jobs:
     - name: Get new image digest
       run: |
         DIGEST_NEW=$(docker inspect --format='{{.RepoDigests}}' $IMAGEID:$SHORT_SHA)
+        echo "DIGEST_NEW=$DIGEST_NEW"
         echo "DIGEST_NEW=$DIGEST_NEW" >> $GITHUB_ENV
     - name: Push image (if changes found)
       if: ${{ github.event.inputs.force_push == 'true' || (env.DIGEST_NEW != env.DIGEST_CACHE) }}
