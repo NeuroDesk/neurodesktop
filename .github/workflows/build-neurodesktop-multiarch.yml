@@ -76,7 +76,7 @@ jobs:
         password: ${{ secrets.GITHUB_TOKEN }}
     - name: Get cached image digest
       run: |
-        docker pull $IMAGEID:latest && DIGEST_CACHE=$(docker inspect --format='{{.RepoDigests}}' $IMAGEID:latest) && docker inspect $IMAGEID:latest && docker rmi $IMAGEID:latest || true
+        docker pull $IMAGEID:latest && DIGEST_CACHE=$(docker inspect --format='{{.Id}}' $IMAGEID:latest) && docker inspect $IMAGEID:latest && docker rmi $IMAGEID:latest || true
         echo "DIGEST_CACHE=$DIGEST_CACHE"
         echo "DIGEST_CACHE=$DIGEST_CACHE" >> $GITHUB_ENV
     - name: Build new image
@@ -91,7 +91,7 @@ jobs:
       run: |
         docker images
         echo "$IMAGEID:$SHORT_SHA"
-        DIGEST_NEW=$(docker inspect --format='{{.RepoDigests}}' $IMAGEID:$SHORT_SHA)
+        DIGEST_NEW=$(docker inspect --format='{{.Id}}' $IMAGEID:$SHORT_SHA)
         echo "DIGEST_NEW=$DIGEST_NEW"
         docker inspect $IMAGEID:$SHORT_SHA
         echo "DIGEST_NEW=$DIGEST_NEW" >> $GITHUB_ENV
