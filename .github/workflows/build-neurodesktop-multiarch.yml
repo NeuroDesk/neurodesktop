@@ -89,16 +89,17 @@ jobs:
     - name: Get new image digest and generate tags
       run: |
         PUSH_TAGS="${IMAGEID}:${BUILDDATE}, ${IMAGEID}:latest"
-        if [ -z "${DOCKERHUB_ORG}" ]; then
-          docker tag ${IMAGEID}:${SHORT_SHA} ${DOCKERHUB_ORG}/${IMAGENAME}:${BUILDDATE}
-          docker tag ${IMAGEID}:${SHORT_SHA} ${DOCKERHUB_ORG}/${IMAGENAME}:latest
-          PUSH_TAGS="${PUSH_TAGS}, ${DOCKERHUB_ORG}/${IMAGENAME}:${BUILDDATE}, ${DOCKERHUB_ORG}/${IMAGENAME}:latest"
-        fi
-        if [ -z "${OCIR_REPO}" ]; then
-          docker tag ${IMAGEID}:${SHORT_SHA} "${OCIR_REPO}/${IMAGENAME}:${BUILDDATE}"
-          docker tag ${IMAGEID}:${SHORT_SHA} "${OCIR_REPO}/${IMAGENAME}:latest"
-          PUSH_TAGS="${PUSH_TAGS}, ${OCIR_REPO}/${IMAGENAME}:${BUILDDATE}, ${OCIR_REPO}/${IMAGENAME}:latest"
-        fi
+        PUSH_TAGS="${PUSH_TAGS}, ${DOCKERHUB_ORG}/${IMAGENAME}:${BUILDDATE}, ${DOCKERHUB_ORG}/${IMAGENAME}:latest"
+        # if [ -z "${DOCKERHUB_ORG}" ]; then
+        #   docker tag ${IMAGEID}:${SHORT_SHA} ${DOCKERHUB_ORG}/${IMAGENAME}:${BUILDDATE}
+        #   docker tag ${IMAGEID}:${SHORT_SHA} ${DOCKERHUB_ORG}/${IMAGENAME}:latest
+        #   PUSH_TAGS="${PUSH_TAGS}, ${DOCKERHUB_ORG}/${IMAGENAME}:${BUILDDATE}, ${DOCKERHUB_ORG}/${IMAGENAME}:latest"
+        # fi
+        # if [ -z "${OCIR_REPO}" ]; then
+        #   docker tag ${IMAGEID}:${SHORT_SHA} "${OCIR_REPO}/${IMAGENAME}:${BUILDDATE}"
+        #   docker tag ${IMAGEID}:${SHORT_SHA} "${OCIR_REPO}/${IMAGENAME}:latest"
+        #   PUSH_TAGS="${PUSH_TAGS}, ${OCIR_REPO}/${IMAGENAME}:${BUILDDATE}, ${OCIR_REPO}/${IMAGENAME}:latest"
+        # fi
         echo "$IMAGEID:$SHORT_SHA"
         ROOTFS_NEW=$(docker inspect --format='{{.RootFS}}' $IMAGEID:$SHORT_SHA)
         echo "PUSH_TAGS=$PUSH_TAGS"
