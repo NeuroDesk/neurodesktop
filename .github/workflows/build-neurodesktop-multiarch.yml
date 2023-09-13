@@ -77,7 +77,6 @@ jobs:
     - name: Get cached image digest
       run: |
         docker pull $IMAGEID:latest && ROOTFS_CACHE=$(docker inspect --format='{{.RootFS}}' $IMAGEID:latest) && docker rmi $IMAGEID:latest || true
-        echo "ROOTFS_CACHE=$ROOTFS_CACHE"
         echo "ROOTFS_CACHE=$ROOTFS_CACHE" >> $GITHUB_ENV
     - name: Build new image
       uses: docker/build-push-action@v4
@@ -102,7 +101,7 @@ jobs:
         fi
         echo "$IMAGEID:$SHORT_SHA"
         ROOTFS_NEW=$(docker inspect --format='{{.RootFS}}' $IMAGEID:$SHORT_SHA)
-        echo "ROOTFS_NEW=$ROOTFS_NEW"
+        echo "PUSH_TAGS=$PUSH_TAGS"
         echo "ROOTFS_NEW=$ROOTFS_NEW" >> $GITHUB_ENV
         echo "PUSH_TAGS=$PUSH_TAGS" >> $GITHUB_ENV
     - name: Login to DockerHub (if changes found)
@@ -122,7 +121,7 @@ jobs:
           tags: ${{ env.PUSH_TAGS}}
           cache-from: type=registry,ref=${{ env.IMAGEID}}:latest
           cache-to: type=inline
-          
+
     # - name: Push image to DockerHub (if changes found)
     #   if: ${{ env.DOCKERHUB_ORG != '' && (github.event.inputs.force_push == 'true' || (env.ROOTFS_NEW != env.ROOTFS_CACHE)) }}
     #   uses: docker/build-push-action@v4
