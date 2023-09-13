@@ -88,6 +88,7 @@ jobs:
           cache-to: type=inline
     - name: Get new image digest and generate tags
       run: |
+        ROOTFS_NEW=$(docker inspect --format='{{.RootFS}}' $IMAGEID:$SHORT_SHA)
         PUSH_TAGS="${IMAGEID}:${BUILDDATE}, ${IMAGEID}:latest"
         if [ ! -z "${DOCKERHUB_ORG}" ]; then
           docker tag ${IMAGEID}:${SHORT_SHA} ${DOCKERHUB_ORG}/${IMAGENAME}:${BUILDDATE}
@@ -99,8 +100,6 @@ jobs:
           docker tag ${IMAGEID}:${SHORT_SHA} "${OCIR_REPO}/${IMAGENAME}:latest"
           PUSH_TAGS="${PUSH_TAGS}, ${OCIR_REPO}/${IMAGENAME}:${BUILDDATE}, ${OCIR_REPO}/${IMAGENAME}:latest"
         fi
-        echo "$IMAGEID:$SHORT_SHA"
-        ROOTFS_NEW=$(docker inspect --format='{{.RootFS}}' $IMAGEID:$SHORT_SHA)
         echo "PUSH_TAGS=$PUSH_TAGS"
         echo "ROOTFS_NEW=$ROOTFS_NEW" >> $GITHUB_ENV
         echo "PUSH_TAGS=$PUSH_TAGS" >> $GITHUB_ENV

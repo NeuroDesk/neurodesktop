@@ -30,6 +30,17 @@ jobs:
         GITHUB_RATE_REMAINING=$(curl -H "Accept: application/vnd.github.v3+json" https://api.github.com/rate_limit | jq '.rate.remaining')
         echo "GITHUB_RATE_REMAINING=${GITHUB_RATE_REMAINING}"
         echo "GITHUB_RATE_REMAINING=$GITHUB_RATE_REMAINING" >> $GITHUB_ENV
+    # - name: Maximize build space
+    #   uses: easimon/maximize-build-space@master
+    #   with:
+    #     root-reserve-mb: 40000
+    #     swap-size-mb: 1024
+    #     overprovision-lvm: 'true'
+    #     remove-dotnet: 'true'
+    #     remove-android: 'true'
+    #     remove-haskell: 'true'
+    #     remove-codeql: 'true'
+    #     remove-docker-images: 'true'
     - name: Checkout repository
       if: ${{ env.GITHUB_RATE_REMAINING > 0 }}
       uses: actions/checkout@v3
@@ -43,59 +54,78 @@ jobs:
         SHORT_SHA=$(git rev-parse --short $GITHUB_SHA)
         IMAGEID=ghcr.io/$GITHUB_REPOSITORY/$IMAGENAME
         IMAGEID=$(echo $IMAGEID | tr '[A-Z]' '[a-z]')
+
         echo "BUILDDATE=$BUILDDATE"
+        echo "SHORT_SHA=$SHORT_SHA"
+        echo "IMAGEID=$IMAGEID"
+        echo "IMAGENAME=$IMAGENAME"
+
         echo "BUILDDATE=$BUILDDATE" >> $GITHUB_ENV
         echo "SHORT_SHA=$SHORT_SHA" >> $GITHUB_ENV
         echo "IMAGEID=$IMAGEID" >> $GITHUB_ENV
         echo "IMAGENAME=$IMAGENAME" >> $GITHUB_ENV
-    - name: Pull latest image from GitHub packages
-      if: ${{ env.GITHUB_RATE_REMAINING > 0 }}
+    - name: Set up QEMU
+      uses: docker/setup-qemu-action@v2
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v2
+    - name: Login to GHCR
+      uses: docker/login-action@v2
+      with:
+        registry: ghcr.io
+        username: ${{ github.repository_owner }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+    - name: Get cached image digest
       run: |
-        echo ${GITHUB_REF}
-        echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u $GITHUB_ACTOR --password-stdin
-        {
-          docker pull $IMAGEID:latest \
-            && ROOTFS_CACHE=$(docker inspect --format='{{.RootFS}}' $IMAGEID:latest) \
-            && echo "ROOTFS_CACHE=$ROOTFS_CACHE" >> $GITHUB_ENV
-        } || echo "$IMAGEID not found. Resuming build..."
-    # - name: Modify Dockerfile for CI build
-    #   if: ${{ env.GITHUB_RATE_REMAINING > 0 }}
-    #   run: |
-    #     sed -i 's/# ADD --keep-git-dir=true/ADD --keep-git-dir=true/g' Dockerfile
-    #     sed -i 's/ADD "https:\/\/api.github.com/# ADD "https:\/\/api.github.com/g' Dockerfile
-    #     sed -i 's/RUN git clone https:\/\/github.com\/NeuroDesk\/neurocommand.git/# RUN git clone https:\/\/github.com\/NeuroDesk\/neurocommand.git/g' Dockerfile
+        docker pull $IMAGEID:latest && ROOTFS_CACHE=$(docker inspect --format='{{.RootFS}}' $IMAGEID:latest) && docker rmi $IMAGEID:latest || true
+        echo "ROOTFS_CACHE=$ROOTFS_CACHE" >> $GITHUB_ENV
     - name: Build new image
-      if: ${{ env.GITHUB_RATE_REMAINING > 0 }}
+      uses: docker/build-push-action@v4
+      with:
+          context: .
+          load: true
+          tags: ${{ env.IMAGEID}}:${{ env.SHORT_SHA }}
+          cache-from: type=registry,ref=${{ env.IMAGEID}}:latest
+          cache-to: type=inline
+    - name: Get new image digest and generate tags
       run: |
-        docker build . --file Dockerfile --tag $IMAGEID:$SHORT_SHA --cache-from $IMAGEID --label "GITHUB_REPOSITORY=$GITHUB_REPOSITORY" --label "GITHUB_SHA=$GITHUB_SHA"
         ROOTFS_NEW=$(docker inspect --format='{{.RootFS}}' $IMAGEID:$SHORT_SHA)
+        PUSH_TAGS="${IMAGEID}:${BUILDDATE}, ${IMAGEID}:latest"
+        if [ ! -z "${DOCKERHUB_ORG}" ]; then
+          docker tag ${IMAGEID}:${SHORT_SHA} ${DOCKERHUB_ORG}/${IMAGENAME}:${BUILDDATE}
+          docker tag ${IMAGEID}:${SHORT_SHA} ${DOCKERHUB_ORG}/${IMAGENAME}:latest
+          PUSH_TAGS="${PUSH_TAGS}, ${DOCKERHUB_ORG}/${IMAGENAME}:${BUILDDATE}, ${DOCKERHUB_ORG}/${IMAGENAME}:latest"
+        fi
+        if [ ! -z "${OCIR_REPO}" ]; then
+          docker tag ${IMAGEID}:${SHORT_SHA} "${OCIR_REPO}/${IMAGENAME}:${BUILDDATE}"
+          docker tag ${IMAGEID}:${SHORT_SHA} "${OCIR_REPO}/${IMAGENAME}:latest"
+          PUSH_TAGS="${PUSH_TAGS}, ${OCIR_REPO}/${IMAGENAME}:${BUILDDATE}, ${OCIR_REPO}/${IMAGENAME}:latest"
+        fi
+        echo "PUSH_TAGS=$PUSH_TAGS"
         echo "ROOTFS_NEW=$ROOTFS_NEW" >> $GITHUB_ENV
-    - name: Push image to GitHub packages (if changes found)
-      if: ${{ github.event.inputs.force_push == 'true' || (env.GITHUB_RATE_REMAINING > 0 && env.ROOTFS_NEW != env.ROOTFS_CACHE && env.DOCKERHUB_ORG != '') }}
-      run: |
-        # Push to GH Packages
-        docker tag $IMAGEID:$SHORT_SHA $IMAGEID:$BUILDDATE
-        docker tag $IMAGEID:$SHORT_SHA $IMAGEID:latest
-        docker push $IMAGEID:$BUILDDATE
-        docker push $IMAGEID:latest
-    - name: Push image to Docker Hub (if enabled & changes found)
-      if: ${{ github.event.inputs.force_push == 'true' || (env.GITHUB_RATE_REMAINING > 0 && env.ROOTFS_NEW != env.ROOTFS_CACHE && env.DOCKERHUB_ORG != '') }}
-      run: |
-        echo "${{ secrets.DOCKERHUB_PASSWORD }}" | docker login -u ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin
-        # Push to GH Packages
-        docker tag $IMAGEID:$SHORT_SHA $DOCKERHUB_ORG/$IMAGENAME:$BUILDDATE
-        docker tag $IMAGEID:$SHORT_SHA $DOCKERHUB_ORG/$IMAGENAME:latest
-        docker push $DOCKERHUB_ORG/$IMAGENAME:$BUILDDATE
-        docker push $DOCKERHUB_ORG/$IMAGENAME:latest
-    - name: Push image to Oracle Container Registry (if enabled & changes found)
-      run: |
-        echo "${{ secrets.OCIR_PASSWORD }}" | docker login syd.ocir.io -u ${{ secrets.OCIR_USERNAME }} --password-stdin
-        # Push to GH Packages
-        echo ${OCIR_REPO}
-        docker tag $IMAGEID:$SHORT_SHA "${OCIR_REPO}/${IMAGENAME}:${BUILDDATE}"
-        docker tag $IMAGEID:$SHORT_SHA "${OCIR_REPO}/${IMAGENAME}:latest"
-        docker push "${OCIR_REPO}/${IMAGENAME}:${BUILDDATE}"
-        docker push "${OCIR_REPO}/${IMAGENAME}:latest"
+        echo "PUSH_TAGS=$PUSH_TAGS" >> $GITHUB_ENV
+    - name: Login to DockerHub (if changes found)
+      if: ${{ env.DOCKERHUB_ORG != '' && (env.ROOTFS_NEW != env.ROOTFS_CACHE || github.event.inputs.force_push == 'true') }}
+      uses: docker/login-action@v2
+      with:
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_PASSWORD }}
+    - name: Login to OCIR (if changes found)
+      if: ${{ env.OCIR_REPO != '' && (env.ROOTFS_NEW != env.ROOTFS_CACHE || github.event.inputs.force_push == 'true') }}
+      uses: docker/login-action@v2
+      with:
+        username: ${{ secrets.OCIR_USERNAME }}
+        password: ${{ secrets.OCIR_PASSWORD }}
+    - name: Push image (if changes found)
+      if: ${{ env.ROOTFS_NEW != env.ROOTFS_CACHE || github.event.inputs.force_push == 'true' }}
+      uses: docker/build-push-action@v4
+      with:
+          context: .
+          platforms: linux/amd64,linux/arm64
+          provenance: false # fixes unknown/unknown arch builds
+          push: true
+          tags: ${{ env.PUSH_TAGS}}
+          cache-from: type=registry,ref=${{ env.IMAGEID}}:latest
+          cache-to: type=inline
     # - name: Container image scan
     #   if: ${{ env.GITHUB_RATE_REMAINING > 0 }}
     #   uses: aquasecurity/trivy-action@0.8.0
