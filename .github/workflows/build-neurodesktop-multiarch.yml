@@ -114,7 +114,7 @@ jobs:
             ${{ env.IMAGEID}}:latest
           cache-from: type=registry,ref=${{ env.IMAGEID}}:latest
           cache-to: type=inline
-    - name: Login to DockerHub
+    - name: Login to DockerHub (if changes found)
       if: ${{ env.DOCKERHUB_ORG != '' && (github.event.inputs.force_push == 'true' || (env.ROOTFS_NEW != env.ROOTFS_CACHE)) }}
       uses: docker/login-action@v2
       with:
