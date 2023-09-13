@@ -78,7 +78,7 @@ jobs:
       run: |
         docker pull $IMAGEID:latest && ROOTFS_CACHE=$(docker inspect --format='{{.RootFS}}' $IMAGEID:latest) && docker rmi $IMAGEID:latest || true
         echo "ROOTFS_CACHE=$ROOTFS_CACHE" >> $GITHUB_ENV
-    - name: Build new image
+    - name: Build image
       uses: docker/build-push-action@v4
       with:
           context: .
