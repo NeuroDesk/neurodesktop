@@ -76,9 +76,9 @@ jobs:
         password: ${{ secrets.GITHUB_TOKEN }}
     - name: Get cached image digest
       run: |
-        docker pull $IMAGEID:latest && DIGEST_CACHE=$(docker inspect --format='{{.Id}}' $IMAGEID:latest) && docker inspect $IMAGEID:latest && docker rmi $IMAGEID:latest || true
-        echo "DIGEST_CACHE=$DIGEST_CACHE"
-        echo "DIGEST_CACHE=$DIGEST_CACHE" >> $GITHUB_ENV
+        docker pull $IMAGEID:latest && ROOTFS_CACHE=$(docker inspect --format='{{.RootFS}}' $IMAGEID:latest) && docker rmi $IMAGEID:latest || true
+        echo "ROOTFS_CACHE=$ROOTFS_CACHE"
+        echo "ROOTFS_CACHE=$ROOTFS_CACHE" >> $GITHUB_ENV
     - name: Build new image
       uses: docker/build-push-action@v4
       with:
@@ -91,12 +91,11 @@ jobs:
       run: |
         docker images
         echo "$IMAGEID:$SHORT_SHA"
-        DIGEST_NEW=$(docker inspect --format='{{.Id}}' $IMAGEID:$SHORT_SHA)
-        echo "DIGEST_NEW=$DIGEST_NEW"
-        docker inspect $IMAGEID:$SHORT_SHA
-        echo "DIGEST_NEW=$DIGEST_NEW" >> $GITHUB_ENV
+        ROOTFS_NEW=$(docker inspect --format='{{.RootFS}}' $IMAGEID:$SHORT_SHA)
+        echo "ROOTFS_NEW=$ROOTFS_NEW"
+        echo "ROOTFS_NEW=$ROOTFS_NEW" >> $GITHUB_ENV
     - name: Push image (if changes found)
-      if: ${{ github.event.inputs.force_push == 'true' || (env.DIGEST_NEW != env.DIGEST_CACHE) }}
+      if: ${{ github.event.inputs.force_push == 'true' || (env.ROOTFS_NEW != env.ROOTFS_CACHE) }}
       uses: docker/build-push-action@v4
       with:
           context: .
