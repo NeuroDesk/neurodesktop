@@ -87,21 +87,31 @@ jobs:
           tags: ${{ env.IMAGEID}}:${{ env.SHORT_SHA }}
           cache-from: type=registry,ref=${{ env.IMAGEID}}:latest
           cache-to: type=inline
-    - name: Get new image digest and tag new image
+    - name: Get new image digest and generate tags
       run: |
+        PUSH_TAGS="${IMAGEID}:${BUILDDATE}, ${IMAGEID}:latest"
         if [ -z "${DOCKERHUB_ORG}" ]; then
           docker tag ${IMAGEID}:${SHORT_SHA} ${DOCKERHUB_ORG}/${IMAGENAME}:${BUILDDATE}
           docker tag ${IMAGEID}:${SHORT_SHA} ${DOCKERHUB_ORG}/${IMAGENAME}:latest
+          PUSH_TAGS="${PUSH_TAGS}, ${DOCKERHUB_ORG}/${IMAGENAME}:${BUILDDATE}, ${DOCKERHUB_ORG}/${IMAGENAME}:latest"
         fi
         if [ -z "${OCIR_REPO}" ]; then
           docker tag ${IMAGEID}:${SHORT_SHA} "${OCIR_REPO}/${IMAGENAME}:${BUILDDATE}"
           docker tag ${IMAGEID}:${SHORT_SHA} "${OCIR_REPO}/${IMAGENAME}:latest"
+          PUSH_TAGS="${PUSH_TAGS}, ${OCIR_REPO}/${IMAGENAME}:${BUILDDATE}, ${OCIR_REPO}/${IMAGENAME}:latest"
         fi
         echo "$IMAGEID:$SHORT_SHA"
         ROOTFS_NEW=$(docker inspect --format='{{.RootFS}}' $IMAGEID:$SHORT_SHA)
         echo "ROOTFS_NEW=$ROOTFS_NEW"
         echo "ROOTFS_NEW=$ROOTFS_NEW" >> $GITHUB_ENV
-    - name: Push image to GHCR (if changes found)
+        echo "PUSH_TAGS=$PUSH_TAGS" >> $GITHUB_ENV
+    - name: Login to DockerHub (if changes found)
+      if: ${{ env.DOCKERHUB_ORG != '' && (github.event.inputs.force_push == 'true' || (env.ROOTFS_NEW != env.ROOTFS_CACHE)) }}
+      uses: docker/login-action@v2
+      with:
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_PASSWORD }}
+    - name: Push image (if changes found)
       if: ${{ github.event.inputs.force_push == 'true' || (env.ROOTFS_NEW != env.ROOTFS_CACHE) }}
       uses: docker/build-push-action@v4
       with:
@@ -109,26 +119,21 @@ jobs:
           platforms: linux/amd64,linux/arm64
           provenance: false # fixes unknown/unknown arch builds
           push: true
-          tags: ${{ env.IMAGEID}}:${{ env.BUILDDATE }}, ${{ env.IMAGEID}}:latest
+          tags: ${{ env.PUSH_TAGS}}
           cache-from: type=registry,ref=${{ env.IMAGEID}}:latest
           cache-to: type=inline
-    - name: Login to DockerHub (if changes found)
-      if: ${{ env.DOCKERHUB_ORG != '' && (github.event.inputs.force_push == 'true' || (env.ROOTFS_NEW != env.ROOTFS_CACHE)) }}
-      uses: docker/login-action@v2
-      with:
-        username: ${{ secrets.DOCKERHUB_USERNAME }}
-        password: ${{ secrets.DOCKERHUB_PASSWORD }}
-    - name: Push image to DockerHub (if changes found)
-      if: ${{ env.DOCKERHUB_ORG != '' && (github.event.inputs.force_push == 'true' || (env.ROOTFS_NEW != env.ROOTFS_CACHE)) }}
-      uses: docker/build-push-action@v4
-      with:
-          context: .
-          platforms: linux/amd64,linux/arm64
-          provenance: false # fixes unknown/unknown arch builds
-          push: true
-          tags: ${{ env.DOCKERHUB_ORG}}/${{ env.IMAGENAME}}:${{ env.BUILDDATE }}, ${{ env.DOCKERHUB_ORG}}/${{ env.IMAGENAME}}:latest
-          cache-from: type=registry,ref=${{ env.IMAGEID}}:latest
-          cache-to: type=inline
+          
+    # - name: Push image to DockerHub (if changes found)
+    #   if: ${{ env.DOCKERHUB_ORG != '' && (github.event.inputs.force_push == 'true' || (env.ROOTFS_NEW != env.ROOTFS_CACHE)) }}
+    #   uses: docker/build-push-action@v4
+    #   with:
+    #       context: .
+    #       platforms: linux/amd64,linux/arm64
+    #       provenance: false # fixes unknown/unknown arch builds
+    #       push: true
+    #       tags: ${{ env.DOCKERHUB_ORG}}/${{ env.IMAGENAME}}:${{ env.BUILDDATE }}, ${{ env.DOCKERHUB_ORG}}/${{ env.IMAGENAME}}:latest
+    #       cache-from: type=registry,ref=${{ env.IMAGEID}}:latest
+    #       cache-to: type=inline
 
     # - name: Pull latest image from GitHub packages
     #   if: ${{ env.GITHUB_RATE_REMAINING > 0 }}
