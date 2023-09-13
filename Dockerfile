@@ -406,3 +406,5 @@ RUN rm /home/${NB_USER}/skipcache \
     && git clone --depth 1 https://github.com/NeuroDesk/example-notebooks
 
 ENV MODULEPATH=/cvmfs/neurodesk.ardc.edu.au/containers/modules/
+
+RUN echo
