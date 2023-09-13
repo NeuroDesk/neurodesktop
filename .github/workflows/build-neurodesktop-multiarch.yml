@@ -109,9 +109,7 @@ jobs:
           platforms: linux/amd64,linux/arm64
           provenance: false # fixes unknown/unknown arch builds
           push: true
-          tags: | 
-            ${{ env.IMAGEID}}:${{ env.BUILDDATE }}
-            ${{ env.IMAGEID}}:latest
+          tags: ${{ env.IMAGEID}}:${{ env.BUILDDATE }}, ${{ env.IMAGEID}}:latest
           cache-from: type=registry,ref=${{ env.IMAGEID}}:latest
           cache-to: type=inline
     - name: Login to DockerHub (if changes found)
@@ -128,9 +126,7 @@ jobs:
           platforms: linux/amd64,linux/arm64
           provenance: false # fixes unknown/unknown arch builds
           push: true
-          tags: | 
-            ${{ env.DOCKERHUB_ORG}}/${{ env.IMAGENAME}}:${{ env.BUILDDATE }}
-            ${{ env.DOCKERHUB_ORG}}/${{ env.IMAGENAME}}:latest
+          tags: ${{ env.DOCKERHUB_ORG}}/${{ env.IMAGENAME}}:${{ env.BUILDDATE }}, ${{ env.DOCKERHUB_ORG}}/${{ env.IMAGENAME}}:latest
           cache-from: type=registry,ref=${{ env.IMAGEID}}:latest
           cache-to: type=inline
 
