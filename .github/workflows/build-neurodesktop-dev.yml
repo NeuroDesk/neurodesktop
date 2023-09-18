@@ -132,8 +132,7 @@ jobs:
         images: ${{ env.PUSH_IMAGES }}
         tags: ${{ env.BUILDDATE }}
         labels: |
-          maintainer=Neurodesk Project <www.neurodesk.org>
-          org.opencontainers.image.description=A flexible and scalable containerised environment for reproducible imaging and data analysis
+          org.opencontainers.image.description=Neurodesktop
     - name: Push image (if changes found)
       if: ${{ env.ROOTFS_NEW != env.ROOTFS_CACHE || github.event.inputs.force_push == 'true' }}
       uses: docker/build-push-action@v4
