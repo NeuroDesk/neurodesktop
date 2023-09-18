@@ -50,7 +50,7 @@ jobs:
       if: ${{ env.GITHUB_RATE_REMAINING > 0 }}
       run: |
         IMAGENAME="neurodesktop-dev"
-        BUILDDATE=`date +%Y%m%dT%H%M`
+        BUILDDATE=`date +%Y-%m-%d-%H%M`
         SHORT_SHA=$(git rev-parse --short $GITHUB_SHA)
         IMAGEID=ghcr.io/$GITHUB_REPOSITORY/$IMAGENAME
         IMAGEID=$(echo $IMAGEID | tr '[A-Z]' '[a-z]')
@@ -74,11 +74,11 @@ jobs:
         registry: ghcr.io
         username: ${{ github.repository_owner }}
         password: ${{ secrets.GITHUB_TOKEN }}
-    - name: Get cached image digest
+    - name: Get rootfs of cached image
       run: |
         docker pull $IMAGEID:latest && ROOTFS_CACHE=$(docker inspect --format='{{.RootFS}}' $IMAGEID:latest) && docker rmi $IMAGEID:latest || true
         echo "ROOTFS_CACHE=$ROOTFS_CACHE" >> $GITHUB_ENV
-    - name: Build image
+    - name: Build new image
       uses: docker/build-push-action@v4
       with:
           context: .
@@ -86,23 +86,19 @@ jobs:
           tags: ${{ env.IMAGEID}}:${{ env.SHORT_SHA }}
           cache-from: type=registry,ref=${{ env.IMAGEID}}:latest
           cache-to: type=inline
-    - name: Get new image digest and generate tags
+    - name: Get rootfs of new image
       run: |
         ROOTFS_NEW=$(docker inspect --format='{{.RootFS}}' $IMAGEID:$SHORT_SHA)
-        PUSH_TAGS="${IMAGEID}:${BUILDDATE}, ${IMAGEID}:latest"
+        PUSH_IMAGES="${IMAGEID}"
         if [ ! -z "${DOCKERHUB_ORG}" ]; then
-          docker tag ${IMAGEID}:${SHORT_SHA} ${DOCKERHUB_ORG}/${IMAGENAME}:${BUILDDATE}
-          docker tag ${IMAGEID}:${SHORT_SHA} ${DOCKERHUB_ORG}/${IMAGENAME}:latest
-          PUSH_TAGS="${PUSH_TAGS}, ${DOCKERHUB_ORG}/${IMAGENAME}:${BUILDDATE}, ${DOCKERHUB_ORG}/${IMAGENAME}:latest"
+          PUSH_IMAGES="${PUSH_IMAGES}, ${DOCKERHUB_ORG}/${IMAGENAME}"
         fi
         if [ ! -z "${OCIR_REPO}" ]; then
-          docker tag ${IMAGEID}:${SHORT_SHA} "${OCIR_REPO}/${IMAGENAME}:${BUILDDATE}"
-          docker tag ${IMAGEID}:${SHORT_SHA} "${OCIR_REPO}/${IMAGENAME}:latest"
-          PUSH_TAGS="${PUSH_TAGS}, ${OCIR_REPO}/${IMAGENAME}:${BUILDDATE}, ${OCIR_REPO}/${IMAGENAME}:latest"
+          PUSH_IMAGES="${PUSH_IMAGES}, ${OCIR_REPO}/${IMAGENAME}"
         fi
-        echo "PUSH_TAGS=$PUSH_TAGS"
+        echo "PUSH_IMAGES=$PUSH_IMAGES"
         echo "ROOTFS_NEW=$ROOTFS_NEW" >> $GITHUB_ENV
-        echo "PUSH_TAGS=$PUSH_TAGS" >> $GITHUB_ENV
+        echo "PUSH_IMAGES=$PUSH_IMAGES" >> $GITHUB_ENV
     - name: Login to DockerHub (if changes found)
       if: ${{ env.DOCKERHUB_ORG != '' && (env.ROOTFS_NEW != env.ROOTFS_CACHE || github.event.inputs.force_push == 'true') }}
       uses: docker/login-action@v2
@@ -116,18 +112,37 @@ jobs:
         registry: syd.ocir.io
         username: ${{ secrets.OCIR_USERNAME }}
         password: ${{ secrets.OCIR_PASSWORD }}
-    - name: Push image (if changes found)
+    - name: Get new image metadata (if changes found)
+      if: ${{ env.ROOTFS_NEW != env.ROOTFS_CACHE || github.event.inputs.force_push == 'true' }}
+      id: meta
+      uses: docker/metadata-action@v5
+      with:
+        images: ${{ env.PUSH_IMAGES }}
+        tags: |
+          ${{ env.BUILDDATE }}
+          latest
+        labels: |
+          org.opencontainers.image.description=Neurodesktop
+    - name: Push new image (if changes found)
       if: ${{ env.ROOTFS_NEW != env.ROOTFS_CACHE || github.event.inputs.force_push == 'true' }}
       uses: docker/build-push-action@v4
       with:
           context: .
+          # platforms: linux/amd64
           platforms: linux/amd64,linux/arm64
           provenance: false # fixes unknown/unknown arch builds
           push: true
-          tags: ${{ env.PUSH_TAGS}}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=registry,ref=${{ env.IMAGEID}}:latest
           cache-to: type=inline
-    # - name: Container image scan
+    - name: Create github tag (if changes found)
+      if: ${{ env.ROOTFS_NEW != env.ROOTFS_CACHE || github.event.inputs.force_push == 'true' }}
+      uses: rickstaa/action-create-tag@v1.6.3
+      with:
+        tag: ${{ env.BUILDDATE }}
+
+    # - name: Container image scan  
     #   if: ${{ env.GITHUB_RATE_REMAINING > 0 }}
     #   uses: aquasecurity/trivy-action@0.8.0
     #   with:
