@@ -103,12 +103,12 @@ jobs:
     #     echo "PUSH_TAGS=$PUSH_TAGS"
     #     echo "ROOTFS_NEW=$ROOTFS_NEW" >> $GITHUB_ENV
     #     echo "PUSH_TAGS=$PUSH_TAGS" >> $GITHUB_ENV
-    # - name: Login to DockerHub (if changes found)
-    #   if: ${{ env.DOCKERHUB_ORG != '' && (env.ROOTFS_NEW != env.ROOTFS_CACHE || github.event.inputs.force_push == 'true') }}
-    #   uses: docker/login-action@v2
-    #   with:
-    #     username: ${{ secrets.DOCKERHUB_USERNAME }}
-    #     password: ${{ secrets.DOCKERHUB_PASSWORD }}
+    - name: Login to DockerHub (if changes found)
+      if: ${{ env.DOCKERHUB_ORG != '' && (env.ROOTFS_NEW != env.ROOTFS_CACHE || github.event.inputs.force_push == 'true') }}
+      uses: docker/login-action@v2
+      with:
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_PASSWORD }}
     # - name: Login to OCIR (if changes found)
     #   if: ${{ env.OCIR_REPO != '' && (env.ROOTFS_NEW != env.ROOTFS_CACHE || github.event.inputs.force_push == 'true') }}
     #   uses: docker/login-action@v2
@@ -118,19 +118,19 @@ jobs:
     #     password: ${{ secrets.OCIR_PASSWORD }}
     - name: Get test image digest and generate tags
       run: |
-        PUSH_TAGS="${BUILDDATE}, latest"
-        echo "PUSH_TAGS=$PUSH_TAGS"
+        PUSH_IMAGES="$IMAGEID, ${DOCKERHUB_ORG}/${IMAGENAME}"
+        echo "PUSH_IMAGES=$PUSH_IMAGES"
         ROOTFS_CACHE=0
         echo "ROOTFS_CACHE=$ROOTFS_CACHE" >> $GITHUB_ENV
         ROOTFS_NEW=1
         echo "ROOTFS_NEW=$ROOTFS_NEW" >> $GITHUB_ENV
-        echo "PUSH_TAGS=$PUSH_TAGS" >> $GITHUB_ENV
+        echo "PUSH_IMAGES=$PUSH_IMAGES" >> $GITHUB_ENV
     - name: Docker meta
       id: meta
       uses: docker/metadata-action@v5
       with:
-        images: ${{ env.IMAGEID }}
-        tags: ${{ env.PUSH_TAGS }}
+        images: ${{ env.PUSH_IMAGES }}
+        tags: ${{ env.BUILDDATE }}
         labels: |
           maintainer=Neurodesk Project <www.neurodesk.org>
           org.opencontainers.image.description=A flexible and scalable containerised environment for reproducible imaging and data analysis
