@@ -130,7 +130,9 @@ jobs:
       uses: docker/metadata-action@v5
       with:
         images: ${{ env.PUSH_IMAGES }}
-        tags: ${{ env.BUILDDATE }}
+        tags: |
+          ${{ env.BUILDDATE }}
+          latest
         labels: |
           org.opencontainers.image.description=Neurodesktop
     - name: Push image (if changes found)
