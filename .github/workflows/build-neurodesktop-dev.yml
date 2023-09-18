@@ -129,7 +129,10 @@ jobs:
       id: meta
       uses: docker/metadata-action@v5
       with:
-        images: ${{ env.PUSH_TAGS}}
+        images: ${{ env.IMAGEID }}
+        tags: |
+          latest
+          ${{ env.BUILDDATE }}
     - name: Push image (if changes found)
       if: ${{ env.ROOTFS_NEW != env.ROOTFS_CACHE || github.event.inputs.force_push == 'true' }}
       uses: docker/build-push-action@v4
