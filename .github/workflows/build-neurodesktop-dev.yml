@@ -133,6 +133,9 @@ jobs:
         tags: |
           latest
           ${{ env.BUILDDATE }}
+        labels: |
+          maintainer=Neurodesk Project <www.neurodesk.org>
+          org.opencontainers.image.description=A flexible and scalable containerised environment for reproducible data analysis
     - name: Push image (if changes found)
       if: ${{ env.ROOTFS_NEW != env.ROOTFS_CACHE || github.event.inputs.force_push == 'true' }}
       uses: docker/build-push-action@v4
@@ -146,7 +149,7 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=registry,ref=${{ env.IMAGEID}}:latest
           cache-to: type=inline
-    # - name: Container image scan
+    # - name: Container image scan  
     #   if: ${{ env.GITHUB_RATE_REMAINING > 0 }}
     #   uses: aquasecurity/trivy-action@0.8.0
     #   with:
