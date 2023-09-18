@@ -74,44 +74,40 @@ jobs:
         registry: ghcr.io
         username: ${{ github.repository_owner }}
         password: ${{ secrets.GITHUB_TOKEN }}
-    # - name: Get cached image digest
-    #   run: |
-    #     docker pull $IMAGEID:latest && ROOTFS_CACHE=$(docker inspect --format='{{.RootFS}}' $IMAGEID:latest) && docker rmi $IMAGEID:latest || true
-    #     echo "ROOTFS_CACHE=$ROOTFS_CACHE" >> $GITHUB_ENV
-    # - name: Build image
-    #   uses: docker/build-push-action@v4
-    #   with:
-    #       context: .
-    #       load: true
-    #       tags: ${{ env.IMAGEID}}:${{ env.SHORT_SHA }}
-    #       cache-from: type=registry,ref=${{ env.IMAGEID}}:latest
-    #       cache-to: type=inline
-    # - name: Get new image digest and generate tags
-    #   run: |
-    #     ROOTFS_NEW=$(docker inspect --format='{{.RootFS}}' $IMAGEID:$SHORT_SHA)
-    #     PUSH_TAGS="${IMAGEID}:${BUILDDATE}, ${IMAGEID}:latest"
-    #     if [ ! -z "${DOCKERHUB_ORG}" ]; then
-    #       docker tag ${IMAGEID}:${SHORT_SHA} ${DOCKERHUB_ORG}/${IMAGENAME}:${BUILDDATE}
-    #       docker tag ${IMAGEID}:${SHORT_SHA} ${DOCKERHUB_ORG}/${IMAGENAME}:latest
-    #       PUSH_TAGS="${PUSH_TAGS}, ${DOCKERHUB_ORG}/${IMAGENAME}:${BUILDDATE}, ${DOCKERHUB_ORG}/${IMAGENAME}:latest"
-    #     fi
-    #     if [ ! -z "${OCIR_REPO}" ]; then
-    #       docker tag ${IMAGEID}:${SHORT_SHA} "${OCIR_REPO}/${IMAGENAME}:${BUILDDATE}"
-    #       docker tag ${IMAGEID}:${SHORT_SHA} "${OCIR_REPO}/${IMAGENAME}:latest"
-    #       PUSH_TAGS="${PUSH_TAGS}, ${OCIR_REPO}/${IMAGENAME}:${BUILDDATE}, ${OCIR_REPO}/${IMAGENAME}:latest"
-    #     fi
-    #     echo "PUSH_TAGS=$PUSH_TAGS"
-    #     echo "ROOTFS_NEW=$ROOTFS_NEW" >> $GITHUB_ENV
-    #     echo "PUSH_TAGS=$PUSH_TAGS" >> $GITHUB_ENV
-    - name: Get test image digest and generate tags
+    - name: Get cached image digest
       run: |
-        PUSH_IMAGES="$IMAGEID, ${DOCKERHUB_ORG}/${IMAGENAME}"
-        echo "PUSH_IMAGES=$PUSH_IMAGES"
-        ROOTFS_CACHE=0
+        docker pull $IMAGEID:latest && ROOTFS_CACHE=$(docker inspect --format='{{.RootFS}}' $IMAGEID:latest) && docker rmi $IMAGEID:latest || true
         echo "ROOTFS_CACHE=$ROOTFS_CACHE" >> $GITHUB_ENV
-        ROOTFS_NEW=1
+    - name: Build image
+      uses: docker/build-push-action@v4
+      with:
+          context: .
+          load: true
+          tags: ${{ env.IMAGEID}}:${{ env.SHORT_SHA }}
+          cache-from: type=registry,ref=${{ env.IMAGEID}}:latest
+          cache-to: type=inline
+    - name: Get new image digest and generate tags
+      run: |
+        ROOTFS_NEW=$(docker inspect --format='{{.RootFS}}' $IMAGEID:$SHORT_SHA)
+        PUSH_IMAGES="${IMAGEID}"
+        if [ ! -z "${DOCKERHUB_ORG}" ]; then
+          PUSH_IMAGES="${PUSH_IMAGES}, ${DOCKERHUB_ORG}/${IMAGENAME}"
+        fi
+        if [ ! -z "${OCIR_REPO}" ]; then
+          PUSH_IMAGES="${PUSH_IMAGES}, ${OCIR_REPO}/${IMAGENAME}"
+        fi
+        echo "PUSH_IMAGES=$PUSH_IMAGES"
         echo "ROOTFS_NEW=$ROOTFS_NEW" >> $GITHUB_ENV
         echo "PUSH_IMAGES=$PUSH_IMAGES" >> $GITHUB_ENV
+    # - name: Get test image digest and generate tags
+    #   run: |
+    #     PUSH_IMAGES="$IMAGEID, ${DOCKERHUB_ORG}/${IMAGENAME}"
+    #     echo "PUSH_IMAGES=$PUSH_IMAGES"
+    #     ROOTFS_CACHE=0
+    #     echo "ROOTFS_CACHE=$ROOTFS_CACHE" >> $GITHUB_ENV
+    #     ROOTFS_NEW=1
+    #     echo "ROOTFS_NEW=$ROOTFS_NEW" >> $GITHUB_ENV
+    #     echo "PUSH_IMAGES=$PUSH_IMAGES" >> $GITHUB_ENV
     - name: Login to DockerHub (if changes found)
       if: ${{ env.DOCKERHUB_ORG != '' && (env.ROOTFS_NEW != env.ROOTFS_CACHE || github.event.inputs.force_push == 'true') }}
       uses: docker/login-action@v2
