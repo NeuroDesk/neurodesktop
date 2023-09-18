@@ -64,8 +64,8 @@ jobs:
         echo "SHORT_SHA=$SHORT_SHA" >> $GITHUB_ENV
         echo "IMAGEID=$IMAGEID" >> $GITHUB_ENV
         echo "IMAGENAME=$IMAGENAME" >> $GITHUB_ENV
-    # - name: Set up QEMU
-    #   uses: docker/setup-qemu-action@v2
+    - name: Set up QEMU
+      uses: docker/setup-qemu-action@v2
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v2
     - name: Login to GHCR
@@ -118,7 +118,7 @@ jobs:
     #     password: ${{ secrets.OCIR_PASSWORD }}
     - name: Get test image digest and generate tags
       run: |
-        PUSH_TAGS="${IMAGEID}:${BUILDDATE}, ${IMAGEID}:latest"
+        PUSH_TAGS="${BUILDDATE}, latest"
         echo "PUSH_TAGS=$PUSH_TAGS"
         ROOTFS_CACHE=0
         echo "ROOTFS_CACHE=$ROOTFS_CACHE" >> $GITHUB_ENV
@@ -130,19 +130,17 @@ jobs:
       uses: docker/metadata-action@v5
       with:
         images: ${{ env.IMAGEID }}
-        tags: |
-          latest
-          ${{ env.BUILDDATE }}
+        tags: ${{ env.PUSH_TAGS }}
         labels: |
           maintainer=Neurodesk Project <www.neurodesk.org>
-          org.opencontainers.image.description=A flexible and scalable containerised environment for reproducible data analysis
+          org.opencontainers.image.description=A flexible and scalable containerised environment for reproducible imaging and data analysis
     - name: Push image (if changes found)
       if: ${{ env.ROOTFS_NEW != env.ROOTFS_CACHE || github.event.inputs.force_push == 'true' }}
       uses: docker/build-push-action@v4
       with:
           context: .
-          platforms: linux/amd64
-          # platforms: linux/amd64,linux/arm64
+          # platforms: linux/amd64
+          platforms: linux/amd64,linux/arm64
           provenance: false # fixes unknown/unknown arch builds
           push: true
           tags: ${{ steps.meta.outputs.tags }}
