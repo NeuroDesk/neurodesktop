@@ -116,6 +116,11 @@ jobs:
         registry: syd.ocir.io
         username: ${{ secrets.OCIR_USERNAME }}
         password: ${{ secrets.OCIR_PASSWORD }}
+    - name: Docker meta
+      id: meta
+      uses: docker/metadata-action@v5
+      with:
+        images: ${{ env.PUSH_TAGS}}
     - name: Push image (if changes found)
       if: ${{ env.ROOTFS_NEW != env.ROOTFS_CACHE || github.event.inputs.force_push == 'true' }}
       uses: docker/build-push-action@v4
@@ -124,7 +129,8 @@ jobs:
           platforms: linux/amd64,linux/arm64
           provenance: false # fixes unknown/unknown arch builds
           push: true
-          tags: ${{ env.PUSH_TAGS}}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=registry,ref=${{ env.IMAGEID}}:latest
           cache-to: type=inline
     # - name: Container image scan
