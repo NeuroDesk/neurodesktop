@@ -51,7 +51,6 @@ jobs:
       run: |
         IMAGENAME="neurodesktop-dev"
         BUILDDATE=`date +%Y-%m-%d-%H%M`
-        SHORT_SHA=$(git rev-parse --short $GITHUB_SHA)
         IMAGEID=ghcr.io/$GITHUB_REPOSITORY/$IMAGENAME
         IMAGEID=$(echo $IMAGEID | tr '[A-Z]' '[a-z]')
 
