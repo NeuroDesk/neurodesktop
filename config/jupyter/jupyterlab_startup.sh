@@ -20,18 +20,6 @@ then
     sudo chown ${NB_UID}:${NB_GID} -R /home/${NB_USER}
 fi
 
-# Delete matlab license file, because the new instance will have a new mac address and the license file is not valid anymore
-if [ -d "/home/${NB_USER}/.matlab/R2022a_licenses" ] 
-then
-    rm -rf /home/${NB_USER}/.matlab/R2022a_licenses
-fi
-
-if [ -d "/home/${NB_USER}/.matlab/R2023a_licenses" ] 
-then
-    rm -rf /home/${NB_USER}/.matlab/R2023a_licenses
-fi
-
-
 # # Overwrite jupyter_notebook_config and .bash with image backup copies
 # # Used in cases of persistent home directories
 # cp -p /tmp/${NB_USER}/.bashrc /home/${NB_USER}/.bashrc
