@@ -131,7 +131,7 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          cache-from: type=registry,ref=${{ env.IMAGEID}}:latest
+          cache-from: type=registry,ref=${{ env.IMAGEID }}:latest
           cache-to: type=inline
     - name: Create github tag (if changes found)
       if: ${{ env.ROOTFS_NEW != env.ROOTFS_CACHE || github.event.inputs.force_push == 'true' }}
