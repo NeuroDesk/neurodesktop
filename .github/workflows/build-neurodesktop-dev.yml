@@ -133,12 +133,11 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=registry,ref=${{ env.IMAGEID }}:latest
           cache-to: type=inline
-    - name: Create github tag (if changes found)
-      if: ${{ env.ROOTFS_NEW != env.ROOTFS_CACHE || github.event.inputs.force_push == 'true' }}
-      uses: rickstaa/action-create-tag@v1.6.3
-      with:
-        tag: ${{ env.BUILDDATE }}
-
+    # - name: Create github tag (if changes found)
+    #   if: ${{ env.ROOTFS_NEW != env.ROOTFS_CACHE || github.event.inputs.force_push == 'true' }}
+    #   uses: rickstaa/action-create-tag@v1.6.3
+    #   with:
+    #     tag: ${{ env.BUILDDATE }}
     # - name: Container image scan  
     #   if: ${{ env.GITHUB_RATE_REMAINING > 0 }}
     #   uses: aquasecurity/trivy-action@0.8.0
