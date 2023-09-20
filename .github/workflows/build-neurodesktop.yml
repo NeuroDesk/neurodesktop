@@ -142,7 +142,7 @@ jobs:
       if: ${{ env.GITHUB_RATE_REMAINING > 0 }}
       uses: aquasecurity/trivy-action@0.8.0
       with:
-        image-ref: ${{ env.IMAGEID }}
+        image-ref: ${{ env.IMAGEID }}:${{ env.BUILDDATE }}
         format: table
         exit-code: '1'
         severity: CRITICAL
