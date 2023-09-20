@@ -37,7 +37,7 @@ jobs:
     #     remove-docker-images: 'true'
     - name: Checkout repository
       if: ${{ env.GITHUB_RATE_REMAINING > 0 }}
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
       with:
         ref: ${{ github.ref }}
     - name: Set environment variables
@@ -70,7 +70,7 @@ jobs:
           tags: ${{ env.IMAGEID }}:${{ env.BUILDDATE }}
     - name: Container image scan  
       if: ${{ env.GITHUB_RATE_REMAINING > 0 }}
-      uses: aquasecurity/trivy-action@0.8.0
+      uses: aquasecurity/trivy-action@0.12.0
       with:
         image-ref: ${{ env.IMAGEID }}:${{ env.BUILDDATE }}
         format: table
@@ -80,7 +80,7 @@ jobs:
         skip-files: /opt/rclone-v1.60.1-linux-amd64/README.txt, /opt/rclone-v1.60.1-linux-amd64/README.html, /opt/rclone-v1.60.1-linux-amd64/rclone.1
     # - name: Generate issue on job failure
     #   if: always() && failure()
-    #   uses: JasonEtco/create-an-issue@v2
+    #   uses: JasonEtco/create-an-issue@v2.9.1
     #   env: 
     #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     #     GITHUB_WORKFLOW: ${{ env.GITHUB_WORKFLOW }}

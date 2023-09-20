@@ -16,6 +16,6 @@ jobs:
       matrix:
         server: ["https://objectstorage.us-ashburn-1.oraclecloud.com/n/sd63xuke79z3/b/neurodesk/o/", "https://objectstorage.eu-frankfurt-1.oraclecloud.com/n/sd63xuke79z3/b/neurodesk/o/", "https://objectstorage.ap-sydney-1.oraclecloud.com/n/sd63xuke79z3/b/neurodesk/o/", "https://swift.rc.nectar.org.au/v1/AUTH_dead991e1fa847e3afcca2d3a7041f5d/neurodesk/"]
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - name: check if ${{ matrix.server }} is online and up-to-date
       run: /bin/bash .github/workflows/test_objectstorage.sh  ${{ matrix.server }}

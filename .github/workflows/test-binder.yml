@@ -22,6 +22,6 @@ jobs:
           "play-frankfurt.neurodesk.org"
           ]
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - name: Build binder
       run: curl "https://${{ matrix.server }}/build/gh/$GITHUB_REPOSITORY/$GITHUB_REF_NAME"
