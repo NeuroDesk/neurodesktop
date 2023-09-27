@@ -69,7 +69,7 @@ sudo service ssh stop
 
 # Create a symlink in home if /data is mounted
 if mountpoint -q /data; then
-    ln -s /data /home/${NB_USER}/data
+    ln -s /data /home/${NB_USER}/
 fi
 
 source /opt/neurodesktop/environment_variables.sh
