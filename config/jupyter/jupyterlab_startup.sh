@@ -63,14 +63,37 @@ then
     sudo sed -i "/private-key/ r /home/${NB_USER}/.ssh/guacamole_rsa" /etc/guacamole/user-mapping.xml
 fi
 
+# Create a symlink in home if /data is mounted
+if mountpoint -q /data; then
+    if [ ! -L "/home/${NB_USER}/data" ]; then
+        ln -s /data /home/${NB_USER}/
+    fi
+fi
+
+# Create a symlink to /neurodesktop-storage in home if it is mounted
+if mountpoint -q /neurodesktop-storage/; then
+    if [ ! -L "/home/${NB_USER}/data/neurodesktop-storage" ]; then
+        ln -s /neurodesktop-storage/ /home/${NB_USER}/
+    fi
+else
+    if [ ! -L "/neurodesktop-storage" ]; then
+        if [ ! -d "/home/${NB_USER}/neurodesktop-storage/" ]; then
+            mkdir -p /home/${NB_USER}/neurodesktop-storage/containers
+        fi
+        sudo ln -s /home/${NB_USER}/neurodesktop-storage/ /neurodesktop-storage
+    fi
+fi
+
+# Create a symlink to the neurodesktop-storage directory if it doens't exist yet:
+if [ ! -L "/neurocommand/local/containers" ]; then
+  ln -s "/home/${NB_USER}/neurodesktop-storage/containers" "/neurocommand/local/containers"
+fi
+
+
 # Start and stop SSH server to initialize host
 sudo service ssh restart
 sudo service ssh stop
 
-# Create a symlink in home if /data is mounted
-if mountpoint -q /data; then
-    ln -s /data /home/${NB_USER}/
-fi
 
 source /opt/neurodesktop/environment_variables.sh
 

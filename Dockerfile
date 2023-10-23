@@ -263,7 +263,7 @@ COPY ./config/lxde/rc.xml /etc/xdg/openbox
 RUN sed -i 's/#user_allow_other/user_allow_other/g' /etc/fuse.conf
 
 # Fetch singularity bind mount list and create placeholder mountpoints
-RUN mkdir -p `curl https://raw.githubusercontent.com/NeuroDesk/neurocontainers/master/recipes/globalMountPointList.txt`
+# RUN mkdir -p `curl https://raw.githubusercontent.com/NeuroDesk/neurocontainers/master/recipes/globalMountPointList.txt`
 
 # Fix "No session for pid prompt"
 RUN rm /usr/bin/lxpolkit
@@ -369,9 +369,7 @@ COPY --chown=${NB_UID}:${NB_GID} config/ssh/sshd_config /home/${NB_USER}/.ssh/ss
 RUN chmod +x /home/${NB_USER}/.vnc/xstartup
 
 # Set up working directories and symlinks
-RUN mkdir -p /home/${NB_USER}/Desktop/ \
-    && ln -s /neurodesktop-storage/ /home/${NB_USER} \
-    && ln -s /data /home/${NB_USER}
+RUN mkdir -p /home/${NB_USER}/Desktop/
 
 #========================================#
 # Finalise build
@@ -384,10 +382,6 @@ USER root
 # Used to restore home dir in persistent sessions
 RUN cp -rp /home/${NB_USER} /tmp/
 
-# Set up working directories and symlinks
-RUN mkdir -p /data \
-    && ln -s /neurodesktop-storage /storage
-
 # Install neurocommand
 ADD "https://api.github.com/repos/neurodesk/neurocommand/git/refs/heads/main" /tmp/skipcache
 RUN rm /tmp/skipcache \
@@ -395,8 +389,7 @@ RUN rm /tmp/skipcache \
     && cd /neurocommand \
     && bash build.sh --lxde --edit \
     && bash install.sh \
-    && mkdir -p /neurodesktop-storage/containers \
-    && ln -s /neurodesktop-storage/containers /neurocommand/local/containers
+    && ln -s /home/${NB_USER}/neurodesktop-storage/containers /neurocommand/local/containers
 
 USER ${NB_UID}
 
