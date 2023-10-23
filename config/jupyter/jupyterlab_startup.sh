@@ -84,7 +84,7 @@ else
     fi
 fi
 
-# Create a symlink to the neurodesktop-storage directory if it doens't exist yet:
+# Create a symlink to the neurodesktop-storage directory if it doesn't exist yet:
 if [ ! -L "/neurocommand/local/containers" ]; then
   ln -s "/home/${NB_USER}/neurodesktop-storage/containers" "/neurocommand/local/containers"
 fi
