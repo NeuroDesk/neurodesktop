@@ -382,6 +382,9 @@ USER root
 # Used to restore home dir in persistent sessions
 RUN cp -rp /home/${NB_USER} /tmp/
 
+# Set up data directory so it exists in the container for the SINGULARITY_BINDPATH
+RUN mkdir -p /data
+
 # Install neurocommand
 ADD "https://api.github.com/repos/neurodesk/neurocommand/git/refs/heads/main" /tmp/skipcache
 RUN rm /tmp/skipcache \
