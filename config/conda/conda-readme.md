@@ -2,10 +2,14 @@ We use nb_conda_kernels to enable users to create their own conda environments. 
 
 ```
 #create a python environment:
+mamba create -n myenv ipykernel
+#OR
 conda create -n myenv ipykernel
 ```
 
 ```
 #create R environment:
+mamba create -n r_env r-irkernel
+#OR
 conda create -n r_env r-irkernel
 ```
