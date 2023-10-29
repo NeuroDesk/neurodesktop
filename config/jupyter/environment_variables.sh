@@ -32,7 +32,7 @@ export SINGULARITY_BINDPATH=/data,/neurodesktop-storage,/tmp,/cvmfs,/home/${NB_U
 export SINGULARITYENV_SUBJECTS_DIR=/home/${NB_USER}/freesurfer-subjects-dir
 export MPLCONFIGDIR=/home/${NB_USER}/.config/matplotlib-mpldir
 
-export PATH=$PATH:/home/${NB_USER}/.local/bin
+export PATH=$PATH:/home/${NB_USER}/.local/bin:/opt/conda/bin:/opt/conda/condabin
 
 # this adds --nv to the singularity calls -> but only if a GPU is present
 if [ "`lspci | grep -i nvidia`" ]
