@@ -97,6 +97,10 @@ sudo service ssh stop
 
 source /opt/neurodesktop/environment_variables.sh
 
+
+conda init bash
+mamba init bash
+
 # if [ ! -d "/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/" ]; then
 #     # the cvmfs directory is not yet mounted
 #     if [ -z "$CVMFS_DISABLE" ]; then
