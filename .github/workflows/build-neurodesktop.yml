@@ -140,7 +140,7 @@ jobs:
         tag: ${{ env.BUILDDATE }}
         tag_exists_error: false
     - name: Container image scan  
-      if: ${{ env.GITHUB_RATE_REMAINING > 0}}
+      if: ${{ env.DOCKERHUB_ORG != '' && (env.ROOTFS_NEW != env.ROOTFS_CACHE || github.event.inputs.force_push == 'true') }}
       uses: aquasecurity/trivy-action@0.12.0
       with:
         image-ref: ${{ env.IMAGEID }}:${{ env.BUILDDATE }}
