@@ -67,6 +67,7 @@ jobs:
           platforms: linux/amd64
           # platforms: linux/amd64,linux/arm64
           provenance: false # fixes unknown/unknown arch builds
+          no-cache: true
           tags: ${{ env.IMAGEID }}:${{ env.BUILDDATE }}
     # - name: Container image scan  
     #   if: ${{ env.GITHUB_RATE_REMAINING > 0 }}
