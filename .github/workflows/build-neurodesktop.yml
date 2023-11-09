@@ -135,10 +135,9 @@ jobs:
           cache-to: type=inline
     - name: Create github tag (if changes found)
       if: ${{ env.ROOTFS_NEW != env.ROOTFS_CACHE || github.event.inputs.force_push == 'true' }}
-      uses: rickstaa/action-create-tag@v1.6.4
-      with:
-        tag: ${{ env.BUILDDATE }}
-        tag_exists_error: false
+      run: |
+        git tag ${BUILDDATE}
+        git push origin --tags
     - name: Container image scan  
       if: ${{ env.DOCKERHUB_ORG != '' && (env.ROOTFS_NEW != env.ROOTFS_CACHE || github.event.inputs.force_push == 'true') }}
       uses: aquasecurity/trivy-action@0.12.0
