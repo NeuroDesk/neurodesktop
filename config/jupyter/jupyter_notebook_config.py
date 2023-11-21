@@ -20,4 +20,7 @@ c.ServerApp.root_dir = '/'
 c.ServerApp.preferred_dir = os.getcwd()
 c.FileContentsManager.allow_hidden = True
 
+# required for google workstation's proxy setup
+c.NotebookApp.allow_origin = '*'
+
 before_notebook = subprocess.call("/opt/neurodesktop/jupyterlab_startup.sh")
