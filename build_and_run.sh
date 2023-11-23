@@ -31,3 +31,11 @@ docker run --shm-size=1gb -it --cap-add SYS_ADMIN --security-opt apparmor:unconf
 #     -v /cvmfs:/cvmfs -p 8888:8888 \
 #     --user=root -e NB_UID="$(id -u)" -e NB_GID="$(id -g)" \
 #     neurodesktop:latest
+
+# launch with custom token
+# docker run --shm-size=1gb -it --cap-add SYS_ADMIN --security-opt apparmor:unconfined \
+#     --device=/dev/fuse --name neurodesktop -v ~/neurodesktop-storage:/neurodesktop-storage \
+#     --mount source=neurodesk-home,target=/home/jovyan \
+#     -p 8888:8888 \
+#     --user=root -e NB_UID="$(id -u)" -e NB_GID="$(id -g)" \
+#     neurodesktop:latest start.sh jupyter lab --ServerApp.password="" --no-browser --expose-app-in-browser --ServerApp.token="jlab:srvr:123" --ServerApp.port=33163 --LabApp.quit_button=False
