@@ -385,6 +385,9 @@ RUN cp -rp /home/${NB_USER} /tmp/
 # Set up data directory so it exists in the container for the SINGULARITY_BINDPATH
 RUN mkdir -p /data
 
+
+
+
 # Install neurocommand
 ADD "https://api.github.com/repos/neurodesk/neurocommand/git/refs/heads/main" /tmp/skipcache
 RUN rm /tmp/skipcache \
@@ -403,4 +406,6 @@ ADD "https://api.github.com/repos/neurodesk/example-notebooks/git/refs/heads/mai
 RUN rm /home/${NB_USER}/skipcache \
     && git clone --depth 1 https://github.com/NeuroDesk/example-notebooks
 
+# Set SINGULARITY_BINDPATH and MODULEPATH here so it's available within a notebook (the startup scripts set these things too late):
+ENV SINGULARITY_BINDPATH=/data,/neurodesktop-storage,/tmp,/cvmfs,/home/${NB_USER}:/home/matlab/.matlab/R2022a_licenses,/home/${NB_USER}:/opt/matlab/R2022a/licenses
 ENV MODULEPATH=/cvmfs/neurodesk.ardc.edu.au/containers/modules/
