@@ -27,7 +27,9 @@ if [ -d /cvmfs/neurodesk.ardc.edu.au/neurodesk-modules ]; then
         export MODULEPATH=`echo $MODULEPATH | sed 's/ /:/g'`
 fi
 
+# This also needs to be set in the Dockerfile, so it is available in a jupyter notebook
 export SINGULARITY_BINDPATH=/data,/neurodesktop-storage,/tmp,/cvmfs,/home/${NB_USER}:/home/matlab/.matlab/R2022a_licenses,/home/${NB_USER}:/opt/matlab/R2022a/licenses
+# This also needs to be set in the Dockerfile, so it is available in a jupyter notebook
 
 export SINGULARITYENV_SUBJECTS_DIR=/home/${NB_USER}/freesurfer-subjects-dir
 export MPLCONFIGDIR=/home/${NB_USER}/.config/matplotlib-mpldir
