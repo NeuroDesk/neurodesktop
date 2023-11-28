@@ -72,7 +72,7 @@ fi
 
 # Create a symlink to /neurodesktop-storage in home if it is mounted
 if mountpoint -q /neurodesktop-storage/; then
-    if [ ! -L "/home/${NB_USER}/data/neurodesktop-storage" ]; then
+    if [ ! -L "/home/${NB_USER}/neurodesktop-storage" ]; then
         ln -s /neurodesktop-storage/ /home/${NB_USER}/
     fi
 else
@@ -80,7 +80,9 @@ else
         if [ ! -d "/home/${NB_USER}/neurodesktop-storage/" ]; then
             mkdir -p /home/${NB_USER}/neurodesktop-storage/containers
         fi
-        sudo ln -s /home/${NB_USER}/neurodesktop-storage/ /neurodesktop-storage
+        if [ ! -L "/neurodesktop-storage" ]; then
+            sudo ln -s /home/${NB_USER}/neurodesktop-storage/ /neurodesktop-storage
+        fi
     fi
 fi
 
@@ -89,6 +91,14 @@ if [ ! -L "/neurocommand/local/containers" ]; then
   ln -s "/home/${NB_USER}/neurodesktop-storage/containers" "/neurocommand/local/containers"
 fi
 
+# Create a cpufino file with a valid CPU Mhz entry for ARM cpus
+if ! grep -iq 'cpu.*hz' /proc/cpuinfo; then
+    cpuinfo_file=/home/${NB_USER}/.local/cpuinfo_with_ARM_MHz_fix
+    cp /proc/cpuinfo $cpuinfo_file
+    chmod u+rw $cpuinfo_file
+    sed -i '/^$/c\cpu MHz         : 2245.778\n' $cpuinfo_file
+    sudo mount --bind $cpuinfo_file /proc/cpuinfo
+fi
 
 # Start and stop SSH server to initialize host
 sudo service ssh restart
