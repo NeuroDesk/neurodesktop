@@ -30,17 +30,17 @@ jobs:
         GITHUB_RATE_REMAINING=$(curl -H "Accept: application/vnd.github.v3+json" https://api.github.com/rate_limit | jq '.rate.remaining')
         echo "GITHUB_RATE_REMAINING=${GITHUB_RATE_REMAINING}"
         echo "GITHUB_RATE_REMAINING=$GITHUB_RATE_REMAINING" >> $GITHUB_ENV
-    - name: Maximize build space
-      uses: easimon/maximize-build-space@master
-      with:
-        root-reserve-mb: 40000
-        swap-size-mb: 1024
-        overprovision-lvm: 'true'
-        remove-dotnet: 'true'
-        remove-android: 'true'
-        remove-haskell: 'true'
-        remove-codeql: 'true'
-        remove-docker-images: 'true'
+    # - name: Maximize build space
+    #   uses: easimon/maximize-build-space@master
+    #   with:
+    #     root-reserve-mb: 40000
+    #     swap-size-mb: 1024
+    #     overprovision-lvm: 'true'
+    #     remove-dotnet: 'true'
+    #     remove-android: 'true'
+    #     remove-haskell: 'true'
+    #     remove-codeql: 'true'
+    #     remove-docker-images: 'true'
     - name: Checkout repository
       if: ${{ env.GITHUB_RATE_REMAINING > 0 }}
       uses: actions/checkout@v4
@@ -137,10 +137,11 @@ jobs:
       if: ${{ env.ROOTFS_NEW != env.ROOTFS_CACHE || github.event.inputs.force_push == 'true' }}
       run: |
         git tag ${BUILDDATE}
-        git push origin --tags
-    - name: Container image scan  
-      if: ${{ env.DOCKERHUB_ORG != '' && (env.ROOTFS_NEW != env.ROOTFS_CACHE || github.event.inputs.force_push == 'true') }}
-      uses: aquasecurity/trivy-action@0.12.0
+        git push origin -f --tags
+        # echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u $GITHUB_ACTOR --password-stdin
+    - name: Container image scan
+      if: ${{ env.ROOTFS_NEW != env.ROOTFS_CACHE || github.event.inputs.force_push == 'true' }}
+      uses: aquasecurity/trivy-action@0.14.0
       with:
         image-ref: ${{ env.IMAGEID }}:${{ env.BUILDDATE }}
         format: table
