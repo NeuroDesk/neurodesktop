@@ -1,8 +1,8 @@
 # FROM jupyter/base-notebook:2023-05-01
 # # FROM jupyter/base-notebook:python-3.10.10
 
-FROM jupyter/base-notebook:2023-09-04
-# FROM jupyter/base-notebook:python-3.11.5
+FROM jupyter/base-notebook:2023-10-20
+# FROM jupyter/base-notebook:python-3.11.6
 
 # Parent image source
 # https://github.com/jupyter/docker-stacks/blob/86d42cadf4695b8e6fc3b3ead58e1f71067b765b/docker-stacks-foundation/Dockerfile
