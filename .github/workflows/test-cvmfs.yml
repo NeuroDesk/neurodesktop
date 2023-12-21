@@ -9,6 +9,12 @@ env:
   DOCKERHUB_ORG: ${{ secrets.DOCKERHUB_ORG }}
 
 jobs:
+  test_cvmfs_1_2_3:
+    runs-on: ubuntu-22.04
+    steps:
+    - uses: actions/checkout@v4
+    - name: check if cvmfs setup with multiple entries works
+      run: /bin/bash .github/workflows/test_cvmfs_1_2_3.sh
   test_cvmfs:
     runs-on: ubuntu-22.04
     strategy:
