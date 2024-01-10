@@ -1,10 +1,10 @@
 # This file is sourced once in jupyterlab_startup.sh and once in ~/.bashrc so we get the same environment variables in the jupyter and in the desktop environment
 if [[ -z "${NB_USER}" ]]; then
-    NB_USER=${USER}
+    export NB_USER=${USER}
 fi
 
 if [[ -z "${USER}" ]]; then
-    USER=${NB_USER}
+    export USER=${NB_USER}
 fi
 
 if [ -f '/usr/share/module.sh' ]; then
