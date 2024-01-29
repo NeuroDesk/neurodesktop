@@ -1,7 +1,11 @@
 set -e
 
 if docker ps --all | grep neurodesktop; then
-    bash stop_and_clean.sh
+    if docker ps --all | grep neurodeskapp; then
+        echo "detected a Neurodeskapp container and ignoring it!"
+    else
+        bash stop_and_clean.sh
+    fi
 fi
 # docker build -t neurodesktop:latest .
 # docker run --shm-size=1gb -it --privileged --name neurodesktop -v ~/neurodesktop-storage:/neurodesktop-storage -e HOST_UID="$(id -u)" -e HOST_GID="$(id -g)" -p 8080:8080 neurodesktop:latest
