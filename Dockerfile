@@ -1,8 +1,5 @@
-# FROM jupyter/base-notebook:2023-05-01
-# # FROM jupyter/base-notebook:python-3.10.10
-
 FROM jupyter/base-notebook:2023-10-20
-# FROM jupyter/base-notebook:python-3.11.6
+# https://hub.docker.com/r/jupyter/base-notebook/tags
 
 # Parent image source
 # https://github.com/jupyter/docker-stacks/blob/86d42cadf4695b8e6fc3b3ead58e1f71067b765b/docker-stacks-foundation/Dockerfile
@@ -19,14 +16,8 @@ USER root
 # Install base image dependencies
 RUN apt-get update --yes \
     && DEBIAN_FRONTEND=noninteractive apt install --yes --no-install-recommends \
-        # Singularity
-        build-essential \
-        libseccomp-dev \
-        libglib2.0-dev \
-        pkg-config \
-        squashfs-tools \
-        cryptsetup \
-        runc \
+        # Apptainer
+        software-properties-common \
         # Apache Tomcat
         openjdk-19-jre \
         # Apache Guacamole
@@ -64,8 +55,6 @@ RUN apt-get update --yes \
         apt-transport-https \
         && apt-get clean && rm -rf /var/lib/apt/lists/* 
 
-ARG GO_VERSION="1.21.1"
-ARG SINGULARITY_VERSION="3.11.4"
 ARG TOMCAT_REL="9"
 ARG TOMCAT_VERSION="9.0.80"
 ARG GUACAMOLE_VERSION="1.5.4"
@@ -74,27 +63,11 @@ ENV LANG ""
 ENV LANGUAGE ""
 ENV LC_ALL ""
 
-# Install singularity
-RUN export VERSION=${GO_VERSION} \
-    && ARCH=$(if [[ $(uname -m) == "aarch64" ]]; then echo "arm64"; else echo "amd64"; fi) \
-    && echo "trying to download https://go.dev/dl/go${VERSION}.linux-${ARCH}.tar.gz" \
-    && wget https://go.dev/dl/go${VERSION}.linux-${ARCH}.tar.gz \
-    && tar -C /usr/local -xzvf go$VERSION.linux-$ARCH.tar.gz \
-    && rm go$VERSION.linux-$ARCH.tar.gz \
-    && export GOPATH=/opt/go \
-    && export PATH=/usr/local/go/bin:${PATH}:${GOPATH}/bin \
-    && which go \
-    && mkdir -p $GOPATH/src/github.com/sylabs \
-    && cd $GOPATH/src/github.com/sylabs \
-    && wget https://github.com/sylabs/singularity/releases/download/v${SINGULARITY_VERSION}/singularity-ce-${SINGULARITY_VERSION}.tar.gz \
-    && tar -xzvf singularity-ce-${SINGULARITY_VERSION}.tar.gz \
-    && cd singularity-ce-${SINGULARITY_VERSION} \
-    && ./mconfig --without-suid --prefix=/usr/local/singularity \
-    && make -C builddir \
-    && make -C builddir install \
-    && rm -rf singularity-ce-${SINGULARITY_VERSION} \
-    && rm -rf /usr/local/go $GOPATH \
-    && ln -s /usr/local/singularity/bin/singularity /bin/ \ 
+# Install apptainer
+RUN add-apt-repository -y ppa:apptainer/ppa \
+    && apt-get update --yes \
+    && DEBIAN_FRONTEND=noninteractive apt-get install --yes apptainer apptainer-suid \
+    && apt-get clean && rm -rf /var/lib/apt/lists/* \
     && rm -rf /root/.cache && rm -rf /home/${NB_USER}/.cache
 
 # Install Apache Tomcat
