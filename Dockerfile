@@ -22,6 +22,7 @@ RUN apt-get update --yes \
         openjdk-19-jre \
         # Apache Guacamole
         ## Core
+        build-essential \
         libcairo2-dev \
         libjpeg-turbo8-dev \
         libpng-dev \
@@ -66,7 +67,7 @@ ENV LC_ALL ""
 # Install apptainer
 RUN add-apt-repository -y ppa:apptainer/ppa \
     && apt-get update --yes \
-    && DEBIAN_FRONTEND=noninteractive apt-get install --yes apptainer apptainer-suid \
+    && DEBIAN_FRONTEND=noninteractive apt-get install --yes apptainer \
     && apt-get clean && rm -rf /var/lib/apt/lists/* \
     && rm -rf /root/.cache && rm -rf /home/${NB_USER}/.cache
 
