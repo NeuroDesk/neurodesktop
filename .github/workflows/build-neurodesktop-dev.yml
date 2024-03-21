@@ -138,16 +138,6 @@ jobs:
     #   uses: rickstaa/action-create-tag@v1.6.3
     #   with:
     #     tag: ${{ env.BUILDDATE }}
-    # - name: Container image scan  
-    #   if: ${{ env.GITHUB_RATE_REMAINING > 0 }}
-    #   uses: aquasecurity/trivy-action@0.12.0
-    #   with:
-    #     image-ref: ${{ env.IMAGEID }}
-    #     format: table
-    #     exit-code: '1'
-    #     severity: CRITICAL
-    #     timeout: 25m0s
-    #     skip-files: /opt/rclone-v1.60.1-linux-amd64/README.txt, /opt/rclone-v1.60.1-linux-amd64/README.html, /opt/rclone-v1.60.1-linux-amd64/rclone.1
     # - name: Generate issue on job failure
     #   if: always() && failure()
     #   uses: JasonEtco/create-an-issue@v2.9.1
@@ -161,3 +151,31 @@ jobs:
     #     filename: .github/job_failure_issue_template.md
     #     update_existing: true
     #     search_existing: open
+  scan-image:
+    needs: build-image
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Set environment variables
+        run: |
+          IMAGENAME="neurodesktop-dev"
+          BUILDDATE=`date +%Y-%m-%d`
+          IMAGEID=ghcr.io/$GITHUB_REPOSITORY/$IMAGENAME
+          IMAGEID=$(echo $IMAGEID | tr '[A-Z]' '[a-z]')
+
+          echo "BUILDDATE=$BUILDDATE"
+          echo "IMAGEID=$IMAGEID"
+          echo "IMAGENAME=$IMAGENAME"
+
+          echo "BUILDDATE=$BUILDDATE" >> $GITHUB_ENV
+          echo "IMAGEID=$IMAGEID" >> $GITHUB_ENV
+          echo "IMAGENAME=$IMAGENAME" >> $GITHUB_ENV
+      - name: Container image scan
+        uses: aquasecurity/trivy-action@0.14.0
+        with:
+          image-ref: ${{ env.IMAGEID }}:${{ env.BUILDDATE }}
+          format: table
+          exit-code: '1'
+          severity: CRITICAL
+          timeout: 25m0s
+          skip-files: /opt/rclone-v1.60.1-linux-amd64/README.txt, /opt/rclone-v1.60.1-linux-amd64/README.html, /opt/rclone-v1.60.1-linux-amd64/rclone.1
+
