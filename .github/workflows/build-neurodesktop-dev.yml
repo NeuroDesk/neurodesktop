@@ -158,7 +158,7 @@ jobs:
       - name: Set environment variables
         run: |
           IMAGENAME="neurodesktop-dev"
-          BUILDDATE=`date +%Y-%m-%d`
+          BUILDDATE=`date +%Y-%m-%d-%H%M`
           IMAGEID=ghcr.io/$GITHUB_REPOSITORY/$IMAGENAME
           IMAGEID=$(echo $IMAGEID | tr '[A-Z]' '[a-z]')
 
