@@ -177,11 +177,11 @@ jobs:
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Pull container image
-        run: docker pull $IMAGEID:$BUILDDATE
+        run: docker pull $IMAGEID:latest
       - name: Container image scan
         uses: aquasecurity/trivy-action@0.14.0
         with:
-          image-ref: ${{ env.IMAGEID }}:${{ env.BUILDDATE }}
+          image-ref: ${{ env.IMAGEID }}:latest
           format: table
           exit-code: '1'
           severity: CRITICAL
