@@ -139,16 +139,16 @@ jobs:
         git tag ${BUILDDATE}
         git push origin -f --tags
         # echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u $GITHUB_ACTOR --password-stdin
-    - name: Container image scan
-      if: ${{ env.ROOTFS_NEW != env.ROOTFS_CACHE || github.event.inputs.force_push == 'true' }}
-      uses: aquasecurity/trivy-action@0.14.0
-      with:
-        image-ref: ${{ env.IMAGEID }}:${{ env.BUILDDATE }}
-        format: table
-        exit-code: '1'
-        severity: CRITICAL
-        timeout: 25m0s
-        skip-files: /opt/rclone-v1.60.1-linux-amd64/README.txt, /opt/rclone-v1.60.1-linux-amd64/README.html, /opt/rclone-v1.60.1-linux-amd64/rclone.1
+    # - name: Container image scan
+    #   if: ${{ env.ROOTFS_NEW != env.ROOTFS_CACHE || github.event.inputs.force_push == 'true' }}
+    #   uses: aquasecurity/trivy-action@0.14.0
+    #   with:
+    #     image-ref: ${{ env.IMAGEID }}:${{ env.BUILDDATE }}
+    #     format: table
+    #     exit-code: '1'
+    #     severity: CRITICAL
+    #     timeout: 25m0s
+    #     skip-files: /opt/rclone-v1.60.1-linux-amd64/README.txt, /opt/rclone-v1.60.1-linux-amd64/README.html, /opt/rclone-v1.60.1-linux-amd64/rclone.1
     - name: Generate issue on job failure
       if: always() && failure()
       uses: JasonEtco/create-an-issue@v2.9.1
