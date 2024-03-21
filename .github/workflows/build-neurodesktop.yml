@@ -170,6 +170,14 @@ jobs:
           echo "BUILDDATE=$BUILDDATE" >> $GITHUB_ENV
           echo "IMAGEID=$IMAGEID" >> $GITHUB_ENV
           echo "IMAGENAME=$IMAGENAME" >> $GITHUB_ENV
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Pull container image
+        run: docker pull $IMAGEID:$BUILDDATE
       - name: Container image scan
         uses: aquasecurity/trivy-action@0.14.0
         with:
