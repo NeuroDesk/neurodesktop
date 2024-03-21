@@ -24,17 +24,17 @@ jobs:
         GITHUB_RATE_REMAINING=$(curl -H "Accept: application/vnd.github.v3+json" https://api.github.com/rate_limit | jq '.rate.remaining')
         echo "GITHUB_RATE_REMAINING=${GITHUB_RATE_REMAINING}"
         echo "GITHUB_RATE_REMAINING=$GITHUB_RATE_REMAINING" >> $GITHUB_ENV
-    - name: Maximize build space
-      uses: easimon/maximize-build-space@master
-      with:
-        root-reserve-mb: 40000
-        swap-size-mb: 1024
-        overprovision-lvm: 'true'
-        remove-dotnet: 'true'
-        remove-android: 'true'
-        remove-haskell: 'true'
-        remove-codeql: 'true'
-        remove-docker-images: 'true'
+    # - name: Maximize build space
+    #   uses: easimon/maximize-build-space@master
+    #   with:
+    #     root-reserve-mb: 40000
+    #     swap-size-mb: 1024
+    #     overprovision-lvm: 'true'
+    #     remove-dotnet: 'true'
+    #     remove-android: 'true'
+    #     remove-haskell: 'true'
+    #     remove-codeql: 'true'
+    #     remove-docker-images: 'true'
     - name: Checkout repository
       if: ${{ env.GITHUB_RATE_REMAINING > 0 }}
       uses: actions/checkout@v4
