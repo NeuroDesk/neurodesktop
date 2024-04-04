@@ -206,6 +206,7 @@ RUN /opt/conda/bin/pip install jupyter-server-proxy \
     && /opt/conda/bin/jupyter labextension disable @jupyterlab/apputils-extension:announcements \ 
     && /opt/conda/bin/pip install jupyterlmod \ 
     && /opt/conda/bin/pip install jupyterlab-git \
+    && /opt/conda/bin/pip install jupyterlab_rise \
     && rm -rf /home/${NB_USER}/.cache
 
 #========================================#
