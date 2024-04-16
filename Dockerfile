@@ -57,8 +57,8 @@ RUN apt-get update --yes \
         && apt-get clean && rm -rf /var/lib/apt/lists/* 
 
 ARG TOMCAT_REL="9"
-ARG TOMCAT_VERSION="9.0.80"
-ARG GUACAMOLE_VERSION="1.5.4"
+ARG TOMCAT_VERSION="9.0.87"
+ARG GUACAMOLE_VERSION="1.5.5"
 
 ENV LANG ""
 ENV LANGUAGE ""
