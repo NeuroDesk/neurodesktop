@@ -14,10 +14,10 @@ if [ -f '/usr/share/module.sh' ]; then
                 export CVMFS_DISABLE=true
         fi
 
-        echo 'Neuroimaging tools are accessible via the Applications menu and running them through the menu will provide help and setup instructions. If you are familiar with the tools and you want to combine multiple tools in one script, you can run "ml av" to see which tools are available and then use "ml <tool>/<version>" to load them. '
+        echo 'Neuroimaging tools are accessible via the Neurodesktop Applications menu and running them through the menu will provide help and setup instructions. If you are familiar with the tools and you want to combine multiple tools in one script, you can run "ml av" to see which tools are available and then use "ml <tool>/<version>" to load them. '
         if [ -v "$CVMFS_DISABLE" ]; then
                 if [ ! -d $MODULEPATH ]; then
-                        echo 'Neurodesk tools not yet downloaded. Choose tools to install from the Application menu.'
+                        echo 'Neurodesk tools not yet downloaded. Choose tools to install from the Neurodesktop Application menu.'
                 fi
         fi
 fi
