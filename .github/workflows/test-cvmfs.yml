@@ -18,6 +18,7 @@ jobs:
   test_cvmfs:
     runs-on: ubuntu-22.04
     strategy:
+      fail-fast: false
       matrix:
         cvmfs-server: [	cvmfs-s1goc.opensciencegrid.org, sampacs01.if.usp.br, cvmfs-s1.hpc.swin.edu.au, cvmfs-stratum-one.ihep.ac.cn, cvmfs-s1fnal.opensciencegrid.org, vmfs-s1bnl.opensciencegrid.org, cvmfs01.nikhef.nl, cvmfs-egi.gridpp.rl.ac.uk, s1brisbane-cvmfs.openhtc.io, cvmfs-tokyo.neurodesk.org, cvmfs-phoenix.neurodesk.org, cvmfs-perth.neurodesk.org, cvmfs-brisbane.neurodesk.org, cvmfs-sydney.neurodesk.org, cvmfs-frankfurt.neurodesk.org, 	cvmfs-zurich.neurodesk.org, cvmfs-toronto.neurodesk.org, cvmfs-ashburn.neurodesk.org, cvmfs1.neurodesk.org, cvmfs2.neurodesk.org, cvmfs3.neurodesk.org]
     steps:
