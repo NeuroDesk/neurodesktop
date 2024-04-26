@@ -15,10 +15,8 @@ jobs:
       fail-fast: false
       matrix:
         server: [
-          "playtest.neurodesk.org",
-          "play-sydney.neurodesk.org",
-          "play-phoenix.neurodesk.org",
-          "play-ashburn.neurodesk.org",
+          "play.neurodesk.cloud.edu.au",
+          "play-iowa.neurodesk.org",
           "play-frankfurt.neurodesk.org"
           ]
     steps:
