@@ -1,7 +1,6 @@
 # set -e
 
 SERVERADDRESS=$1
-# SERVERADDRESS=https://objectstorage.us-ashburn-1.oraclecloud.com/n/sd63xuke79z3/b/neurodesk/o/
 
 wget https://raw.githubusercontent.com/NeuroDesk/neurocommand/main/cvmfs/log.txt
 
