@@ -33,25 +33,25 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        cvmfs-servers: [s1fnal-cvmfs.openhtc.io:8080,
-                        cvmfs-s1fnal.opensciencegrid.org:8000, 
-                        s1sampa-cvmfs.openhtc.io:8080,
-                        sampacs01.if.usp.br:8000, 
-                        s1osggoc-cvmfs.openhtc.io:8080,
-                        cvmfs-s1goc.opensciencegrid.org:8000, 
-                        s1brisbane-cvmfs.openhtc.io,
-                        cvmfs-brisbane.neurodesk.org, 
-                        cvmfs-tokyo.neurodesk.org, 
-                        cvmfs-phoenix.neurodesk.org, 
-                        cvmfs-perth.neurodesk.org, 
-                        cvmfs-sydney.neurodesk.org, 
-                        cvmfs-frankfurt.neurodesk.org, 
-                        cvmfs-zurich.neurodesk.org, 
-                        cvmfs-toronto.neurodesk.org, 
-                        cvmfs-ashburn.neurodesk.org, 
-                        cvmfs1.neurodesk.org, 
-                        cvmfs2.neurodesk.org, 
-                        cvmfs3.neurodesk.org]
+        cvmfs-servers: ["s1fnal-cvmfs.openhtc.io:8080",
+                        "cvmfs-s1fnal.opensciencegrid.org:8000", 
+                        "s1sampa-cvmfs.openhtc.io:8080",
+                        "sampacs01.if.usp.br:8000", 
+                        "s1osggoc-cvmfs.openhtc.io:8080",
+                        "cvmfs-s1goc.opensciencegrid.org:8000", 
+                        "s1brisbane-cvmfs.openhtc.io",
+                        "cvmfs-brisbane.neurodesk.org", 
+                        "cvmfs-tokyo.neurodesk.org", 
+                        "cvmfs-phoenix.neurodesk.org", 
+                        "cvmfs-perth.neurodesk.org", 
+                        "cvmfs-sydney.neurodesk.org", 
+                        "cvmfs-frankfurt.neurodesk.org", 
+                        "cvmfs-zurich.neurodesk.org", 
+                        "cvmfs-toronto.neurodesk.org", 
+                        "cvmfs-ashburn.neurodesk.org", 
+                        "cvmfs1.neurodesk.org", 
+                        "cvmfs2.neurodesk.org", 
+                        "cvmfs3.neurodesk.org"]
     steps:
     - uses: actions/checkout@v4
     - name: check if ${{ matrix.cvmfs-servers }} is online and up-to-date
