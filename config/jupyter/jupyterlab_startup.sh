@@ -9,7 +9,7 @@
 
 # Copy homedirectory files if they don't exist yet
 # Check for missing .bashrc in persisting homedir
-if [ ! -f "/home/${NB_USER}/.bashrc" ] 
+if [ ! -f "/home/${NB_USER}/conda-readme.md" ] 
 then
     mkdir -p /home/${NB_USER}
     chown ${NB_UID}:${NB_GID} -R /home/${NB_USER}
@@ -19,10 +19,6 @@ then
     sudo cp -rpn /tmp/${NB_USER}/ /home/
     sudo chown ${NB_UID}:${NB_GID} -R /home/${NB_USER}
 fi
-
-# # Overwrite jupyter_notebook_config and .bash with image backup copies
-# # Used in cases of persistent home directories
-# cp -p /tmp/${NB_USER}/.bashrc /home/${NB_USER}/.bashrc
 
 # Set .ssh directory permissions
 chmod -R 700 /home/${NB_USER}/.ssh
