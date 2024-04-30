@@ -17,7 +17,7 @@ jobs:
       run: /bin/bash .github/workflows/test_cvmfs_1_2_3.sh
     - name: Generate issue on job failure
       if: always() && failure()
-      uses: JasonEtco/create-an-issue@v2.9.1
+      uses: JasonEtco/create-an-issue@v2.9.2
       env: 
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         GITHUB_WORKFLOW: ${{ env.GITHUB_WORKFLOW }}
@@ -58,7 +58,7 @@ jobs:
       run: /bin/bash .github/workflows/test_cvmfs.sh  ${{ matrix.cvmfs-servers }}
     - name: Generate issue on job failure
       if: always() && failure()
-      uses: JasonEtco/create-an-issue@v2.9.1
+      uses: JasonEtco/create-an-issue@v2.9.2
       env: 
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         GITHUB_WORKFLOW: ${{ env.GITHUB_WORKFLOW }}

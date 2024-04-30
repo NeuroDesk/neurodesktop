@@ -126,24 +126,6 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=registry,ref=${{ env.IMAGEID }}:latest
           cache-to: type=inline
-    # - name: Create github tag (if changes found)
-    #   if: ${{ env.ROOTFS_NEW != env.ROOTFS_CACHE || github.event.inputs.force_push == 'true' }}
-    #   uses: rickstaa/action-create-tag@v1.6.3
-    #   with:
-    #     tag: ${{ env.BUILDDATE }}
-    # - name: Generate issue on job failure
-    #   if: always() && failure()
-    #   uses: JasonEtco/create-an-issue@v2.9.1
-    #   env: 
-    #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    #     GITHUB_WORKFLOW: ${{ env.GITHUB_WORKFLOW }}
-    #     GITHUB_SERVER_URL: ${{ env.GITHUB_SERVER_URL }}
-    #     GITHUB_REPOSITORY: ${{ env.GITHUB_REPOSITORY }}
-    #     GITHUB_RUN_ID: ${{ env.GITHUB_RUN_ID }}
-    #   with:
-    #     filename: .github/job_failure_issue_template.md
-    #     update_existing: true
-    #     search_existing: open
   scan-image:
     needs: build-image
     runs-on: ubuntu-22.04
