@@ -102,13 +102,6 @@ jobs:
       with:
         username: ${{ secrets.DOCKERHUB_USERNAME }}
         password: ${{ secrets.DOCKERHUB_PASSWORD }}
-    - name: Login to OCIR (if changes found)
-      if: ${{ env.OCIR_REPO != '' && (env.ROOTFS_NEW != env.ROOTFS_CACHE || github.event.inputs.force_push == 'true') }}
-      uses: docker/login-action@v3
-      with:
-        registry: syd.ocir.io
-        username: ${{ secrets.OCIR_USERNAME }}
-        password: ${{ secrets.OCIR_PASSWORD }}
     - name: Get new image metadata (if changes found)
       if: ${{ env.ROOTFS_NEW != env.ROOTFS_CACHE || github.event.inputs.force_push == 'true' }}
       id: meta
