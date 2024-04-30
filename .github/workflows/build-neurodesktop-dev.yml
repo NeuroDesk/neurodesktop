@@ -19,7 +19,6 @@ on:
     
 env:
   DOCKERHUB_ORG: ${{ vars.DOCKERHUB_ORG }}
-  OCIR_REPO: ${{ vars.OCIR_REPO }}
 
 jobs:
   build-image:
@@ -89,9 +88,6 @@ jobs:
         PUSH_IMAGES="${IMAGEID}"
         if [ ! -z "${DOCKERHUB_ORG}" ]; then
           PUSH_IMAGES="${PUSH_IMAGES}, ${DOCKERHUB_ORG}/${IMAGENAME}"
-        fi
-        if [ ! -z "${OCIR_REPO}" ]; then
-          PUSH_IMAGES="${PUSH_IMAGES}, ${OCIR_REPO}/${IMAGENAME}"
         fi
         echo "PUSH_IMAGES=$PUSH_IMAGES"
         echo "ROOTFS_NEW=$ROOTFS_NEW" >> $GITHUB_ENV

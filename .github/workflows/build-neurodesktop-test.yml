@@ -13,7 +13,6 @@ on:
     
 env:
   DOCKERHUB_ORG: ${{ vars.DOCKERHUB_ORG }}
-  OCIR_REPO: ${{ vars.OCIR_REPO }}
 
 jobs:
   build-image:
