@@ -6,35 +6,6 @@
 /usr/bin/printf '%s\n%s\n' 'password' 'password' | passwd ${NB_USER}
 usermod --shell /bin/bash ${NB_USER}
 
-# # Generate SSH keys
-# if [ ! -f "/home/${NB_USER}/.ssh/guacamole_rsa" ]; then
-#     ssh-keygen -t rsa -f /home/${NB_USER}/.ssh/guacamole_rsa -b 4096 -m PEM -N '' <<< n
-# fi
-# if [ ! -f "/home/${NB_USER}/.ssh/id_rsa" ]; then
-#     ssh-keygen -t rsa -f /home/${NB_USER}/.ssh/id_rsa -b 4096 -m PEM -N '' <<< n
-# fi
-# if [ ! -f "/home/${NB_USER}/.ssh/ssh_host_rsa_key" ]; then
-#     ssh-keygen -t rsa -f /home/${NB_USER}/.ssh/ssh_host_rsa_key -N '' <<< n
-# fi
-
-# cat /home/${NB_USER}/.ssh/guacamole_rsa.pub >> /home/${NB_USER}/.ssh/authorized_keys
-# cat /home/${NB_USER}/.ssh/id_rsa.pub >> /home/${NB_USER}/.ssh/authorized_keys
-
-# # Set .ssh directory permissions
-# chmod -R 700 .ssh && chown -R ${NB_UID}:${NB_GID} .ssh
-
-# # Insert guacamole private key into user-mapping for ssh/sftp support
-# sed -i "/private-key/ r /home/${NB_USER}/.ssh/guacamole_rsa" /etc/guacamole/user-mapping.xml
-
-# # Start and stop SSH server to initialize host
-# sudo service ssh restart
-# sudo service ssh stop
-
-# # Create a symlink in home if /data is mounted
-# if mountpoint -q /data; then
-#     ln -s /data /home/${NB_USER}/data
-# fi
-
 if [ ! -d "/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/" ]; then
     # the cvmfs directory is not yet mounted
     if [ -z "$CVMFS_DISABLE" ]; then
@@ -68,36 +39,3 @@ if [ ! -d "/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/" ]; then
         fi
     fi
 fi
-
-# source /opt/neurodesktop/environment_variables.sh
-
-# # clean up old session files (they prevent the start of the next session):
-# echo "starting cleanup before if"
-# if [ -f "/home/${NB_USER}/.ssh/id_rsa" ]
-# then
-#     echo "starting cleanup"
-#     rm /home/${NB_USER}/.ssh/id_rsa
-#     rm /home/${NB_USER}/.ssh/authorized_keys
-#     rm /home/${NB_USER}/.ssh/id_rsa.pub
-#     rm /home/${NB_USER}/.ssh/ssh_host_rsa_key
-#     rm /home/${NB_USER}/.ssh/ssh_host_rsa_key.pub 
-#     rm /home/${NB_USER}/.ssh/sshd.pid
-#     rm /home/${NB_USER}/.Xauthority
-#     rm -rf /home/${NB_USER}/.dbus/session-bus
-#     rm -rf /home/${NB_USER}/.vnc
-#     cp -r /tmp/${NB_USER}/.vnc /home/${NB_USER}/
-# fi
-
-# # update example directory
-# if [ -d "/home/${NB_USER}/example-notebooks" ]
-# then
-#     cd /home/${NB_USER}/example-notebooks
-#     git pull
-# else
-#     git clone https://github.com/NeuroDesk/example-notebooks /home/${NB_USER}/example-notebooks
-# fi
-
-# cvmfs2 -o config=/cvmfs/neurodesk.ardc.edu.au.conf neurodesk.ardc.edu.au /cvmfs/neurodesk.ardc.edu.au
-# ssh-keygen -t rsa -f /home/${NB_USER}/.ssh/id_rsa -b 4096 -m PEM -N '' <<< n
-# ssh-keygen -t rsa -f /home/${NB_USER}/.ssh/ssh_host_rsa_key -N '' <<< n
-# cat /home/${NB_USER}/.ssh/id_rsa.pub >> /home/${NB_USER}/.ssh/authorized_keys
