@@ -34,11 +34,13 @@ jobs:
       fail-fast: false
       matrix:
         cvmfs-servers: ["s1fnal-cvmfs.openhtc.io:8080",
-                        "cvmfs-s1fnal.opensciencegrid.org:8000", 
                         "s1sampa-cvmfs.openhtc.io:8080",
-                        "sampacs01.if.usp.br:8000", 
                         "s1osggoc-cvmfs.openhtc.io:8080",
-                        "cvmfs-s1goc.opensciencegrid.org:8000", 
+                        "s1ral-cvmfs.openhtc.io:8080",
+                        "cvmfs-s1.hpc.swin.edu.au:8080",
+                        "cvmfs-stratum-one.ihep.ac.cn:8080",
+                        "s1bnl-cvmfs.openhtc.io:8080",
+                        "s1nikhef-cvmfs.openhtc.io:8080",
                         "s1brisbane-cvmfs.openhtc.io",
                         "cvmfs-brisbane.neurodesk.org", 
                         "cvmfs-tokyo.neurodesk.org", 
