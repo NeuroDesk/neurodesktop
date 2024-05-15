@@ -36,11 +36,6 @@ jobs:
         cvmfs-servers: ["s1fnal-cvmfs.openhtc.io:8080",
                         "s1sampa-cvmfs.openhtc.io:8080",
                         "s1osggoc-cvmfs.openhtc.io:8080",
-                        "s1ral-cvmfs.openhtc.io:8080",
-                        "cvmfs-s1.hpc.swin.edu.au:8080",
-                        "cvmfs-stratum-one.ihep.ac.cn:8080",
-                        "s1bnl-cvmfs.openhtc.io:8080",
-                        "s1nikhef-cvmfs.openhtc.io:8080",
                         "s1brisbane-cvmfs.openhtc.io",
                         "cvmfs-brisbane.neurodesk.org", 
                         "cvmfs-tokyo.neurodesk.org", 
@@ -74,7 +69,14 @@ jobs:
 
 
 
-        # currently not yet working:
+        # # currently not yet working:
+        #   "s1ral-cvmfs.openhtc.io:8080",
+        #   "cvmfs-s1.hpc.swin.edu.au:8080",
+        #   "cvmfs-stratum-one.ihep.ac.cn:8080",
+        #   "s1bnl-cvmfs.openhtc.io:8080",
+        #   "s1nikhef-cvmfs.openhtc.io:8080",
+
+
           # s1ral-cvmfs.openhtc.io,
           # cvmfs-egi.gridpp.rl.ac.uk, 
 
