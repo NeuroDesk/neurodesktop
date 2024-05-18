@@ -207,6 +207,8 @@ RUN /opt/conda/bin/pip install jupyter-server-proxy \
     && /opt/conda/bin/pip install jupyterlmod \ 
     && /opt/conda/bin/pip install jupyterlab-git \
     && /opt/conda/bin/pip install jupyterlab_rise \
+    && /opt/conda/bin/pip install ipycanvas \
+    && /opt/conda/bin/pip install jupyter_scheduler \
     && rm -rf /home/${NB_USER}/.cache
 
 #========================================#
