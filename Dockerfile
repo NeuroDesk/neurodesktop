@@ -384,5 +384,5 @@ RUN rm /home/${NB_USER}/skipcache \
     && git clone --depth 1 https://github.com/NeuroDesk/example-notebooks
 
 # Set SINGULARITY_BINDPATH and MODULEPATH here so it's available within a notebook (the startup scripts set these things too late):
-ENV SINGULARITY_BINDPATH=/data,/neurodesktop-storage,/tmp,/cvmfs,/home/${NB_USER}:/home/matlab/.matlab/R2022a_licenses,/home/${NB_USER}:/opt/matlab/R2022a/licenses
+ENV APPTAINER_BINDPATH=/data,/mnt,/neurodesktop-storage,/tmp,/cvmfs,/home/${NB_USER}:/home/matlab/.matlab/R2022a_licenses,/home/${NB_USER}:/opt/matlab/R2022a/licenses
 ENV MODULEPATH=/cvmfs/neurodesk.ardc.edu.au/containers/modules/
