@@ -40,7 +40,7 @@ jobs:
                         "s1brisbane-cvmfs.openhtc.io",
                         "cvmfs-brisbane.neurodesk.org", 
                         "cvmfs-perth.neurodesk.org",
-                        "s1nikhef-cvmfs.openhtc.io:8080",
+                        "cvmfs01.nikhef.nl:8000",
                         "cvmfs-frankfurt.neurodesk.org"]
     steps:
     - uses: actions/checkout@v4
