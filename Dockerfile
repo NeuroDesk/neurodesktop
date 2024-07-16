@@ -200,8 +200,10 @@ RUN conda config --system --prepend envs_dirs '~/conda-environments'
 RUN /opt/conda/bin/pip install nipype matplotlib datalad-container datalad-osf osfclient ipyniivue \
     && rm -rf /home/${NB_USER}/.cache
 
+
 # Install jupyter-server-proxy and disable announcements
 # Deprecated: jupyter labextension install ..
+# jupyter_server_proxy needs to be at least 4.2.0 to fix CVE-2024-35225
 RUN /opt/conda/bin/pip install jupyter-server-proxy \
     && /opt/conda/bin/jupyter labextension disable @jupyterlab/apputils-extension:announcements \ 
     && /opt/conda/bin/pip install jupyterlmod \ 
