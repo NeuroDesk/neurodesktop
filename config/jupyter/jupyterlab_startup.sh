@@ -96,13 +96,13 @@ source /opt/neurodesktop/environment_variables.sh
 conda init bash
 mamba init bash
 
-
+# DISABLED TEMPORARILY TO TEST IF THIS COULD BE RELATED TO THE SLOW STARTUP
 # update example directory
-git config --global --add safe.directory /home/${NB_USER}/example-notebooks
-if [ -d "/home/${NB_USER}/example-notebooks" ]
-then
-    cd /home/${NB_USER}/example-notebooks
-    git pull
-else
-    git clone https://github.com/NeuroDesk/example-notebooks /home/${NB_USER}/example-notebooks
-fi
+# git config --global --add safe.directory /home/${NB_USER}/example-notebooks
+# if [ -d "/home/${NB_USER}/example-notebooks" ]
+# then
+#     cd /home/${NB_USER}/example-notebooks
+#     git pull
+# else
+#     git clone https://github.com/NeuroDesk/example-notebooks /home/${NB_USER}/example-notebooks
+# fi
