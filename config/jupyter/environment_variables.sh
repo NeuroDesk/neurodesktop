@@ -42,6 +42,9 @@ then
         export neurodesk_singularity_opts="${neurodesk_singularity_opts} --nv "
 fi
 
+# fix for kernel bug in docker on arm64 when using a read-only bindmount from a fuse mount. The -w flag makes the container writable instead of read-only which works around the issue
+export neurodesk_singularity_opts="${neurodesk_singularity_opts} -w "
+
 export PS1='\u@neurodesktop-$NEURODESKTOP_VERSION:\w$ '
 
 alias ll='ls -la'
