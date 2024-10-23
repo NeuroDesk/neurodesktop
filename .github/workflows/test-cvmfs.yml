@@ -41,7 +41,8 @@ jobs:
                         "cvmfs-brisbane.neurodesk.org", 
                         "cvmfs-perth.neurodesk.org",
                         "cvmfs01.nikhef.nl",
-                        "cvmfs-frankfurt.neurodesk.org"]
+                        "cvmfs-frankfurt.neurodesk.org",
+                        "cvmfs.neurodesk.org"]
     steps:
     - uses: actions/checkout@v4
     - name: check if ${{ matrix.cvmfs-servers }} is online and up-to-date
