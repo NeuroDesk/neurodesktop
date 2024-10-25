@@ -42,6 +42,7 @@ jobs:
                         "cvmfs-perth.neurodesk.org",
                         "cvmfs01.nikhef.nl",
                         "cvmfs-frankfurt.neurodesk.org",
+                        "cvmfs-geoproximity.neurodesk.org",
                         "cvmfs.neurodesk.org"]
     steps:
     - uses: actions/checkout@v4
