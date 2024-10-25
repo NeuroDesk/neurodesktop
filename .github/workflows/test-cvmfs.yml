@@ -43,6 +43,9 @@ jobs:
                         "cvmfs01.nikhef.nl",
                         "cvmfs-frankfurt.neurodesk.org",
                         "cvmfs-geoproximity.neurodesk.org",
+                        "cvmfs1.neurodesk.org",
+                        "cvmfs2.neurodesk.org",
+                        "cvmfs3.neurodesk.org",
                         "cvmfs.neurodesk.org"]
     steps:
     - uses: actions/checkout@v4
