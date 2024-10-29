@@ -37,12 +37,21 @@ echo "CVMFS_HTTP_PROXY=DIRECT" | sudo tee  /etc/cvmfs/default.local
 echo "CVMFS_QUOTA_LIMIT=5000" | sudo tee -a  /etc/cvmfs/default.local
 
 sudo cvmfs_config setup
-# sudo cvmfs_config wsl2_start
 sudo cvmfs_config chksetup
 
 ls /cvmfs/neurodesk.ardc.edu.au
 
-# sudo cvmfs_config umount
+echo "[DEBUG]: Resolving DNS name cvmfs-geoproximity.neurodesk.org"
+resolved_ip=$(dig +short cvmfs-geoproximity.neurodesk.org)
+echo "[DEBUG]: Resolved IP for cvmfs-geoproximity.neurodesk.org: $resolved_ip"
+
+echo "[DEBUG]: Test download from cvmfs-geoproximity.neurodesk.org"
+curl --head http://cvmfs-geoproximity.neurodesk.org/cvmfs/neurodesk.ardc.edu.au/.cvmfspublished
+
+echo "[DEBUG]: Test download from cvmfs.neurodesk.org"
+curl --head http://cvmfs.neurodesk.org/cvmfs/neurodesk.ardc.edu.au/.cvmfspublished
+
+cvmfs_config probe neurodesk.ardc.edu.au
 
 cvmfs_config stat -v neurodesk.ardc.edu.au
 
