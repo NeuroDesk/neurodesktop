@@ -34,6 +34,7 @@ RUN apt-get update --yes \
         libssl-dev \
         libwebp-dev \
         libssh2-1-dev \
+        strace \
         # SSH (Optional)
         libpango1.0-dev \
         ## VNC
