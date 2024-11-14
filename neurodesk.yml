@@ -1,0 +1,20 @@
+# TinyRange (https://github.com/tinyrange/tinyrange) configuration file for NeuroDesktop
+version: 1
+oci_image: vnmd/neurodesktop:2024-10-22
+commands:
+    # Mount the shared storage. This part can fail non-fatally if the storage is not available.
+    - mkdir /root/.ssh;ssh-keyscan host.internal > /root/.ssh/known_hosts
+    - mkdir /share;echo password | sshfs -o allow_other -o password_stdin host.internal:/ /share
+    - mkdir /neurodesktop-storage;mount --bind /share/neurodesktop-storage /neurodesktop-storage
+    # Expose the fuse device to the container
+    - chmod 777 /dev/fuse
+    # Run the container entrypoint
+    - start-notebook.py
+forward_ports:
+    - "8888"
+macros:
+    - "//lib/qemu:user"
+min_spec:
+    cpu: 2
+    memory: 4096
+    disk: 8192
