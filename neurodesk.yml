@@ -12,6 +12,8 @@ commands:
     - start-notebook.py
 forward_ports:
     - "8888"
+macros:
+    - "//lib/qemu:user"
 min_spec:
     cpu: 2
     memory: 4096
