@@ -391,3 +391,5 @@ RUN rm /home/${NB_USER}/skipcache \
 # Set SINGULARITY_BINDPATH and MODULEPATH here so it's available within a notebook (the startup scripts set these things too late):
 ENV APPTAINER_BINDPATH=/data,/mnt,/neurodesktop-storage,/tmp,/cvmfs
 ENV MODULEPATH=/cvmfs/neurodesk.ardc.edu.au/containers/modules/
+ENV neurodesk_singularity_opts=" -w "
+
