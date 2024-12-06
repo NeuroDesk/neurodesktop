@@ -176,3 +176,16 @@ jobs:
           severity: CRITICAL
           timeout: 25m0s
           skip-files: /opt/rclone-v1.60.1-linux-amd64/README.txt, /opt/rclone-v1.60.1-linux-amd64/README.html, /opt/rclone-v1.60.1-linux-amd64/rclone.1
+      - name: Generate issue on job failure
+        if: always() && failure()
+        uses: JasonEtco/create-an-issue@v2.9.2
+        env: 
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_WORKFLOW: ${{ env.GITHUB_WORKFLOW }}
+          GITHUB_SERVER_URL: ${{ env.GITHUB_SERVER_URL }}
+          GITHUB_REPOSITORY: ${{ env.GITHUB_REPOSITORY }}
+          GITHUB_RUN_ID: ${{ env.GITHUB_RUN_ID }}
+        with:
+          filename: .github/job_failure_issue_template.md
+          update_existing: true
+          search_existing: open
