@@ -32,8 +32,7 @@ if [ ! -d "/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/" ]; then
 
                 echo "\
                 ==================================================================
-                Testing which CVMFS server is fastest"
-                cvmfs_talk -i neurodesk.ardc.edu.au host probe
+                CVMFS servers:"
                 cvmfs_talk -i neurodesk.ardc.edu.au host info
             fi
         fi

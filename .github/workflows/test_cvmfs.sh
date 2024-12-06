@@ -51,10 +51,7 @@ curl --head http://cvmfs-geoproximity.neurodesk.org/cvmfs/neurodesk.ardc.edu.au/
 echo "[DEBUG]: Test download from cvmfs.neurodesk.org"
 curl --head http://cvmfs.neurodesk.org/cvmfs/neurodesk.ardc.edu.au/.cvmfspublished
 
-cvmfs_config probe neurodesk.ardc.edu.au
-
 cvmfs_config stat -v neurodesk.ardc.edu.au
-
 
 
 ## Test if containers are on CVMFS:

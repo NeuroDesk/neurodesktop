@@ -38,8 +38,7 @@ jobs:
                         "s1bnl-cvmfs.openhtc.io",
                         "s1osggoc-cvmfs.openhtc.io:8080",
                         "s1brisbane-cvmfs.openhtc.io",
-                        "cvmfs-brisbane.neurodesk.org", 
-                        "cvmfs-perth.neurodesk.org",
+                        "s1perth-cvmfs.openhtc.io",
                         "s1nikhef-cvmfs.openhtc.io",
                         "cvmfs-frankfurt.neurodesk.org",
                         "cvmfs-geoproximity.neurodesk.org",
@@ -64,68 +63,3 @@ jobs:
         filename: .github/job_failure_issue_template.md
         update_existing: true
         search_existing: open
-
-
-
-# # currently not yet working:
-  # cvmfs-egi.gridpp.rl.ac.uk:8000
-#   "s1ral-cvmfs.openhtc.io:8080",
-
-#   "cvmfs-s1.hpc.swin.edu.au:8080",
-# s1swinburne-cvmfs.openhtc.io:8080,
-
-#   "cvmfs-stratum-one.ihep.ac.cn:8080",
-# s1ihep-cvmfs.openhtc.io:8080,
-
-# vmfs-s1bnl.opensciencegrid.org, 
-#   "s1bnl-cvmfs.openhtc.io:8080",
-
-# cvmfs01.nikhef.nl, 
-#   "s1nikhef-cvmfs.openhtc.io:8080",
-
-
-# working
-# cvmfs-s1fnal.opensciencegrid.org:8000
-# s1fnal-cvmfs.openhtc.io:8080",
-# Illinois, USA
-
-# sampacs01.if.usp.br:8000
-# "s1sampa-cvmfs.openhtc.io:8080",
-# Sao Paulo, Brazil
-
-# cvmfs-s1goc.opensciencegrid.org:8000
-# "s1osggoc-cvmfs.openhtc.io:8080",
-# Lincoln, Nebraska, USA
-
-# cvmfs-brisbane.neurodesk.org
-# "s1brisbane-cvmfs.openhtc.io",
-# Brisbane, Australia
-
-# cdn:
-# s1ral-cvmfs.openhtc.io
-# s1nikhef-cvmfs.openhtc.io
-# s1bnl-cvmfs.openhtc.io
-# s1fnal-cvmfs.openhtc.io:8080
-# s1ihep-cvmfs.openhtc.io:8080
-# s1swinburne-cvmfs.openhtc.io:8080
-# s1sampa-cvmfs.openhtc.io:8080
-# s1osggoc-cvmfs.openhtc.io:8080
-# s1brisbane-cvmfs.openhtc.io
-
-
-# stratum1:
-# cvmfs-egi.gridpp.rl.ac.uk:8000
-# cvmfs01.nikhef.nl:8000
-# cvmfs-s1bnl.opensciencegrid.org:8000
-# cvmfs-s1fnal.opensciencegrid.org:8000
-# cvmfs-stratum-one.ihep.ac.cn:8000
-# cvmfs-s1.hpc.swin.edu.au:8000
-# sampacs01.if.usp.br:8000
-# cvmfs-s1goc.opensciencegrid.org:8000
-# cvmfs-brisbane.neurodesk.org
-
-
-
-
-# DNS setup:
-
