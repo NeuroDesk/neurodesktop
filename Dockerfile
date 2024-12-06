@@ -195,12 +195,15 @@ COPY config/firefox/syspref.js /etc/firefox/syspref.js
 
 USER ${NB_USER}
 
-# Install conda packages, datalad, git-annex, datalad-container, datalad-osf, osfclient and ipyniivue to the conda environment
-RUN conda install -c conda-forge nb_conda_kernels datalad-installer \
+# Install conda packages
+RUN conda install -c conda-forge nb_conda_kernels \
     && conda clean --all -f -y \
-    && conda config --system --prepend envs_dirs '~/conda-environments' \
-    && datalad-installer datalad \
-    && /opt/conda/bin/pip install nipype matplotlib datalad-container datalad-osf osfclient ipyniivue \
+    && rm -rf /home/${NB_USER}/.cache
+RUN conda config --system --prepend envs_dirs '~/conda-environments'
+
+# Add datalad-container datalad-osf osfclient ipyniivue to the conda environment
+RUN /opt/conda/bin/pip install datalad-installer nipype matplotlib datalad-container datalad-osf osfclient ipyniivue \
+    datalad-installer datalad git-annex \
     && rm -rf /home/${NB_USER}/.cache
 
 # Install jupyter-server-proxy and disable announcements
