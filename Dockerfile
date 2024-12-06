@@ -135,6 +135,7 @@ RUN apt-get update --yes \
         emacs \
         gedit \
         git \
+        git-annex \
         gnome-keyring \
         graphviz \
         htop \
@@ -202,7 +203,7 @@ RUN conda install -c conda-forge nb_conda_kernels \
 RUN conda config --system --prepend envs_dirs '~/conda-environments'
 
 # Add datalad-container datalad-osf osfclient ipyniivue to the conda environment
-RUN /opt/conda/bin/pip install nipype matplotlib datalad-container datalad-osf osfclient ipyniivue \
+RUN /opt/conda/bin/pip install datalad nipype matplotlib datalad-container datalad-osf osfclient ipyniivue \
     && rm -rf /home/${NB_USER}/.cache
 
 # Install jupyter-server-proxy and disable announcements
