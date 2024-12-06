@@ -195,16 +195,13 @@ COPY config/firefox/syspref.js /etc/firefox/syspref.js
 
 USER ${NB_USER}
 
-# Install conda packages
-RUN conda install -c conda-forge nb_conda_kernels datalad \
+# Install conda packages, datalad-container, datalad-osf, osfclient and ipyniivue to the conda environment
+RUN conda install -c conda-forge nb_conda_kernels datalad-installer \
     && conda clean --all -f -y \
+    && conda config --system --prepend envs_dirs '~/conda-environments' \
+    && datalad-installer datalad \
+    && /opt/conda/bin/pip install nipype matplotlib datalad-container datalad-osf osfclient ipyniivue \
     && rm -rf /home/${NB_USER}/.cache
-RUN conda config --system --prepend envs_dirs '~/conda-environments'
-
-# Add datalad-container datalad-osf osfclient ipyniivue to the conda environment
-RUN /opt/conda/bin/pip install nipype matplotlib datalad-container datalad-osf osfclient ipyniivue \
-    && rm -rf /home/${NB_USER}/.cache
-
 
 # Install jupyter-server-proxy and disable announcements
 # Deprecated: jupyter labextension install ..
@@ -371,9 +368,6 @@ RUN cp -rp /home/${NB_USER} /tmp/
 
 # Set up data directory so it exists in the container for the SINGULARITY_BINDPATH
 RUN mkdir -p /data
-
-
-
 
 # Install neurocommand
 ADD "https://api.github.com/repos/neurodesk/neurocommand/git/refs/heads/main" /tmp/skipcache
