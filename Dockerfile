@@ -195,7 +195,7 @@ COPY config/firefox/syspref.js /etc/firefox/syspref.js
 
 USER ${NB_USER}
 
-# Install conda packages, datalad-container, datalad-osf, osfclient and ipyniivue to the conda environment
+# Install conda packages, datalad, git-annex, datalad-container, datalad-osf, osfclient and ipyniivue to the conda environment
 RUN conda install -c conda-forge nb_conda_kernels datalad-installer \
     && conda clean --all -f -y \
     && conda config --system --prepend envs_dirs '~/conda-environments' \
