@@ -1,4 +1,4 @@
-FROM jupyter/base-notebook:2023-10-20
+FROM quay.io/jupyter/base-notebook:2024-12-03
 # https://hub.docker.com/r/jupyter/base-notebook/tags
 
 # Parent image source
@@ -20,9 +20,9 @@ RUN apt-get update --yes \
         # Apptainer
         software-properties-common \
         # Apache Tomcat
-        openjdk-19-jre \
-        # Apache Guacamole
-        ## Core
+        openjdk-21-jre \
+        # # Apache Guacamole
+        # ## Core
         build-essential \
         libcairo2-dev \
         libjpeg-turbo8-dev \
@@ -130,7 +130,6 @@ RUN apt-get update --yes \
         aria2 \
         code \
         cvmfs \
-        datalad \
         davfs2 \
         debootstrap \
         emacs \
@@ -197,7 +196,7 @@ COPY config/firefox/syspref.js /etc/firefox/syspref.js
 USER ${NB_USER}
 
 # Install conda packages
-RUN conda install -c conda-forge nb_conda_kernels \
+RUN conda install -c conda-forge nb_conda_kernels datalad \
     && conda clean --all -f -y \
     && rm -rf /home/${NB_USER}/.cache
 RUN conda config --system --prepend envs_dirs '~/conda-environments'
