@@ -1,4 +1,4 @@
-FROM jupyter/base-notebook:2023-10-20
+FROM quay.io/jupyter/base-notebook:2024-12-03
 # https://hub.docker.com/r/jupyter/base-notebook/tags
 
 # Parent image source
@@ -20,9 +20,9 @@ RUN apt-get update --yes \
         # Apptainer
         software-properties-common \
         # Apache Tomcat
-        openjdk-19-jre \
-        # Apache Guacamole
-        ## Core
+        openjdk-21-jre \
+        # # Apache Guacamole
+        # ## Core
         build-essential \
         libcairo2-dev \
         libjpeg-turbo8-dev \
@@ -130,12 +130,12 @@ RUN apt-get update --yes \
         aria2 \
         code \
         cvmfs \
-        datalad \
         davfs2 \
         debootstrap \
         emacs \
         gedit \
         git \
+        git-annex \
         gnome-keyring \
         graphviz \
         htop \
@@ -203,9 +203,8 @@ RUN conda install -c conda-forge nb_conda_kernels \
 RUN conda config --system --prepend envs_dirs '~/conda-environments'
 
 # Add datalad-container datalad-osf osfclient ipyniivue to the conda environment
-RUN /opt/conda/bin/pip install nipype matplotlib datalad-container datalad-osf osfclient ipyniivue \
+RUN /opt/conda/bin/pip install datalad nipype matplotlib datalad-container datalad-osf osfclient ipyniivue \
     && rm -rf /home/${NB_USER}/.cache
-
 
 # Install jupyter-server-proxy and disable announcements
 # Deprecated: jupyter labextension install ..
@@ -372,9 +371,6 @@ RUN cp -rp /home/${NB_USER} /tmp/
 
 # Set up data directory so it exists in the container for the SINGULARITY_BINDPATH
 RUN mkdir -p /data
-
-
-
 
 # Install neurocommand
 ADD "https://api.github.com/repos/neurodesk/neurocommand/git/refs/heads/main" /tmp/skipcache
