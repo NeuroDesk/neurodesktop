@@ -1,9 +1,5 @@
 FROM quay.io/jupyter/base-notebook:2024-12-03
-# https://hub.docker.com/r/jupyter/base-notebook/tags
-
-# Parent image source
-# https://github.com/jupyter/docker-stacks/blob/86d42cadf4695b8e6fc3b3ead58e1f71067b765b/docker-stacks-foundation/Dockerfile
-# https://github.com/jupyter/docker-stacks/blob/86d42cadf4695b8e6fc3b3ead58e1f71067b765b/base-notebook/Dockerfile
+# https://quay.io/repository/jupyter/base-notebook?tab=tags
 
 LABEL maintainer="Neurodesk Project <www.neurodesk.org>"
 
