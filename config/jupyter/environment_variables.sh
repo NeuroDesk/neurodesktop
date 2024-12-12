@@ -36,6 +36,9 @@ export MPLCONFIGDIR=/home/${NB_USER}/.config/matplotlib-mpldir
 
 export PATH=$PATH:/home/${NB_USER}/.local/bin:/opt/conda/bin:/opt/conda/condabin
 
+# workaround for docker on MacOS 
+export neurodesk_singularity_opts=" -w "
+
 # this adds --nv to the singularity calls -> but only if a GPU is present
 if [ "$(lspci | grep -i nvidia)" ]
 then
