@@ -1,6 +1,6 @@
 # TinyRange (https://github.com/tinyrange/tinyrange) configuration file for NeuroDesktop
 version: 1
-oci_image: vnmd/neurodesktop:2024-10-22
+oci_image: vnmd/neurodesktop:2024-12-06
 commands:
     # Mount the shared storage. This part can fail non-fatally if the storage is not available.
     - mkdir /root/.ssh;ssh-keyscan host.internal > /root/.ssh/known_hosts
