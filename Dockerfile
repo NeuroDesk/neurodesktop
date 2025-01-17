@@ -1,9 +1,5 @@
-FROM jupyter/base-notebook:2023-10-20
-# https://hub.docker.com/r/jupyter/base-notebook/tags
-
-# Parent image source
-# https://github.com/jupyter/docker-stacks/blob/86d42cadf4695b8e6fc3b3ead58e1f71067b765b/docker-stacks-foundation/Dockerfile
-# https://github.com/jupyter/docker-stacks/blob/86d42cadf4695b8e6fc3b3ead58e1f71067b765b/base-notebook/Dockerfile
+FROM quay.io/jupyter/base-notebook:2024-12-03
+# https://quay.io/repository/jupyter/base-notebook?tab=tags
 
 LABEL maintainer="Neurodesk Project <www.neurodesk.org>"
 
@@ -12,6 +8,7 @@ USER root
 #========================================#
 # Core services
 #========================================#
+ 
 
 # Install base image dependencies
 RUN apt-get update --yes \
@@ -19,9 +16,9 @@ RUN apt-get update --yes \
         # Apptainer
         software-properties-common \
         # Apache Tomcat
-        openjdk-19-jre \
-        # Apache Guacamole
-        ## Core
+        openjdk-21-jre \
+        # # Apache Guacamole
+        # ## Core
         build-essential \
         libcairo2-dev \
         libjpeg-turbo8-dev \
@@ -34,7 +31,6 @@ RUN apt-get update --yes \
         libssl-dev \
         libwebp-dev \
         libssh2-1-dev \
-        strace \
         # SSH (Optional)
         libpango1.0-dev \
         ## VNC
@@ -57,8 +53,13 @@ RUN apt-get update --yes \
         apt-transport-https \
         && apt-get clean && rm -rf /var/lib/apt/lists/* 
 
+# add a static strace executable to /opt which we can copy to containers for debugging:
+RUN mkdir -p /opt/strace \
+    && wget -qO- https://github.com/JuliaBinaryWrappers/strace_jll.jl/releases/download/strace-v6.7.0%2B1/strace.v6.7.0.x86_64-linux-gnu.tar.gz | tar xz -C /opt/strace --strip-components=1 \
+    && chmod +x /opt/strace
+
 ARG TOMCAT_REL="9"
-ARG TOMCAT_VERSION="9.0.87"
+ARG TOMCAT_VERSION="9.0.97"
 ARG GUACAMOLE_VERSION="1.5.5"
 
 ENV LANG ""
@@ -125,12 +126,12 @@ RUN apt-get update --yes \
         aria2 \
         code \
         cvmfs \
-        datalad \
         davfs2 \
         debootstrap \
         emacs \
         gedit \
         git \
+        git-annex \
         gnome-keyring \
         graphviz \
         htop \
@@ -198,16 +199,16 @@ RUN conda install -c conda-forge nb_conda_kernels \
 RUN conda config --system --prepend envs_dirs '~/conda-environments'
 
 # Add datalad-container datalad-osf osfclient ipyniivue to the conda environment
-RUN /opt/conda/bin/pip install nipype matplotlib datalad-container datalad-osf osfclient ipyniivue \
+RUN /opt/conda/bin/pip install datalad nipype matplotlib datalad-container datalad-osf osfclient ipyniivue \
     && rm -rf /home/${NB_USER}/.cache
-
 
 # Install jupyter-server-proxy and disable announcements
 # Deprecated: jupyter labextension install ..
 # jupyter_server_proxy needs to be at least 4.2.0 to fix CVE-2024-35225
+# jupyterlmod==4.0.3 needs to be pinned for now because they broken the API after that and have not fixed it yet in  5.2.1: https://github.com/cmd-ntrf/jupyter-lmod/issues/79
 RUN /opt/conda/bin/pip install jupyter-server-proxy \
     && /opt/conda/bin/jupyter labextension disable @jupyterlab/apputils-extension:announcements \ 
-    && /opt/conda/bin/pip install jupyterlmod \ 
+    && /opt/conda/bin/pip install jupyterlmod==4.0.3 \ 
     && /opt/conda/bin/pip install jupyterlab-git \
     && /opt/conda/bin/pip install jupyterlab_rise \
     && /opt/conda/bin/pip install ipycanvas \
@@ -367,9 +368,6 @@ RUN cp -rp /home/${NB_USER} /tmp/
 # Set up data directory so it exists in the container for the SINGULARITY_BINDPATH
 RUN mkdir -p /data
 
-
-
-
 # Install neurocommand
 ADD "https://api.github.com/repos/neurodesk/neurocommand/git/refs/heads/main" /tmp/skipcache
 RUN rm /tmp/skipcache \
@@ -391,3 +389,6 @@ RUN rm /home/${NB_USER}/skipcache \
 # Set SINGULARITY_BINDPATH and MODULEPATH here so it's available within a notebook (the startup scripts set these things too late):
 ENV APPTAINER_BINDPATH=/data,/mnt,/neurodesktop-storage,/tmp,/cvmfs
 ENV MODULEPATH=/cvmfs/neurodesk.ardc.edu.au/containers/modules/
+# This workaround is currently needed for Docker on Apple silicone - they broke normal mounting of /cvmfs in the custom docker kernel. Mounting as writable works around it.
+ENV neurodesk_singularity_opts=" -w "
+

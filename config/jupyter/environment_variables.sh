@@ -36,14 +36,14 @@ export MPLCONFIGDIR=/home/${NB_USER}/.config/matplotlib-mpldir
 
 export PATH=$PATH:/home/${NB_USER}/.local/bin:/opt/conda/bin:/opt/conda/condabin
 
+# workaround for docker on MacOS 
+export neurodesk_singularity_opts=" -w "
+
 # this adds --nv to the singularity calls -> but only if a GPU is present
-if [ "`lspci | grep -i nvidia`" ]
+if [ "$(lspci | grep -i nvidia)" ]
 then
         export neurodesk_singularity_opts="${neurodesk_singularity_opts} --nv "
 fi
-
-# fix for kernel bug in docker on arm64 when using a read-only bindmount from a fuse mount. The -w flag makes the container writable instead of read-only which works around the issue
-export neurodesk_singularity_opts="${neurodesk_singularity_opts} -w "
 
 export PS1='\u@neurodesktop-$NEURODESKTOP_VERSION:\w$ '
 
