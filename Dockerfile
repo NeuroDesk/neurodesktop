@@ -13,45 +13,34 @@ USER root
 # Install base image dependencies
 RUN apt-get update --yes \
     && DEBIAN_FRONTEND=noninteractive apt install --yes --no-install-recommends \
-        # Apptainer
         software-properties-common \
-        # Apache Tomcat
         openjdk-21-jre \
-        # # Apache Guacamole
-        # ## Core
         build-essential \
         libcairo2-dev \
         libjpeg-turbo8-dev \
         libpng-dev \
         libtool-bin \
         uuid-dev \
-        ## Optionals
         freerdp2-dev \
         libvncserver-dev \
         libssl-dev \
         libwebp-dev \
         libssh2-1-dev \
-        # SSH (Optional)
         libpango1.0-dev \
-        ## VNC
         tigervnc-common \
         tigervnc-standalone-server \
         tigervnc-tools \
-        ## RDP
         xorgxrdp \
         xrdp \
-        # Desktop Env
         lxde \
-        # Installer tools
         acl \
         wget \
         curl \
-        dirmngr \ 
+        dirmngr \
         gpg \
         gpg-agent \
-        software-properties-common \
         apt-transport-https \
-        && apt-get clean && rm -rf /var/lib/apt/lists/* 
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # add a static strace executable to /opt which we can copy to containers for debugging:
 RUN mkdir -p /opt/strace \
@@ -107,11 +96,9 @@ RUN wget -qO- https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor 
     && install -D -o root -g root -m 644 packages.microsoft.gpg /etc/apt/keyrings/packages.microsoft.gpg \
     && sh -c 'echo "deb [arch=amd64,arm64,armhf signed-by=/etc/apt/keyrings/packages.microsoft.gpg] https://packages.microsoft.com/repos/code stable main" > /etc/apt/sources.list.d/vscode.list' \
     && rm -f packages.microsoft.gpg \
-    # Nextcloud Client
     && add-apt-repository ppa:nextcloud-devs/client \
     && chmod -R 770 /home/${NB_USER}/.launchpadlib \
     && chown -R ${NB_UID}:${NB_GID} /home/${NB_USER}/.launchpadlib \
-    # NodeJS
     && curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
@@ -207,8 +194,8 @@ RUN /opt/conda/bin/pip install datalad nipype matplotlib datalad-container datal
 # jupyter_server_proxy needs to be at least 4.2.0 to fix CVE-2024-35225
 # jupyterlmod==4.0.3 needs to be pinned for now because they broken the API after that and have not fixed it yet in  5.2.1: https://github.com/cmd-ntrf/jupyter-lmod/issues/79
 RUN /opt/conda/bin/pip install jupyter-server-proxy \
-    && /opt/conda/bin/jupyter labextension disable @jupyterlab/apputils-extension:announcements \ 
-    && /opt/conda/bin/pip install jupyterlmod==4.0.3 \ 
+    && /opt/conda/bin/jupyter labextension disable @jupyterlab/apputils-extension:announcements \
+    && /opt/conda/bin/pip install jupyterlmod==4.0.3 \
     && /opt/conda/bin/pip install jupyterlab-git \
     && /opt/conda/bin/pip install jupyterlab_rise \
     && /opt/conda/bin/pip install ipycanvas \
