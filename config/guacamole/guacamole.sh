@@ -1,7 +1,9 @@
 #!/bin/bash
 
+export JAVA_TOOL_OPTIONS="-XX:UseSVE=0"
+
 # Tomcat
-sudo /usr/local/tomcat/bin/startup.sh
+sudo --preserve-env=JAVA_TOOL_OPTIONS /usr/local/tomcat/bin/startup.sh
 
 
 # RDP
