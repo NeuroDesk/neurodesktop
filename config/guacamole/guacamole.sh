@@ -1,6 +1,9 @@
 #!/bin/bash
 
-export JAVA_TOOL_OPTIONS="-XX:UseSVE=0"
+# -XX:UseSVE=0 only exists on aarch64 so only add it if it exists. Check using `uname -m`
+if [ "$(uname -m)" == "aarch64" ]; then
+    export JAVA_TOOL_OPTIONS="-XX:UseSVE=0"
+fi
 
 # Tomcat
 sudo --preserve-env=JAVA_TOOL_OPTIONS /usr/local/tomcat/bin/startup.sh
