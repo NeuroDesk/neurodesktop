@@ -22,7 +22,7 @@ docker build . -t neurodesktop:latest
 
 # Test with persistent home directory
 docker volume create neurodesk-home
-docker run --shm-size=1gb -it --cap-add SYS_ADMIN --security-opt apparmor:unconfined \
+docker run --shm-size=1gb -it --privileged --user=root \
     --device=/dev/fuse --name neurodesktop -v ~/neurodesktop-storage:/neurodesktop-storage \
     --mount source=neurodesk-home,target=/home/jovyan \
     -p 8888:8888 \

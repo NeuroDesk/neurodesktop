@@ -388,4 +388,3 @@ ENV APPTAINER_BINDPATH=/data,/mnt,/neurodesktop-storage,/tmp,/cvmfs
 ENV MODULEPATH=/cvmfs/neurodesk.ardc.edu.au/containers/modules/
 # This workaround is currently needed for Docker on Apple silicone - they broke normal mounting of /cvmfs in the custom docker kernel. Mounting as writable works around it.
 ENV neurodesk_singularity_opts=" -w "
-ENV JAVA_TOOL_OPTIONS="-XX:UseSVE=0"
