@@ -125,6 +125,7 @@ RUN apt-get update --yes \
         code \
         davfs2 \
         debootstrap \
+        dnsutils \
         emacs \
         gedit \
         git \
@@ -224,6 +225,8 @@ USER root
 RUN mkdir -p /etc/cvmfs/keys/ardc.edu.au
 COPY config/cvmfs/neurodesk.ardc.edu.au.pub /etc/cvmfs/keys/ardc.edu.au/neurodesk.ardc.edu.au.pub
 COPY config/cvmfs/neurodesk.ardc.edu.au.conf /etc/cvmfs/config.d/neurodesk.ardc.edu.au.conf
+COPY config/cvmfs/neurodesk.ardc.edu.au.conf.cdn /etc/cvmfs/config.d/neurodesk.ardc.edu.au.conf.cdn
+COPY config/cvmfs/neurodesk.ardc.edu.au.conf.direct /etc/cvmfs/config.d/neurodesk.ardc.edu.au.conf.direct
 COPY config/cvmfs/default.local /etc/cvmfs/default.local
 
 # # Customise logo, wallpaper, terminal

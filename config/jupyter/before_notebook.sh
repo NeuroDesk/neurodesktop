@@ -17,6 +17,34 @@ if [ ! -d "/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/" ]; then
         if [ ! -d "/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/" ]; then
             # it is not available outside, so try mounting with fuse inside container
 
+            echo "probing if the latency of direct connection or the latency of a CDN is better"
+            DIRECT=cvmfs-geoproximity.neurodesk.org
+            DIRECT_url="http://${DIRECT}/cvmfs/neurodesk.ardc.edu.au/.cvmfspublished" 
+            CDN=cvmfs.neurodesk.org
+            CDN_url="http://${CDN}/cvmfs/neurodesk.ardc.edu.au/.cvmfspublished"
+
+            echo testing $CDN_url
+            echo "Resolving DNS name"
+            resolved_dns=$(dig +short $CDN)
+            echo "[DEBUG]: Resolved DNS for $CDN: $resolved_dns"
+            CDN_url_latency=$(curl -s -w %{time_total}\\n -o /dev/null "$CDN_url")
+            echo $CDN_url_latency
+            
+            echo testing $DIRECT_url
+            echo "Resolving DNS name"
+            resolved_dns=$(dig +short $DIRECT)
+            echo "[DEBUG]: Resolved DNS for $DIRECT: $resolved_dns"
+            DIRECT_url_latency=$(curl -s -w %{time_total}\\n -o /dev/null "$DIRECT_url")
+            echo $DIRECT_url_latency
+
+            if (( $(echo "$DIRECT_url_latency < $CDN_url_latency" |bc -l) )); then
+                echo "Direct connection is faster"
+                cp /etc/cvmfs/config.d/neurodesk.ardc.edu.au.conf.direct /etc/cvmfs/config.d/neurodesk.ardc.edu.au.conf
+            else
+                echo "CDN is faster"
+                cp /etc/cvmfs/config.d/neurodesk.ardc.edu.au.conf.cdn /etc/cvmfs/config.d/neurodesk.ardc.edu.au.conf
+            fi
+
             echo "\
             ==================================================================
             Mounting CVMFS"
