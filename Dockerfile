@@ -1,4 +1,4 @@
-FROM quay.io/jupyter/base-notebook:2024-12-03
+FROM quay.io/jupyter/base-notebook:2025-02-03
 # https://quay.io/repository/jupyter/base-notebook?tab=tags
 
 LABEL maintainer="Neurodesk Project <www.neurodesk.org>"
@@ -122,6 +122,7 @@ RUN apt-get update --yes \
 RUN apt-get update --yes \
     && DEBIAN_FRONTEND=noninteractive apt install --yes --no-install-recommends \
         aria2 \
+        bc \
         code \
         davfs2 \
         debootstrap \
@@ -212,6 +213,7 @@ RUN /opt/conda/bin/pip install jupyter-server-proxy \
     && /opt/conda/bin/pip install ipycanvas \
     && /opt/conda/bin/pip install jupyter-resource-usage \
     && /opt/conda/bin/pip install jupyter_scheduler \
+    && /opt/conda/bin/pip install httpx \
     && /opt/conda/bin/pip install ipywidgets ipyvolume jupyterlab_widgets \
     && rm -rf /home/${NB_USER}/.cache
 
