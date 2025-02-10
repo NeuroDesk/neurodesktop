@@ -39,7 +39,6 @@ jobs:
                         "s1osggoc-cvmfs.openhtc.io:8080",
                         "s1brisbane-cvmfs.openhtc.io",
                         "s1perth-cvmfs.openhtc.io",
-                        "s1nikhef-cvmfs.openhtc.io",
                         "cvmfs-frankfurt.neurodesk.org",
                         "cvmfs-jetstream.neurodesk.org",
                         "cvmfs-geoproximity.neurodesk.org",
@@ -47,6 +46,7 @@ jobs:
                         "cvmfs2.neurodesk.org",
                         "cvmfs3.neurodesk.org",
                         "cvmfs.neurodesk.org"]
+                        # "s1nikhef-cvmfs.openhtc.io",
     steps:
     - uses: actions/checkout@v4
     - name: check if ${{ matrix.cvmfs-servers }} is online and up-to-date
