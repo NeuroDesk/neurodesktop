@@ -9,7 +9,10 @@ if [ -z "$RESTARTABLE" ]; then
 export RESTARTABLE='yes'
 fi
 
-if [[ "$NB_UID" != "1000" || "$NB_GID" != "100" ]]; then
+HOME_UID=$(stat -c "%u" /home/${NB_USER})
+HOME_GID=$(stat -c "%g" /home/${NB_USER})
+
+if [[ "${NB_UID}" != "${HOME_UID}" || "${NB_GID}" != "${HOME_GID}" ]]; then
     if [ -z "$CHOWN_HOME" ]; then
     export CHOWN_HOME='yes'
     fi
