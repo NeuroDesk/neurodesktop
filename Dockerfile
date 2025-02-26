@@ -83,9 +83,9 @@ RUN wget -q "https://archive.apache.org/dist/guacamole/${GUACAMOLE_VERSION}/bina
     && ldconfig \
     && rm -r /tmp/guacamole-server-${GUACAMOLE_VERSION}
 
-# Set home directory default acls
-RUN chmod g+rwxs /home/${NB_USER}
-RUN setfacl -dRm u::rwX,g::rwX,o::0 /home/${NB_USER}
+# # Set home directory default acls
+# RUN chmod g+rwxs /home/${NB_USER}
+# RUN setfacl -dRm u::rwX,g::rwX,o::0 /home/${NB_USER}
 
 # #========================================#
 # # Software (as root user)
