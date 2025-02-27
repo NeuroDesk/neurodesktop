@@ -5,21 +5,29 @@
 
 # Copy homedirectory files if they don't exist yet
 # Check for missing conda-readme.md in persisting homedir
-if [ ! -f "/home/${NB_USER}/conda-readme.md" ] 
+if [ ! -f "${HOME}/conda-readme.md" ] 
 then
-    mkdir -p /home/${NB_USER}
-    chown ${NB_UID}:${NB_GID} -R /home/${NB_USER}
-    chmod g+rwxs /home/${NB_USER}
-    setfacl -dRm u::rwX,g::rwX,o::0 /home/${NB_USER}
+    mkdir -p ${HOME}
+    sudo cp -rpn /tmp/${NB_USER} $(dirname "${HOME}")
 
-    sudo cp -rpn /tmp/${NB_USER}/ /home/
-    sudo chown ${NB_UID}:${NB_GID} -R /home/${NB_USER}
+    # mkdir -p /home/${NB_USER}
+    # chown ${NB_UID}:${NB_GID} -R /home/${NB_USER}
+    # chmod g+rwxs /home/${NB_USER}
+    # setfacl -dRm u::rwX,g::rwX,o::0 /home/${NB_USER}
+
+    # sudo cp -rpn /tmp/${NB_USER}/ /home/
+    # sudo chown ${NB_UID}:${NB_GID} -R /home/${NB_USER}
 fi
 
-# Set .ssh directory permissions
-chmod -R 700 /home/${NB_USER}/.ssh
-chown -R ${NB_UID}:${NB_GID} /home/${NB_USER}/.ssh
-setfacl -dRm u::rwx,g::0,o::0 /home/${NB_USER}/.ssh
+# Apply minimum permissions and ownerships for desktop to startup
+chown -R ${NB_UID}:${NB_GID} ${HOME}/.ssh ${HOME}/.local/share/jupyter
+chown ${NB_UID}:${NB_GID} ${HOME} ${HOME}/.local ${HOME}/.local/share
+chmod -R 700 ${HOME}/.ssh
+
+# # Set .ssh directory permissions
+# chmod -R 700 /home/${NB_USER}/.ssh
+# chown -R ${NB_UID}:${NB_GID} /home/${NB_USER}/.ssh
+# setfacl -dRm u::rwx,g::0,o::0 /home/${NB_USER}/.ssh
 
 # Generate SSH keys
 if [ ! -f "/home/${NB_USER}/.ssh/guacamole_rsa" ]; then
@@ -93,8 +101,8 @@ sudo service ssh stop
 source /opt/neurodesktop/environment_variables.sh
 
 
-conda init bash
-mamba init bash
+# conda init bash
+# mamba init bash
 
 # DISABLED TEMPORARILY TO TEST IF THIS COULD BE RELATED TO THE SLOW STARTUP
 # update example directory

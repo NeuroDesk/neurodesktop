@@ -9,14 +9,17 @@ if [ -z "$RESTARTABLE" ]; then
 export RESTARTABLE='yes'
 fi
 
-HOME_UID=$(stat -c "%u" /home/${NB_USER})
-HOME_GID=$(stat -c "%g" /home/${NB_USER})
+# HOME_UID=$(stat -c "%u" ${HOME})
+# HOME_GID=$(stat -c "%g" ${HOME})
 
-if [[ "${NB_UID}" != "${HOME_UID}" || "${NB_GID}" != "${HOME_GID}" ]]; then
-    if [ -z "$CHOWN_HOME" ]; then
-    export CHOWN_HOME='yes'
-    fi
-    if [ -z "$CHOWN_HOME_OPTS" ]; then
-    export CHOWN_HOME_OPTS='-R'
-    fi
-fi
+# if [[ "${NB_UID}" != "${HOME_UID}" || "${NB_GID}" != "${HOME_GID}" ]]; then
+#     if [ -z "$CHOWN_HOME" ]; then
+#     export CHOWN_HOME='yes'
+#     fi
+#     if [ -z "$CHOWN_HOME_OPTS" ]; then
+#     export CHOWN_HOME_OPTS='-R'
+#     fi
+# fi
+
+chown -R ${NB_UID}:${NB_GID} ${HOME}/.ssh ${HOME}/.local/share/jupyter
+chown ${NB_UID}:${NB_GID} ${HOME} ${HOME}/.local ${HOME}/.local/share
