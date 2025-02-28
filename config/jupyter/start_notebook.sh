@@ -29,17 +29,17 @@ apply_chown_if_needed() {
         current_uid=$(stat -c "%u" "$dir")
         current_gid=$(stat -c "%g" "$dir")
         if [ "$current_uid" != "$NB_UID" ] || [ "$current_gid" != "$NB_GID" ]; then
+            export CHOWN_HOME='yes'
             if [ "$recursive" = true ]; then
-                chown -R ${NB_UID}:${NB_GID} "$dir"
-            else
-                chown ${NB_UID}:${NB_GID} "$dir"
+                export CHOWN_HOME_OPTS='-R'
             fi
         fi
     fi
 }
 
-apply_chown_if_needed "${HOME}" false
-apply_chown_if_needed "${HOME}/.local" false
-apply_chown_if_needed "${HOME}/.local/share" false
-apply_chown_if_needed "${HOME}/.ssh" true
-apply_chown_if_needed "${HOME}/.local/share/jupyter" true
+apply_chown_if_needed "${HOME}" true
+# apply_chown_if_needed "${HOME}" false
+# apply_chown_if_needed "${HOME}/.local" false
+# apply_chown_if_needed "${HOME}/.local/share" false
+# apply_chown_if_needed "${HOME}/.ssh" true
+# apply_chown_if_needed "${HOME}/.local/share/jupyter" true
