@@ -104,21 +104,22 @@ if [ ! -L "/neurocommand/local/containers" ]; then
 fi
 
 # Create a cpufino file with a valid CPU Mhz entry for ARM cpus
+echo "[INFO] Checking for ARM CPU and adding a CPU Mhz entry in /proc/cpuinfo to work around a bug in Matlab that expects this value to be present."
 if ! grep -iq 'cpu.*hz' /proc/cpuinfo; then
+    mkdir -p /home/${NB_USER}/.local
     cpuinfo_file=/home/${NB_USER}/.local/cpuinfo_with_ARM_MHz_fix
     cp /proc/cpuinfo $cpuinfo_file
     chmod u+rw $cpuinfo_file
     sed -i '/^$/c\cpu MHz         : 2245.778\n' $cpuinfo_file
     sudo mount --bind $cpuinfo_file /proc/cpuinfo
+    echo "[INFO] Added CPU Mhz entry in /proc/cpuinfo to work around a bug in Matlab that expects this value to be present."
 fi
 
 # Start and stop SSH server to initialize host
 sudo service ssh restart
 sudo service ssh stop
 
-
 source /opt/neurodesktop/environment_variables.sh
-
 
 conda init bash
 mamba init bash
