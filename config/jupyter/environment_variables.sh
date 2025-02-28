@@ -38,9 +38,18 @@ export PATH=$PATH:/home/${NB_USER}/.local/bin:/opt/conda/bin:/opt/conda/condabin
 
 # workaround for docker on MacOS - this -w flag should only be done when needed, because it prevents apptainer overlay bind mounts from working if they do not yet exist inside the container
 # check if the user is running on MacOS with Apple Silicon through our CPU Frequency hack file /home/${NB_USER}/.local/cpuinfo_with_ARM_MHz_fix
+# echo "[INFO] Checking if our CPU Frequency hack file is present to determine if we are running on MacOS with Apple Silicon to then set the -w workaround."
 if [ -f ~/.local/cpuinfo_with_ARM_MHz_fix ]; then
+        # echo "[INFO] Detected MacOS with Apple Silicon, setting -w workaround for singularity."
         export neurodesk_singularity_opts=" -w "
 fi
+# Test this in jupyter terminal, desktop terminal and a notebook:
+# !echo $neurodesk_singularity_opts
+# test if the workaround is still needed: ml fsl; fslmaths or 
+# import lmod
+# await lmod.load('fsl/6.0.4')
+# await lmod.list()
+# !fslmaths
 
 # # this adds --nv to the singularity calls -> but only if a GPU is present
 # if [ "$(lspci | grep -i nvidia)" ]

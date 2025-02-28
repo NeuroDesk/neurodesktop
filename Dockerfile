@@ -51,9 +51,9 @@ ARG TOMCAT_REL="9"
 ARG TOMCAT_VERSION="9.0.97"
 ARG GUACAMOLE_VERSION="1.5.5"
 
-ENV LANG ""
-ENV LANGUAGE ""
-ENV LC_ALL ""
+ENV LANG=""
+ENV LANGUAGE=""
+ENV LC_ALL=""
 
 # Install apptainer
 RUN add-apt-repository -y ppa:apptainer/ppa \
@@ -337,7 +337,7 @@ COPY --chown=${NB_UID}:${NB_GID} ./config/lxde/libfm.conf /home/${NB_USER}/.conf
 RUN touch /home/${NB_USER}/.sudo_as_admin_successful
 
 ENV DONT_PROMPT_WSL_INSTALL=1
-ENV LMOD_CMD /usr/share/lmod/lmod/libexec/lmod
+ENV LMOD_CMD=/usr/share/lmod/lmod/libexec/lmod
 
 # Add startup and config files for neurodesktop, jupyter, guacamole, vnc
 RUN mkdir /home/${NB_USER}/.vnc \
@@ -388,8 +388,10 @@ ADD "https://api.github.com/repos/neurodesk/example-notebooks/git/refs/heads/mai
 RUN rm /home/${NB_USER}/skipcache \
     && git clone --depth 1 https://github.com/NeuroDesk/example-notebooks
 
-# Set SINGULARITY_BINDPATH and MODULEPATH here so it's available within a notebook (the startup scripts set these things too late):
+# Set SINGULARITY_BINDPATH and MODULEPATH here so it's available within a notebook (the startup scripts set these things too late?):
 ENV APPTAINER_BINDPATH=/data,/mnt,/neurodesktop-storage,/tmp,/cvmfs
 ENV MODULEPATH=/cvmfs/neurodesk.ardc.edu.au/containers/modules/
+
 # This workaround is currently needed for Docker on Apple silicone - they broke normal mounting of /cvmfs in the custom docker kernel. Mounting as writable works around it.
 ENV neurodesk_singularity_opts=" -w "
+# It would be better not to have to set any of these variables here, but I don't know how to get them into the jupyter notebooks otherwise
