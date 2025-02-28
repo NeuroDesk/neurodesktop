@@ -19,24 +19,24 @@ then
     # sudo chown ${NB_UID}:${NB_GID} -R /home/${NB_USER}
 fi
 
-# # Function to check and apply chown if necessary
-# apply_chown_if_needed() {
-#     local dir=$1
-#     local recursive=$2
-#     if [ -d "$dir" ]; then
-#         current_uid=$(stat -c "%u" "$dir")
-#         current_gid=$(stat -c "%g" "$dir")
-#         if [ "$current_uid" != "$NB_UID" ] || [ "$current_gid" != "$NB_GID" ]; then
-#             if [ "$recursive" = true ]; then
-#                 chown -R ${NB_UID}:${NB_GID} "$dir"
-#             else
-#                 chown ${NB_UID}:${NB_GID} "$dir"
-#             fi
-#         fi
-#     fi
-# }
+# Function to check and apply chown if necessary
+apply_chown_if_needed() {
+    local dir=$1
+    local recursive=$2
+    if [ -d "$dir" ]; then
+        current_uid=$(stat -c "%u" "$dir")
+        current_gid=$(stat -c "%g" "$dir")
+        if [ "$current_uid" != "$NB_UID" ] || [ "$current_gid" != "$NB_GID" ]; then
+            if [ "$recursive" = true ]; then
+                chown -R ${NB_UID}:${NB_GID} "$dir"
+            else
+                chown ${NB_UID}:${NB_GID} "$dir"
+            fi
+        fi
+    fi
+}
 
-# apply_chown_if_needed "${HOME}" true
+apply_chown_if_needed "${HOME}" true
 # apply_chown_if_needed "${HOME}" false
 # apply_chown_if_needed "${HOME}/.local" false
 # apply_chown_if_needed "${HOME}/.local/share" false
