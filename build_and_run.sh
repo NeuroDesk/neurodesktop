@@ -26,7 +26,7 @@ docker run --shm-size=1gb -it --privileged --user=root \
     --device=/dev/fuse --name neurodesktop -v ~/neurodesktop-storage:/neurodesktop-storage \
     --mount source=neurodesk-home,target=/home/jovyan \
     -p 8888:8888 \
-    --user=root -e NB_UID="$(id -u)" -e NB_GID="$(id -g)" \
+    -e NB_UID="$(id -u)" -e NB_GID="$(id -g)" \
     neurodesktop:latest
 
 # Run with external CVMFS:
