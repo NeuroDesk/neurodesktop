@@ -36,8 +36,11 @@ export MPLCONFIGDIR=/home/${NB_USER}/.config/matplotlib-mpldir
 
 export PATH=$PATH:/home/${NB_USER}/.local/bin:/opt/conda/bin:/opt/conda/condabin
 
-# workaround for docker on MacOS 
-export neurodesk_singularity_opts=" -w "
+# workaround for docker on MacOS - this -w flag should only be done when needed, because it prevents apptainer overlay bind mounts from working if they do not yet exist inside the container
+# check if the user is running on MacOS with Apple Silicon through our CPU Frequency hack file /home/${NB_USER}/.local/cpuinfo_with_ARM_MHz_fix
+if [ -f ~/.local/cpuinfo_with_ARM_MHz_fix ]; then
+        export neurodesk_singularity_opts=" -w "
+fi
 
 # # this adds --nv to the singularity calls -> but only if a GPU is present
 # if [ "$(lspci | grep -i nvidia)" ]
