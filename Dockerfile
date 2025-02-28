@@ -392,6 +392,7 @@ RUN rm /home/${NB_USER}/skipcache \
 ENV APPTAINER_BINDPATH=/data,/mnt,/neurodesktop-storage,/tmp,/cvmfs
 ENV MODULEPATH=/cvmfs/neurodesk.ardc.edu.au/containers/modules/
 
-# This workaround is currently needed for Docker on Apple silicone - they broke normal mounting of /cvmfs in the custom docker kernel. Mounting as writable works around it.
-ENV neurodesk_singularity_opts=" -w "
+# This workaround is currently needed for Docker on Apple silicone - they broke normal mounting of /cvmfs in the custom docker kernel. Mounting as writable works around it and it's even better than -w because this was not working with simg downloaded container files
+ENV neurodesk_singularity_opts=" --overlay /tmp/apptainer_overlay "
+
 # It would be better not to have to set any of these variables here, but I don't know how to get them into the jupyter notebooks otherwise

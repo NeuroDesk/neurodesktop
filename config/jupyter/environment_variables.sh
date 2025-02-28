@@ -19,9 +19,9 @@ if [ -f '/usr/share/module.sh' ]; then
         fi
 
         echo 'Neuroimaging tools are accessible via the Neurodesktop Applications menu and running them through the menu will provide help and setup instructions. If you are familiar with the tools and you want to combine multiple tools in one script, you can run "ml av" to see which tools are available and then use "ml <tool>/<version>" to load them. '
-        echo "CVMFS_DISABLE: $CVMFS_DISABLE"
         
-        if [ -v "$CVMFS_DISABLE" ]; then
+        # check if $CVMFS_DISABLE is set to true
+        if [[ "$CVMFS_DISABLE" == "true" ]]; then
                 echo "CVMFS is disabled. Using local containers stored in $MODULEPATH"
                 if [ ! -d $MODULEPATH ]; then
                         echo 'Neurodesk tools not yet downloaded. Choose tools to install from the Neurodesktop Application menu.'
@@ -38,13 +38,16 @@ export MPLCONFIGDIR=/home/${NB_USER}/.config/matplotlib-mpldir
 
 export PATH=$PATH:/home/${NB_USER}/.local/bin:/opt/conda/bin:/opt/conda/condabin
 
+
+# THIS IS CURRENLTY IN THE DOCKERFILE, because the overlay solution might be more robust than the -w flag
+
 # workaround for docker on MacOS - this -w flag should only be done when needed, because it prevents apptainer overlay bind mounts from working if they do not yet exist inside the container
 # check if the user is running on MacOS with Apple Silicon through our CPU Frequency hack file /home/${NB_USER}/.local/cpuinfo_with_ARM_MHz_fix
-# echo "[INFO] Checking if our CPU Frequency hack file is present to determine if we are running on MacOS with Apple Silicon to then set the -w workaround."
-if [ -f ~/.local/cpuinfo_with_ARM_MHz_fix ]; then
-        # echo "[INFO] Detected MacOS with Apple Silicon, setting -w workaround for singularity."
-        export neurodesk_singularity_opts=" -w "
-fi
+# # echo "[INFO] Checking if our CPU Frequency hack file is present to determine if we are running on MacOS with Apple Silicon to then set the -w workaround."
+# if [ -f ~/.local/cpuinfo_with_ARM_MHz_fix ]; then
+#         # echo "[INFO] Detected MacOS with Apple Silicon, setting -w workaround for singularity."
+#         export neurodesk_singularity_opts=" --overlay /tmp/apptainer_overlay "
+# fi
 # Test this in jupyter terminal, desktop terminal and a notebook:
 # !echo $neurodesk_singularity_opts
 # test if the workaround is still needed: ml fsl; fslmaths or 
