@@ -21,7 +21,7 @@ if [ -f '/usr/share/module.sh' ]; then
 
                 # if the offline modules directory exists, we can use it and will prefer it over cvmfs
                 if [ -d ${OFFLINE_MODULES} ]; then
-                        echo "Found local container installations in $OFFLINE_MODULES. Using installed containers with a higher prioritiy over CVMFS."
+                        echo "Found local container installations in $OFFLINE_MODULES. Using installed containers with a higher priority over CVMFS."
                         export MODULEPATH=${OFFLINE_MODULES}:$MODULEPATH
                 fi
         fi
@@ -47,7 +47,7 @@ export MPLCONFIGDIR=/home/${NB_USER}/.config/matplotlib-mpldir
 export PATH=$PATH:/home/${NB_USER}/.local/bin:/opt/conda/bin:/opt/conda/condabin
 
 
-# THIS IS CURRENLTY IN THE DOCKERFILE, because the overlay solution might be more robust than the -w flag
+# THIS IS CURRENTLY IN THE DOCKERFILE, because the overlay solution seems more robust than the old -w flag workaround
 
 # workaround for docker on MacOS - this -w flag should only be done when needed, because it prevents apptainer overlay bind mounts from working if they do not yet exist inside the container
 # check if the user is running on MacOS with Apple Silicon through our CPU Frequency hack file /home/${NB_USER}/.local/cpuinfo_with_ARM_MHz_fix
