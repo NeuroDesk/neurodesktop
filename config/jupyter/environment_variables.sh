@@ -9,13 +9,21 @@ fi
 
 # Only setup MODULEPATH if a module system is installed
 if [ -f '/usr/share/module.sh' ]; then
-        if [ ! -d /cvmfs/neurodesk.ardc.edu.au/neurodesk-modules ]; then
-                MODULEPATH=/neurodesktop-storage/containers/modules/*
-                export MODULEPATH=`echo $MODULEPATH | sed 's/ /:/g'`              
+        export OFFLINE_MODULES=/neurodesktop-storage/containers/modules/
+        export CVMFS_MODULES=/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/
+
+        if [ ! -d $CVMFS_MODULES ]; then
+                MODULEPATH=${OFFLINE_MODULES}
                 export CVMFS_DISABLE=true
         else
-                MODULEPATH=/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/*
+                MODULEPATH=${CVMFS_MODULES}*
                 export MODULEPATH=`echo $MODULEPATH | sed 's/ /:/g'`
+
+                # if the offline modules directory exists, we can use it and will prefer it over cvmfs
+                if [ -d ${OFFLINE_MODULES} ]; then
+                        echo 'Found local container installations in $OFFLINE_MODULES. Using installed containers with a higher prioritiy over CVMFS.'
+                        export MODULEPATH=${OFFLINE_MODULES}:$MODULEPATH
+                fi
         fi
 
         echo 'Neuroimaging tools are accessible via the Neurodesktop Applications menu and running them through the menu will provide help and setup instructions. If you are familiar with the tools and you want to combine multiple tools in one script, you can run "ml av" to see which tools are available and then use "ml <tool>/<version>" to load them. '

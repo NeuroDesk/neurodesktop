@@ -25,6 +25,7 @@ docker volume create neurodesk-home
 docker run --shm-size=1gb -it --privileged --user=root \
     --device=/dev/fuse --name neurodesktop -v ~/neurodesktop-storage:/neurodesktop-storage \
     --mount source=neurodesk-home,target=/home/jovyan \
+    -e CVMFS_DISABLE=true \
     -p 8888:8888 \
     -e NB_UID="$(id -u)" -e NB_GID="$(id -g)" \
     neurodesktop:latest

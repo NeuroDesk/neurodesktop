@@ -8,6 +8,15 @@ usermod --shell /bin/bash ${NB_USER}
 
 if [ ! -d "/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/" ]; then
     # the cvmfs directory is not yet mounted
+
+    # check if we have internet connectivity:
+    if ping -q -c 1 -W 1 google.com >/dev/null; then
+        echo "Internet is up"
+    else
+        export CVMFS_DISABLE=true
+        echo "No internet connection. Disabling CVMFS."
+    fi
+
     if [ -z "$CVMFS_DISABLE" ]; then
         # CVMFS is not disabled
 
