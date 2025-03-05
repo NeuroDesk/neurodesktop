@@ -21,7 +21,7 @@ if [ -f '/usr/share/module.sh' ]; then
 
                 # if the offline modules directory exists, we can use it and will prefer it over cvmfs
                 if [ -d ${OFFLINE_MODULES} ]; then
-                        echo 'Found local container installations in $OFFLINE_MODULES. Using installed containers with a higher prioritiy over CVMFS.'
+                        echo "Found local container installations in $OFFLINE_MODULES. Using installed containers with a higher prioritiy over CVMFS."
                         export MODULEPATH=${OFFLINE_MODULES}:$MODULEPATH
                 fi
         fi
