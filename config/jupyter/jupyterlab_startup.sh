@@ -117,6 +117,9 @@ if ! grep -iq 'cpu.*hz' /proc/cpuinfo; then
     echo "[INFO] Added CPU Mhz entry in /proc/cpuinfo to work around a bug in Matlab that expects this value to be present."
 fi
 
+# ensure overlay directory exists
+mkdir -p /tmp/apptainer_overlay
+
 # Start and stop SSH server to initialize host
 sudo service ssh restart
 sudo service ssh stop

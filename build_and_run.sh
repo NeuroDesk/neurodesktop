@@ -21,13 +21,13 @@ docker build . -t neurodesktop:latest
 #     neurodesktop:latest
 
 # Test with persistent home directory
-docker volume create neurodesk-home
-docker run --shm-size=1gb -it --privileged --user=root \
-    --device=/dev/fuse --name neurodesktop -v ~/neurodesktop-storage:/neurodesktop-storage \
-    --mount source=neurodesk-home,target=/home/jovyan \
-    -p 8888:8888 \
-    -e NB_UID="$(id -u)" -e NB_GID="$(id -g)" \
-    neurodesktop:latest
+# docker volume create neurodesk-home
+# docker run --shm-size=1gb -it --privileged --user=root \
+#     --device=/dev/fuse --name neurodesktop -v ~/neurodesktop-storage:/neurodesktop-storage \
+#     --mount source=neurodesk-home,target=/home/jovyan \
+#     -p 8888:8888 \
+#     -e NB_UID="$(id -u)" -e NB_GID="$(id -g)" \
+#     neurodesktop:latest
 
 # Test Offline mode with CVMFS disabled
 # docker volume create neurodesk-home
@@ -38,6 +38,25 @@ docker run --shm-size=1gb -it --privileged --user=root \
 #     -p 8888:8888 \
 #     -e NB_UID="$(id -u)" -e NB_GID="$(id -g)" \
 #     neurodesktop:latest
+
+# # Test Offline mode with CVMFS disabled without --device=/dev/fuse
+# docker volume create neurodesk-home
+# docker run --shm-size=1gb -it --privileged --user=root \
+#     --name neurodesktop -v ~/neurodesktop-storage:/neurodesktop-storage \
+#     --mount source=neurodesk-home,target=/home/jovyan \
+#     -e CVMFS_DISABLE=true \
+#     -p 8888:8888 \
+#     -e NB_UID="$(id -u)" -e NB_GID="$(id -g)" \
+#     neurodesktop:latest
+
+# Test normal mode without --device=/dev/fuse
+docker volume create neurodesk-home
+docker run --shm-size=1gb -it --privileged --user=root \
+    --name neurodesktop -v ~/neurodesktop-storage:/neurodesktop-storage \
+    --mount source=neurodesk-home,target=/home/jovyan \
+    -p 8888:8888 \
+    -e NB_UID="$(id -u)" -e NB_GID="$(id -g)" \
+    neurodesktop:latest
 
 # Run with external CVMFS:
 # docker run --shm-size=1gb -it --cap-add SYS_ADMIN --security-opt apparmor:unconfined \
