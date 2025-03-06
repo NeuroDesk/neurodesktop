@@ -46,17 +46,12 @@ export MPLCONFIGDIR=/home/${NB_USER}/.config/matplotlib-mpldir
 
 export PATH=$PATH:/home/${NB_USER}/.local/bin:/opt/conda/bin:/opt/conda/condabin
 
+# This is needed to make containers writable as a workaround for macos with Apple Silicon. We need to do it here for the desktop
+# and in the dockerfile for the jupyter notebook
+export neurodesk_singularity_opts=" --overlay /tmp/apptainer_overlay "
+# export neurodesk_singularity_opts=" -w " THIS DOES NOT WORK FOR SIMG FILES IN OFFLINE MODE
+# There is a small delay in using --overlay in comparison to -w - maybe it would be faster to use a fixed size overlay file instead?
 
-# THIS IS CURRENTLY IN THE DOCKERFILE, because the overlay solution seems more robust than the old -w flag workaround
-
-# workaround for docker on MacOS - this -w flag should only be done when needed, because it prevents apptainer overlay bind mounts from working if they do not yet exist inside the container
-# check if the user is running on MacOS with Apple Silicon through our CPU Frequency hack file /home/${NB_USER}/.local/cpuinfo_with_ARM_MHz_fix
-# # echo "[INFO] Checking if our CPU Frequency hack file is present to determine if we are running on MacOS with Apple Silicon to then set the -w workaround."
-# if [ -f ~/.local/cpuinfo_with_ARM_MHz_fix ]; then
-#         # echo "[INFO] Detected MacOS with Apple Silicon, setting -w workaround for singularity."
-#         export neurodesk_singularity_opts=" --overlay /tmp/apptainer_overlay "
-# fi
-# Test this in jupyter terminal, desktop terminal and a notebook:
 # !echo $neurodesk_singularity_opts
 # test if the workaround is still needed: ml fsl; fslmaths or 
 # import lmod
