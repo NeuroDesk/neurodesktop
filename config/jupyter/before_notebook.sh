@@ -17,7 +17,7 @@ if [ ! -d "/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/" ]; then
         echo "No internet connection. Disabling CVMFS."
     fi
 
-    # This is to capture legacy use. If CVMFS_DISABLE is not set, we assume it is false.
+    # This is to capture legacy use. If CVMFS_DISABLE is not set, we assume it is false, which was the legacy behaviour.
     if [ -z "$CVMFS_DISABLE" ]; then
         export CVMFS_DISABLE="false"
     fi
