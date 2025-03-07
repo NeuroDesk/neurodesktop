@@ -17,8 +17,14 @@ if [ ! -d "/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/" ]; then
         echo "No internet connection. Disabling CVMFS."
     fi
 
+    # This is to capture legacy use. If CVMFS_DISABLE is not set, we assume it is false.
     if [ -z "$CVMFS_DISABLE" ]; then
-        # CVMFS is not disabled
+        export CVMFS_DISABLE="false"
+    fi
+
+
+    if [[ "$CVMFS_DISABLE" == "false" ]]; then
+        # CVMFS_DISABLE is false and CVMFS should be enabled.
 
         # try to list the directory in case it's autofs mounted outside
         ls /cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/ 2>/dev/null && echo "CVMFS is ready" || echo "CVMFS directory not there. Trying internal fuse mount next."
