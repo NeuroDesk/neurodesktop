@@ -8,7 +8,17 @@ usermod --shell /bin/bash ${NB_USER}
 
 
 # Make sure binfmt_misc is mounted in the place apptainer expects it. This is most likely a bug in apptainer and is a workaround for now on apple silicon when CVMFS is disabled.
-sudo mount -t binfmt_misc binfmt /proc/sys/fs/binfmt_misc
+if [ -d "/proc/sys/fs/binfmt_misc" ]; then
+    # Check if binfmt_misc is already mounted
+    if ! mountpoint -q /proc/sys/fs/binfmt_misc; then
+        echo "binfmt_misc directory exists but is not mounted. Mounting now..."
+        sudo mount -t binfmt_misc binfmt /proc/sys/fs/binfmt_misc
+    else
+        echo "binfmt_misc is already mounted."
+    fi
+else
+    echo "binfmt_misc directory does not exist in /proc/sys/fs."
+fi
 
 if [ ! -d "/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/" ]; then
     # the cvmfs directory is not yet mounted
