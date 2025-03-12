@@ -209,6 +209,7 @@ RUN /opt/conda/bin/pip install jupyter-server-proxy \
     && /opt/conda/bin/jupyter labextension disable @jupyterlab/apputils-extension:announcements \
     && /opt/conda/bin/pip install jupyterlmod==4.0.3 \
     && /opt/conda/bin/pip install jupyterlab-git \
+    && /opt/conda/bin/pip install notebook_intelligence \
     && /opt/conda/bin/pip install jupyterlab_rise \
     && /opt/conda/bin/pip install ipycanvas \
     && /opt/conda/bin/pip install jupyter-resource-usage \
