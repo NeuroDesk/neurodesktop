@@ -1,6 +1,3 @@
-# This script runs in local Jupyterlab only (e.g. Docker, Neurodeskapp)
-# This script does NOT run on stock JupterHub/BinderHub instances (e.g. kubernetes)
-# For global startup script, see ./config/jupyter/jupterlab_startup.sh
 
 if [ "$EUID" -eq 0 ]; then
     # # Overrides Dockerfile changes to NB_USER

@@ -1,8 +1,5 @@
 #!/bin/bash
 
-# This script runs globally (e.g. Docker, Neurodeskapp, JupyterHub, BinderHub)
-# For local Jupyterlab only, see ./config/jupyter/before_notebook.sh
-
 # Copy homedirectory files if they don't exist yet
 # Check for missing conda-readme.md in persisting homedir
 if [ ! -f "${HOME}/conda-readme.md" ] 
