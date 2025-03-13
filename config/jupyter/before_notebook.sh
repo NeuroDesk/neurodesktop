@@ -3,8 +3,8 @@
 # For global startup script, see ./config/jupyter/jupterlab_startup.sh
 
 # Overrides Dockerfile changes to NB_USER
-/usr/bin/printf '%s\n%s\n' 'password' 'password' | passwd ${NB_USER}
-usermod --shell /bin/bash ${NB_USER}
+sudo /usr/bin/printf '%s\n%s\n' 'password' 'password' | passwd ${NB_USER}
+sudo usermod --shell /bin/bash ${NB_USER}
 
 
 # Make sure binfmt_misc is mounted in the place apptainer expects it. This is most likely a bug in apptainer and is a workaround for now on apple silicon when CVMFS is disabled.
