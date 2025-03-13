@@ -1,8 +1,8 @@
 
 if [ "$EUID" -eq 0 ]; then
     # # Overrides Dockerfile changes to NB_USER
-    # /usr/bin/printf '%s\n%s\n' 'password' 'password' | passwd ${NB_USER}
-    # usermod --shell /bin/bash ${NB_USER}
+    /usr/bin/printf '%s\n%s\n' 'password' 'password' | passwd ${NB_USER}
+    usermod --shell /bin/bash ${NB_USER}
 
     # Make sure binfmt_misc is mounted in the place apptainer expects it. This is most likely a bug in apptainer and is a workaround for now on apple silicon when CVMFS is disabled.
     if [ -d "/proc/sys/fs/binfmt_misc" ]; then
