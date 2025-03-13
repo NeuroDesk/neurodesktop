@@ -159,6 +159,7 @@ RUN apt-get update --yes \
         openssh-server \
         owncloud-client \
         pciutils \
+        python3-setuptools \
         qdirstat \
         rsync \
         s3fs \
