@@ -1,3 +1,5 @@
+#!/bin/bash
+
 # order: start_notebook.sh -> ### before_notebook.sh ###-> jupyter_notebook_config.py -> jupyterlab_startup.sh
 
 if [ "$EUID" -eq 0 ]; then

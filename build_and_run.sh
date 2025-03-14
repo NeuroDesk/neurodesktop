@@ -1,3 +1,4 @@
+#!/bin/bash
 set -e
 
 if docker ps --all | grep neurodesktop; then

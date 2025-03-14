@@ -1,3 +1,5 @@
+#!/bin/bash
+
 # This file is sourced once in jupyterlab_startup.sh and once in ~/.bashrc so we get the same environment variables in the jupyter and in the desktop environment
 if [[ -z "${NB_USER}" ]]; then
     export NB_USER=${USER}
