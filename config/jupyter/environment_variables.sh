@@ -7,6 +7,8 @@ if [[ -z "${USER}" ]]; then
     export USER=${NB_USER}
 fi
 
+export MODULEPATH=/neurodesktop-storage/containers/modules/:/cvmfs/neurodesk.ardc.edu.au/containers/modules/
+
 # Only setup MODULEPATH if a module system is installed
 if [ -f '/usr/share/module.sh' ]; then
         export OFFLINE_MODULES=/neurodesktop-storage/containers/modules/

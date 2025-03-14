@@ -50,7 +50,11 @@ docker build . -t neurodesktop:latest
 #     -e NB_UID="$(id -u)" -e NB_GID="$(id -g)" \
 #     neurodesktop:latest
 
-# # # Test Online mode with CVMFS enabled without --device=/dev/fuse
+
+
+
+
+# Test Online mode with CVMFS enabled without --device=/dev/fuse
 docker volume create neurodesk-home
 docker run --shm-size=1gb -it --privileged --user=root \
     --name neurodesktop -v ~/neurodesktop-storage:/neurodesktop-storage \

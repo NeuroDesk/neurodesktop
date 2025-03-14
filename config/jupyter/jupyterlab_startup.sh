@@ -1,4 +1,5 @@
 #!/bin/bash
+# order: start_notebook.sh -> before_notebook.sh -> jupyter_notebook_config.py -> #### jupyterlab_startup.sh ####
 
 # Copy homedirectory files if they don't exist yet
 # Check for missing conda-readme.md in persisting homedir
@@ -6,14 +7,6 @@ if [ ! -f "${HOME}/conda-readme.md" ]
 then
     mkdir -p ${HOME}
     sudo cp -rpn /tmp/${NB_USER} $(dirname "${HOME}")
-
-    # mkdir -p /home/${NB_USER}
-    # chown ${NB_UID}:${NB_GID} -R /home/${NB_USER}
-    # chmod g+rwxs /home/${NB_USER}
-    # setfacl -dRm u::rwX,g::rwX,o::0 /home/${NB_USER}
-
-    # sudo cp -rpn /tmp/${NB_USER}/ /home/
-    # sudo chown ${NB_UID}:${NB_GID} -R /home/${NB_USER}
 fi
 
 # Function to check and apply chown if necessary
@@ -121,18 +114,5 @@ mkdir -p /tmp/apptainer_overlay
 sudo service ssh restart
 sudo service ssh stop
 
-source /opt/neurodesktop/environment_variables.sh
-
 conda init bash
 mamba init bash
-
-# DISABLED TEMPORARILY TO TEST IF THIS COULD BE RELATED TO THE SLOW STARTUP
-# update example directory
-# git config --global --add safe.directory /home/${NB_USER}/example-notebooks
-# if [ -d "/home/${NB_USER}/example-notebooks" ]
-# then
-#     cd /home/${NB_USER}/example-notebooks
-#     git pull
-# else
-#     git clone https://github.com/NeuroDesk/example-notebooks /home/${NB_USER}/example-notebooks
-# fi

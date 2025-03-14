@@ -1,3 +1,4 @@
+# order: start_notebook.sh -> ### before_notebook.sh ###-> jupyter_notebook_config.py -> jupyterlab_startup.sh
 
 if [ "$EUID" -eq 0 ]; then
     # # Overrides Dockerfile changes to NB_USER
@@ -93,3 +94,5 @@ if [ "$EUID" -eq 0 ]; then
         fi
     fi
 fi
+
+source /opt/neurodesktop/environment_variables.sh

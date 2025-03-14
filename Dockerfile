@@ -389,12 +389,3 @@ WORKDIR "${HOME}"
 ADD "https://api.github.com/repos/neurodesk/example-notebooks/git/refs/heads/main" /home/${NB_USER}/skipcache
 RUN rm /home/${NB_USER}/skipcache \
     && git clone --depth 1 https://github.com/NeuroDesk/example-notebooks
-
-# Set SINGULARITY_BINDPATH and MODULEPATH here so it's available within a notebook (the startup scripts set these things too late?):
-ENV APPTAINER_BINDPATH=/data,/mnt,/neurodesktop-storage,/tmp,/cvmfs
-ENV MODULEPATH=/neurodesktop-storage/containers/modules/:/cvmfs/neurodesk.ardc.edu.au/containers/modules/
-
-# This workaround is currently needed for Docker on Apple silicone - they broke normal mounting of /cvmfs in the custom docker kernel. Mounting as writable works around it and it's even better than -w because this was not working with simg downloaded container files
-ENV neurodesk_singularity_opts=" --overlay /tmp/apptainer_overlay "
-
-# It would be better not to have to set any of these variables here, but I don't know how to get them into the jupyter notebooks otherwise
