@@ -16,6 +16,6 @@ jobs:
       matrix:
         server: ["https://object-store.rc.nectar.org.au/v1/AUTH_dead991e1fa847e3afcca2d3a7041f5d/neurodesk/"]
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
     - name: check if ${{ matrix.server }} is online and up-to-date
       run: /bin/bash .github/workflows/test_objectstorage.sh  ${{ matrix.server }}

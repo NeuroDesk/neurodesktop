@@ -12,12 +12,12 @@ jobs:
   test_cvmfs_1_2_3:
     runs-on: ubuntu-22.04
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
     - name: check if cvmfs setup with multiple entries works
       run: /bin/bash .github/workflows/test_cvmfs_1_2_3.sh
     - name: Generate issue on job failure
       if: always() && failure()
-      uses: JasonEtco/create-an-issue@v2.9.2
+      uses: JasonEtco/create-an-issue@1b14a70e4d8dc185e5cc76d3bec9eab20257b2c5
       env: 
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         GITHUB_WORKFLOW: ${{ env.GITHUB_WORKFLOW }}
@@ -48,12 +48,12 @@ jobs:
                         "cvmfs.neurodesk.org"]
                         # "s1nikhef-cvmfs.openhtc.io",
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
     - name: check if ${{ matrix.cvmfs-servers }} is online and up-to-date
       run: /bin/bash .github/workflows/test_cvmfs.sh  ${{ matrix.cvmfs-servers }}
     - name: Generate issue on job failure
       if: always() && failure()
-      uses: JasonEtco/create-an-issue@v2.9.2
+      uses: JasonEtco/create-an-issue@1b14a70e4d8dc185e5cc76d3bec9eab20257b2c5
       env: 
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         GITHUB_WORKFLOW: ${{ env.GITHUB_WORKFLOW }}
