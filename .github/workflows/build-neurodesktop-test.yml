@@ -68,3 +68,56 @@ jobs:
           provenance: false # fixes unknown/unknown arch builds
           no-cache: true
           tags: ${{ env.IMAGEID }}:${{ env.BUILDDATE }}
+  scan-image:
+    needs: build-image
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Set environment variables
+        run: |
+          IMAGENAME="neurodesktop"
+          BUILDDATE=`date +%Y-%m-%d`
+          IMAGEID=ghcr.io/$GITHUB_REPOSITORY/$IMAGENAME
+          IMAGEID=$(echo $IMAGEID | tr '[A-Z]' '[a-z]')
+
+          echo "BUILDDATE=$BUILDDATE"
+          echo "IMAGEID=$IMAGEID"
+          echo "IMAGENAME=$IMAGENAME"
+
+          echo "BUILDDATE=$BUILDDATE" >> $GITHUB_ENV
+          echo "IMAGEID=$IMAGEID" >> $GITHUB_ENV
+          echo "IMAGENAME=$IMAGENAME" >> $GITHUB_ENV
+      - name: Checkout repository
+        if: ${{ env.GITHUB_RATE_REMAINING > 0 }}
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: ${{ github.ref }}
+      - name: Login to GHCR
+        uses: docker/login-action@74a5d142397b4f367a81961eba4e8cd7edddf772
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Pull container image
+        run: docker pull $IMAGEID:latest
+      - name: Container image scan
+        uses: aquasecurity/trivy-action@6c175e9c4083a92bbca2f9724c8a5e33bc2d97a5
+        with:
+          image-ref: ${{ env.IMAGEID }}:latest
+          format: table
+          exit-code: '1'
+          severity: CRITICAL
+          timeout: 25m0s
+          skip-files: /opt/rclone-v1.60.1-linux-amd64/README.txt, /opt/rclone-v1.60.1-linux-amd64/README.html, /opt/rclone-v1.60.1-linux-amd64/rclone.1
+      # - name: Generate issue on job failure
+      #   if: always() && failure()
+      #   uses: JasonEtco/create-an-issue@1b14a70e4d8dc185e5cc76d3bec9eab20257b2c5
+      #   env: 
+      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #     GITHUB_WORKFLOW: ${{ env.GITHUB_WORKFLOW }}
+      #     GITHUB_SERVER_URL: ${{ env.GITHUB_SERVER_URL }}
+      #     GITHUB_REPOSITORY: ${{ env.GITHUB_REPOSITORY }}
+      #     GITHUB_RUN_ID: ${{ env.GITHUB_RUN_ID }}
+      #   with:
+      #     filename: .github/job_failure_issue_template.md
+      #     update_existing: true
+      #     search_existing: open
