@@ -48,7 +48,7 @@ RUN mkdir -p /opt/strace \
     && chmod +x /opt/strace
 
 ARG TOMCAT_REL="9"
-ARG TOMCAT_VERSION="9.0.97"
+ARG TOMCAT_VERSION="9.0.102"
 ARG GUACAMOLE_VERSION="1.5.5"
 
 ENV LANG=""
