@@ -68,13 +68,30 @@ jobs:
           provenance: false # fixes unknown/unknown arch builds
           no-cache: true
           tags: ${{ env.IMAGEID }}:${{ env.BUILDDATE }}
+    - name: Push new image (if changes found)
+      uses: docker/build-push-action@471d1dc4e07e5cdedd4c2171150001c434f0b7a4
+      with:
+          context: .
+          # platforms: linux/amd64
+          platforms: linux/amd64,linux/arm64
+          provenance: false # fixes unknown/unknown arch builds
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=registry,ref=${{ env.IMAGEID }}:latest
+          cache-to: type=inline
+    - name: Create github tag (if changes found)
+      run: |
+        git tag ${BUILDDATE}
+        git push origin -f --tags
+        # echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u $GITHUB_ACTOR --password-stdin
   scan-image:
     needs: build-image
     runs-on: ubuntu-22.04
     steps:
       - name: Set environment variables
         run: |
-          IMAGENAME="neurodesktop"
+          IMAGENAME="neurodesktop-test"
           BUILDDATE=`date +%Y-%m-%d`
           IMAGEID=ghcr.io/$GITHUB_REPOSITORY/$IMAGENAME
           IMAGEID=$(echo $IMAGEID | tr '[A-Z]' '[a-z]')
