@@ -24,7 +24,7 @@ if [ "$EUID" -eq 0 ]; then
         # the cvmfs directory is not yet mounted
 
         # check if we have internet connectivity:
-        if ping -q -c 1 -W 1 google.com >/dev/null; then
+        if nslookup neurodesk.org >/dev/null; then
             echo "Internet is up"
         else
             export CVMFS_DISABLE=true
