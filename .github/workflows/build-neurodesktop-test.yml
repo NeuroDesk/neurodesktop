@@ -8,6 +8,12 @@ name: Build neurodesktop-test
 
 on:
   workflow_dispatch:
+    inputs:
+      force_push:
+        description: 'Force push?'
+        type: boolean
+        required: true
+        default: false
   schedule:
     - cron:  '0 17 * * *'
     
@@ -43,7 +49,7 @@ jobs:
       if: ${{ env.GITHUB_RATE_REMAINING > 0 }}
       run: |
         IMAGENAME="neurodesktop-test"
-        BUILDDATE=`date +%Y-%m-%d-%H%M`
+        BUILDDATE=`date +%Y-%m-%d`
         IMAGEID=ghcr.io/$GITHUB_REPOSITORY/$IMAGENAME
         IMAGEID=$(echo $IMAGEID | tr '[A-Z]' '[a-z]')
 
@@ -58,6 +64,16 @@ jobs:
       uses: docker/setup-qemu-action@29109295f81e9208d7d86ff1c6c12d2833863392
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@b5ca514318bd6ebac0fb2aedd5d36ec1b5c232a2
+    - name: Login to GHCR
+      uses: docker/login-action@74a5d142397b4f367a81961eba4e8cd7edddf772
+      with:
+        registry: ghcr.io
+        username: ${{ github.repository_owner }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+    - name: Get rootfs of cached image
+      run: |
+        docker pull $IMAGEID:latest && ROOTFS_CACHE=$(docker inspect --format='{{.RootFS}}' $IMAGEID:latest) && docker rmi $IMAGEID:latest || true
+        echo "ROOTFS_CACHE=$ROOTFS_CACHE" >> $GITHUB_ENV
     - name: Build new image
       uses: docker/build-push-action@471d1dc4e07e5cdedd4c2171150001c434f0b7a4
       with:
@@ -68,7 +84,35 @@ jobs:
           provenance: false # fixes unknown/unknown arch builds
           no-cache: true
           tags: ${{ env.IMAGEID }}:${{ env.BUILDDATE }}
+    - name: Get rootfs of new image
+      run: |
+        ROOTFS_NEW=$(docker inspect --format='{{.RootFS}}' $IMAGEID:$BUILDDATE)
+        PUSH_IMAGES="${IMAGEID}"
+        if [ ! -z "${DOCKERHUB_ORG}" ]; then
+          PUSH_IMAGES="${PUSH_IMAGES}, ${DOCKERHUB_ORG}/${IMAGENAME}"
+        fi
+        echo "PUSH_IMAGES=$PUSH_IMAGES"
+        echo "ROOTFS_NEW=$ROOTFS_NEW" >> $GITHUB_ENV
+        echo "PUSH_IMAGES=$PUSH_IMAGES" >> $GITHUB_ENV
+    - name: Login to DockerHub (if changes found)
+      if: ${{ env.DOCKERHUB_ORG != '' && (env.ROOTFS_NEW != env.ROOTFS_CACHE || github.event.inputs.force_push == 'true') }}
+      uses: docker/login-action@74a5d142397b4f367a81961eba4e8cd7edddf772
+      with:
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_PASSWORD }}
+    - name: Get new image metadata (if changes found)
+      if: ${{ env.ROOTFS_NEW != env.ROOTFS_CACHE || github.event.inputs.force_push == 'true' }}
+      id: meta
+      uses: docker/metadata-action@902fa8ec7d6ecbf8d84d538b9b233a880e428804
+      with:
+        images: ${{ env.PUSH_IMAGES }}
+        tags: |
+          ${{ env.BUILDDATE }}
+          latest
+        labels: |
+          org.opencontainers.image.description=Neurodesktop
     - name: Push new image (if changes found)
+      if: ${{ env.ROOTFS_NEW != env.ROOTFS_CACHE || github.event.inputs.force_push == 'true' }}
       uses: docker/build-push-action@471d1dc4e07e5cdedd4c2171150001c434f0b7a4
       with:
           context: .
@@ -81,10 +125,24 @@ jobs:
           cache-from: type=registry,ref=${{ env.IMAGEID }}:latest
           cache-to: type=inline
     - name: Create github tag (if changes found)
+      if: ${{ env.ROOTFS_NEW != env.ROOTFS_CACHE || github.event.inputs.force_push == 'true' }}
       run: |
         git tag ${BUILDDATE}
         git push origin -f --tags
         # echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u $GITHUB_ACTOR --password-stdin
+    - name: Generate issue on job failure
+      if: always() && failure()
+      uses: JasonEtco/create-an-issue@1b14a70e4d8dc185e5cc76d3bec9eab20257b2c5
+      env: 
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GITHUB_WORKFLOW: ${{ env.GITHUB_WORKFLOW }}
+        GITHUB_SERVER_URL: ${{ env.GITHUB_SERVER_URL }}
+        GITHUB_REPOSITORY: ${{ env.GITHUB_REPOSITORY }}
+        GITHUB_RUN_ID: ${{ env.GITHUB_RUN_ID }}
+      with:
+        filename: .github/job_failure_issue_template.md
+        update_existing: true
+        search_existing: open
   scan-image:
     needs: build-image
     runs-on: ubuntu-22.04
@@ -125,16 +183,16 @@ jobs:
           severity: CRITICAL
           timeout: 25m0s
           skip-files: /opt/rclone-v1.60.1-linux-amd64/README.txt, /opt/rclone-v1.60.1-linux-amd64/README.html, /opt/rclone-v1.60.1-linux-amd64/rclone.1
-      # - name: Generate issue on job failure
-      #   if: always() && failure()
-      #   uses: JasonEtco/create-an-issue@1b14a70e4d8dc185e5cc76d3bec9eab20257b2c5
-      #   env: 
-      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      #     GITHUB_WORKFLOW: ${{ env.GITHUB_WORKFLOW }}
-      #     GITHUB_SERVER_URL: ${{ env.GITHUB_SERVER_URL }}
-      #     GITHUB_REPOSITORY: ${{ env.GITHUB_REPOSITORY }}
-      #     GITHUB_RUN_ID: ${{ env.GITHUB_RUN_ID }}
-      #   with:
-      #     filename: .github/job_failure_issue_template.md
-      #     update_existing: true
-      #     search_existing: open
+      - name: Generate issue on job failure
+        if: always() && failure()
+        uses: JasonEtco/create-an-issue@1b14a70e4d8dc185e5cc76d3bec9eab20257b2c5
+        env: 
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_WORKFLOW: ${{ env.GITHUB_WORKFLOW }}
+          GITHUB_SERVER_URL: ${{ env.GITHUB_SERVER_URL }}
+          GITHUB_REPOSITORY: ${{ env.GITHUB_REPOSITORY }}
+          GITHUB_RUN_ID: ${{ env.GITHUB_RUN_ID }}
+        with:
+          filename: .github/job_failure_issue_template.md
+          update_existing: true
+          search_existing: open
