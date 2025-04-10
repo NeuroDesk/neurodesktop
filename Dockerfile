@@ -225,14 +225,6 @@ RUN /opt/conda/bin/pip install jupyter-server-proxy \
 
 USER root
 
-# Create cvmfs keys
-RUN mkdir -p /etc/cvmfs/keys/ardc.edu.au
-COPY config/cvmfs/neurodesk.ardc.edu.au.pub /etc/cvmfs/keys/ardc.edu.au/neurodesk.ardc.edu.au.pub
-COPY config/cvmfs/neurodesk.ardc.edu.au.conf /etc/cvmfs/config.d/neurodesk.ardc.edu.au.conf
-COPY config/cvmfs/neurodesk.ardc.edu.au.conf.cdn /etc/cvmfs/config.d/neurodesk.ardc.edu.au.conf.cdn
-COPY config/cvmfs/neurodesk.ardc.edu.au.conf.direct /etc/cvmfs/config.d/neurodesk.ardc.edu.au.conf.direct
-COPY config/cvmfs/default.local /etc/cvmfs/default.local
-
 # # Customise logo, wallpaper, terminal
 COPY config/jupyter/neurodesk_brain_logo.svg /opt/neurodesk_brain_logo.svg
 COPY config/jupyter/neurodesk_brain_icon.svg /opt/neurodesk_brain_icon.svg
@@ -364,6 +356,13 @@ RUN mkdir -p /home/${NB_USER}/Desktop/
 
 # Switch to root user
 USER root
+
+
+# Create cvmfs keys
+RUN mkdir -p /etc/cvmfs/keys/ardc.edu.au
+COPY config/cvmfs/neurodesk.ardc.edu.au.pub /etc/cvmfs/keys/ardc.edu.au/neurodesk.ardc.edu.au.pub
+COPY config/cvmfs/neurodesk.ardc.edu.au.conf* /etc/cvmfs/config.d/
+COPY config/cvmfs/default.local /etc/cvmfs/default.local
 
 # Save a backup copy of startup home dir into /tmp
 # Used to restore home dir in persistent sessions

@@ -45,6 +45,60 @@ if [ "$EUID" -eq 0 ]; then
 
             if [ ! -d "/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/" ]; then
                 # it is not available outside, so try mounting with fuse inside container
+                echo "probing if the user is better off using a server in America, Asia or Europe"
+                EUROPE=cvmfs-frankfurt.neurodesk.org
+                EUROPE_url="http://${EUROPE}/cvmfs/neurodesk.ardc.edu.au/.cvmfspublished" 
+                AMERICA=cvmfs-jetstream.neurodesk.org
+                AMERICA_url="http://${AMERICA}/cvmfs/neurodesk.ardc.edu.au/.cvmfspublished"
+                ASIA=cvmfs-brisbane.neurodesk.org
+                ASIA_url="http://${ASIA}/cvmfs/neurodesk.ardc.edu.au/.cvmfspublished"
+
+
+                echo testing $EUROPE_url
+                echo "Resolving DNS name"
+                resolved_dns=$(dig +short $EUROPE)
+                echo "[DEBUG]: Resolved DNS for $EUROPE: $resolved_dns"
+                EUROPE_url_latency=$(curl -s -w %{time_total}\\n -o /dev/null "$EUROPE_url")
+                echo $EUROPE_url_latency
+
+                echo testing $AMERICA_url
+                echo "Resolving DNS name"
+                resolved_dns=$(dig +short $AMERICA)
+                echo "[DEBUG]: Resolved DNS for $AMERICA: $resolved_dns"
+                AMERICA_url_latency=$(curl -s -w %{time_total}\\n -o /dev/null "$AMERICA_url")
+                echo $AMERICA_url_latency
+
+                echo testing $ASIA_url
+                echo "Resolving DNS name"
+                resolved_dns=$(dig +short $ASIA)
+                echo "[DEBUG]: Resolved DNS for $ASIA: $resolved_dns"
+                ASIA_url_latency=$(curl -s -w %{time_total}\\n -o /dev/null "$ASIA_url")
+                echo $ASIA_url_latency
+
+                # compare the latencies between Asia, Europe and America
+                if (( $(echo "$EUROPE_url_latency < $AMERICA_url_latency" |bc -l) )); then
+                    echo "Europe is faster than America"
+                    region="europe"
+                else
+                    echo "America is faster than Europe"
+                    region="america"
+                fi
+                if (( $(echo "$EUROPE_url_latency < $ASIA_url_latency" |bc -l) )); then
+                    echo "Europe is faster than Asia"
+                    region="europe"
+                else
+                    echo "Asia is faster than Europe"
+                    region="asia"
+                fi
+                if (( $(echo "$AMERICA_url_latency < $ASIA_url_latency" |bc -l) )); then
+                    echo "America is faster than Asia"
+                    region="america"
+                else
+                    echo "Asia is faster than America"
+                    region="asia"
+                fi
+                echo "The fastest region is $region"
+
 
                 echo "probing if the latency of direct connection or the latency of a CDN is better"
                 DIRECT=cvmfs-geoproximity.neurodesk.org
@@ -66,13 +120,19 @@ if [ "$EUID" -eq 0 ]; then
                 DIRECT_url_latency=$(curl -s -w %{time_total}\\n -o /dev/null "$DIRECT_url")
                 echo $DIRECT_url_latency
 
-                if (( $(echo "$DIRECT_url_latency < $CDN_url_latency" |bc -l) )); then
+
+                # compare the latencies between Direct and CDN
+                if (( $(echo "$DIRECT_url_latency < $AMERICA_url_latency" |bc -l) )); then
                     echo "Direct connection is faster"
-                    cp /etc/cvmfs/config.d/neurodesk.ardc.edu.au.conf.direct /etc/cvmfs/config.d/neurodesk.ardc.edu.au.conf
+                    mode="direct"
                 else
                     echo "CDN is faster"
-                    cp /etc/cvmfs/config.d/neurodesk.ardc.edu.au.conf.cdn /etc/cvmfs/config.d/neurodesk.ardc.edu.au.conf
+                    mode="cdn"
                 fi
+
+                # copying the selected config file
+                echo "selected config file: cvmfs/config.d/neurodesk.ardc.edu.au.conf.${mode}.${region}"
+                cp /etc/cvmfs/config.d/neurodesk.ardc.edu.au.conf.${mode}.${region} /etc/cvmfs/config.d/neurodesk.ardc.edu.au.conf
 
                 echo "\
                 ==================================================================
@@ -90,6 +150,9 @@ if [ "$EUID" -eq 0 ]; then
                     echo "\
                     ==================================================================
                     CVMFS servers:"
+                    if [ "$mode" = "direct" ]; then
+                        cvmfs_talk -i neurodesk.ardc.edu.au host probe
+                    fi
                     cvmfs_talk -i neurodesk.ardc.edu.au host info
                 fi
             fi
