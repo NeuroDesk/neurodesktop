@@ -45,94 +45,101 @@ if [ "$EUID" -eq 0 ]; then
 
             if [ ! -d "/cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/" ]; then
                 # it is not available outside, so try mounting with fuse inside container
-                echo "probing if the user is better off using a server in America, Asia or Europe"
-                EUROPE=cvmfs-frankfurt.neurodesk.org
-                EUROPE_url="http://${EUROPE}/cvmfs/neurodesk.ardc.edu.au/.cvmfspublished" 
-                AMERICA=cvmfs-jetstream.neurodesk.org
-                AMERICA_url="http://${AMERICA}/cvmfs/neurodesk.ardc.edu.au/.cvmfspublished"
-                ASIA=cvmfs-brisbane.neurodesk.org
-                ASIA_url="http://${ASIA}/cvmfs/neurodesk.ardc.edu.au/.cvmfspublished"
+                # Function to get latency, returns 999 on failure
+                get_latency() {
+                    local url="$1"
+                    local server_name="$2"
+                    # Redirect informational output to stderr
+                    echo "Testing $url" >&2
+                    echo "Resolving DNS name for $server_name" >&2
+                    local resolved_dns
+                    resolved_dns=$(dig +short "$server_name")
+                    # Redirect debug output to stderr
+                    echo "[DEBUG]: Resolved DNS for $server_name: $resolved_dns" >&2
+                    local output
+                    local exit_code
+                    # Curl output format captures time and status code
+                    output=$(curl --connect-timeout 5 -s -w "%{time_total} %{http_code}" -o /dev/null "$url")
+                    exit_code=$?
+                    if [ $exit_code -eq 0 ]; then
+                        local time
+                        local status
+                        time=$(echo "$output" | awk '{print $1}')
+                        status=$(echo "$output" | awk '{print $2}')
+                        if [ "$status" -eq 200 ]; then
+                            # Echo latency to stdout (captured by command substitution)
+                            echo "$time"
+                        else
+                            # Redirect error message to stderr
+                            echo "Curl request to $url failed with HTTP status $status" >&2
+                            # Echo fallback value to stdout (captured by command substitution)
+                            echo "999"
+                        fi
+                    else
+                        # Handle curl specific errors (e.g., timeout, DNS resolution failure)
+                        # Redirect error message to stderr
+                        echo "Curl command failed for $url with exit code $exit_code" >&2
+                         # Check for timeout error (exit code 28)
+                        if [ $exit_code -eq 28 ]; then
+                            # Redirect error message to stderr
+                            echo "Curl request timed out for $url" >&2
+                        fi
+                        # Echo fallback value to stdout (captured by command substitution)
+                        echo "999"
+                    fi
+                }
 
-
-                echo testing $EUROPE_url
-                echo "Resolving DNS name"
-                resolved_dns=$(dig +short $EUROPE)
-                echo "[DEBUG]: Resolved DNS for $EUROPE: $resolved_dns"
-                EUROPE_url_latency=$(curl -s -w %{time_total}\\n -o /dev/null "$EUROPE_url")
-                echo $EUROPE_url_latency
-
-                echo testing $AMERICA_url
-                echo "Resolving DNS name"
-                resolved_dns=$(dig +short $AMERICA)
-                echo "[DEBUG]: Resolved DNS for $AMERICA: $resolved_dns"
-                AMERICA_url_latency=$(curl -s -w %{time_total}\\n -o /dev/null "$AMERICA_url")
-                echo $AMERICA_url_latency
-
-                echo testing $ASIA_url
-                echo "Resolving DNS name"
-                resolved_dns=$(dig +short $ASIA)
-                echo "[DEBUG]: Resolved DNS for $ASIA: $resolved_dns"
-                ASIA_url_latency=$(curl -s -w %{time_total}\\n -o /dev/null "$ASIA_url")
-                echo $ASIA_url_latency
-
-                # compare the latencies between Asia, Europe and America
-                if (( $(echo "$EUROPE_url_latency < $AMERICA_url_latency" |bc -l) )); then
-                    echo "Europe is faster than America"
-                    region="europe"
-                else
-                    echo "America is faster than Europe"
-                    region="america"
-                fi
-                if (( $(echo "$EUROPE_url_latency < $ASIA_url_latency" |bc -l) )); then
-                    echo "Europe is faster than Asia"
-                    region="europe"
-                else
-                    echo "Asia is faster than Europe"
-                    region="asia"
-                fi
-                if (( $(echo "$AMERICA_url_latency < $ASIA_url_latency" |bc -l) )); then
-                    echo "America is faster than Asia"
-                    region="america"
-                else
-                    echo "Asia is faster than America"
-                    region="asia"
-                fi
-                echo "The fastest region is $region"
-
-
-                echo "probing if the latency of direct connection or the latency of a CDN is better"
-                DIRECT=cvmfs-geoproximity.neurodesk.org
-                DIRECT_url="http://${DIRECT}/cvmfs/neurodesk.ardc.edu.au/.cvmfspublished" 
-                CDN=cvmfs.neurodesk.org
-                CDN_url="http://${CDN}/cvmfs/neurodesk.ardc.edu.au/.cvmfspublished"
-
-                echo testing $CDN_url
-                echo "Resolving DNS name"
-                resolved_dns=$(dig +short $CDN)
-                echo "[DEBUG]: Resolved DNS for $CDN: $resolved_dns"
-                CDN_url_latency=$(curl -s -w %{time_total}\\n -o /dev/null "$CDN_url")
-                echo $CDN_url_latency
+                echo "Probing regional servers (Europe, America, Asia)..."
+                EUROPE_HOST=cvmfs-frankfurt.neurodesk.org
+                AMERICA_HOST=cvmfs-jetstream.neurodesk.org
+                ASIA_HOST=cvmfs-brisbane.neurodesk.org2
                 
-                echo testing $DIRECT_url
-                echo "Resolving DNS name"
-                resolved_dns=$(dig +short $DIRECT)
-                echo "[DEBUG]: Resolved DNS for $DIRECT: $resolved_dns"
-                DIRECT_url_latency=$(curl -s -w %{time_total}\\n -o /dev/null "$DIRECT_url")
-                echo $DIRECT_url_latency
+                EUROPE_url="http://${EUROPE_HOST}/cvmfs/neurodesk.ardc.edu.au/.cvmfspublished" 
+                AMERICA_url="http://${AMERICA_HOST}/cvmfs/neurodesk.ardc.edu.au/.cvmfspublished"
+                ASIA_url="http://${ASIA_HOST}/cvmfs/neurodesk.ardc.edu.au/.cvmfspublished"
 
+                EUROPE_latency=$(get_latency "$EUROPE_url" "$EUROPE_HOST")
+                echo "Europe Latency: $EUROPE_latency"
+                AMERICA_latency=$(get_latency "$AMERICA_url" "$AMERICA_HOST")
+                echo "America Latency: $AMERICA_latency"
+                ASIA_latency=$(get_latency "$ASIA_url" "$ASIA_HOST")
+                echo "Asia Latency: $ASIA_latency"
 
-                # compare the latencies between Direct and CDN
-                if (( $(echo "$DIRECT_url_latency < $AMERICA_url_latency" |bc -l) )); then
-                    echo "Direct connection is faster"
-                    mode="direct"
-                else
-                    echo "CDN is faster"
-                    mode="cdn"
-                fi
+                # Find the fastest region
+                printf "%s europe\n%s america\n%s asia\n" "$EUROPE_latency" "$AMERICA_latency" "$ASIA_latency"
+                FASTEST_REGION=$(printf "%s europe\n%s america\n%s asia\n" "$EUROPE_latency" "$AMERICA_latency" "$ASIA_latency" | sort -n | head -n 1 | awk '{print $2}')
+
+                echo "Probing connection modes (Direct vs CDN)..."
+                DIRECT_HOST=cvmfs-geoproximity.neurodesk.org
+                CDN_HOST=cvmfs.neurodesk.org
+
+                DIRECT_url="http://${DIRECT_HOST}/cvmfs/neurodesk.ardc.edu.au/.cvmfspublished" 
+                CDN_url="http://${CDN_HOST}/cvmfs/neurodesk.ardc.edu.au/.cvmfspublished"
+
+                DIRECT_latency=$(get_latency "$DIRECT_url" "$DIRECT_HOST")
+                echo "Direct Latency: $DIRECT_latency"
+                CDN_latency=$(get_latency "$CDN_url" "$CDN_HOST")
+                echo "CDN Latency: $CDN_latency"
+
+                # Determine the fastest mode
+                FASTEST_MODE=$(printf "%s direct\n%s cdn\n" "$DIRECT_latency" "$CDN_latency" | sort -n | head -n 1 | awk '{print $2}')
+                
+                echo "Fastest region determined: $FASTEST_REGION"
+                echo "Fastest mode determined: $FASTEST_MODE"
 
                 # copying the selected config file
-                echo "selected config file: cvmfs/config.d/neurodesk.ardc.edu.au.conf.${mode}.${region}"
-                cp /etc/cvmfs/config.d/neurodesk.ardc.edu.au.conf.${mode}.${region} /etc/cvmfs/config.d/neurodesk.ardc.edu.au.conf
+                config_file_suffix="${FASTEST_MODE}.${FASTEST_REGION}"
+                source_config="/etc/cvmfs/config.d/neurodesk.ardc.edu.au.conf.${config_file_suffix}"
+                target_config="/etc/cvmfs/config.d/neurodesk.ardc.edu.au.conf"
+                
+                if [ -f "$source_config" ]; then
+                    echo "Selected config file: $source_config"
+                    cp "$source_config" "$target_config"
+                # else
+                #     echo "Warning: Config file $source_config not found. Using default."
+                    # cp /etc/cvmfs/config.d/neurodesk.ardc.edu.au.conf.default $target_config
+                fi
+                exit
 
                 echo "\
                 ==================================================================
