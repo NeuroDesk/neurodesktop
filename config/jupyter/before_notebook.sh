@@ -139,7 +139,6 @@ if [ "$EUID" -eq 0 ]; then
                 #     echo "Warning: Config file $source_config not found. Using default."
                     # cp /etc/cvmfs/config.d/neurodesk.ardc.edu.au.conf.default $target_config
                 fi
-                exit
 
                 echo "\
                 ==================================================================
