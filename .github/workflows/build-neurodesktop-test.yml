@@ -34,7 +34,7 @@ jobs:
       with:
         root-reserve-mb: 40000
         swap-size-mb: 1024
-        overprovision-lvm: 'true'
+        overprovision-lvm: 'false'
         remove-dotnet: 'true'
         remove-android: 'true'
         remove-haskell: 'true'
