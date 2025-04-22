@@ -199,8 +199,11 @@ RUN conda install -c conda-forge nb_conda_kernels \
 RUN conda config --system --prepend envs_dirs '~/conda-environments'
 
 # Add datalad-container datalad-osf osfclient ipyniivue to the conda environment
-RUN /opt/conda/bin/pip install datalad nipype matplotlib datalad-container datalad-osf osfclient ipyniivue \
+RUN /opt/conda/bin/pip install datalad nipype matplotlib datalad-container datalad-osf osfclient  \
     && rm -rf /home/${NB_USER}/.cache
+RUN git clone https://github.com/niivue/ipyniivue.git \
+    && cd ipyniivue && git checkout main && git pull \
+    && /opt/conda/bin/pip install -e ./ipyniivue
 
 # Install jupyter-server-proxy and disable announcements
 # Deprecated: jupyter labextension install ..
