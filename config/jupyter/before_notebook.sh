@@ -167,3 +167,40 @@ if [ "$EUID" -eq 0 ]; then
 fi
 
 source /opt/neurodesktop/environment_variables.sh
+
+if [ "$START_LOCAL_LLMS" -eq 1 ]; then
+    # Check if Ollama is installed
+    if ! command -v ollama &> /dev/null; then
+        echo "Ollama is not installed. Installing Ollama..."
+        wget -qO- https://ollama.com/install.sh | bash
+    fi
+
+    # Start the Ollama server in the background
+    if ! pgrep -x "ollama" > /dev/null; then
+        ollama serve &
+        echo "Waiting for Ollama server to start..."
+        sleep 20
+    fi
+
+    # Download the neurodesk.gguf file if it doesn't exist
+    if [ ! -f "neurodesk.gguf" ]; then
+        wget -O neurodesk.gguf \
+            "https://huggingface.co/jnikhilreddy/neurodesk-gguf/resolve/main/neurodesk.gguf?download=true"
+        
+        # Create the Modelfile
+        cat << 'EOL' > Modelfile
+FROM ./neurodesk.gguf
+EOL
+    fi
+
+    # Create the neurodesk model to serve using ollama
+    ollama create neurodesk -f Modelfile
+
+    ollama run neurodesk &
+    ollama run codellama:7b-code &
+    
+    echo "================================="
+    echo "LLM Setup Complete:"
+    echo "Ollama server running on port 11434"
+    echo "================================="
+fi
