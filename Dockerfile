@@ -205,6 +205,8 @@ RUN git clone https://github.com/niivue/ipyniivue.git \
     && cd ipyniivue && git checkout main && git pull \
     && /opt/conda/bin/pip install .
 
+RUN apt-get update && apt-get install -y tcsh
+
 # Install jupyter-server-proxy and disable announcements
 # Deprecated: jupyter labextension install ..
 # jupyter_server_proxy needs to be at least 4.2.0 to fix CVE-2024-35225
