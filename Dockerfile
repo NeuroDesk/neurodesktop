@@ -175,6 +175,7 @@ RUN apt-get update --yes \
         xdg-utils \
         yarn \
         zip \
+        tcsh \
         && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Install firefox
@@ -205,7 +206,6 @@ RUN git clone https://github.com/niivue/ipyniivue.git \
     && cd ipyniivue && git checkout main && git pull \
     && /opt/conda/bin/pip install .
 
-RUN apt-get update && apt-get install -y tcsh
 
 # Install jupyter-server-proxy and disable announcements
 # Deprecated: jupyter labextension install ..
