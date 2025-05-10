@@ -22,13 +22,18 @@ env:
 
 jobs:
   build-image:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps:
     - name: Fetch github api rate limit
       run: |
         GITHUB_RATE_REMAINING=$(curl -H "Accept: application/vnd.github.v3+json" https://api.github.com/rate_limit | jq '.rate.remaining')
         echo "GITHUB_RATE_REMAINING=${GITHUB_RATE_REMAINING}"
         echo "GITHUB_RATE_REMAINING=$GITHUB_RATE_REMAINING" >> $GITHUB_ENV
+    - name: Free up build space 
+      run: |
+        sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL
+        sudo docker image prune --all --force
+        sudo docker builder prune -a
     # - name: Maximize build space
     #   uses: easimon/maximize-build-space@master
     #   with:
