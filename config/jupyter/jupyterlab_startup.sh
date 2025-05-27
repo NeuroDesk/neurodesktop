@@ -6,7 +6,7 @@
 if [ ! -f "${HOME}/conda-readme.md" ] 
 then
     mkdir -p ${HOME}
-    sudo cp -rpn /tmp/${NB_USER} $(dirname "${HOME}")
+    sudo cp -rpn /tmp/${NB_USER} "$(dirname "${HOME}")"
 fi
 
 # Function to check and apply chown if necessary

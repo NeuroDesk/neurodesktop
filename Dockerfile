@@ -1,4 +1,4 @@
-FROM quay.io/jupyter/base-notebook:2025-02-03
+FROM quay.io/jupyter/base-notebook:hub-5.3.0
 # https://quay.io/repository/jupyter/base-notebook?tab=tags
 
 LABEL maintainer="Neurodesk Project <www.neurodesk.org>"
@@ -208,12 +208,9 @@ RUN git clone https://github.com/niivue/ipyniivue.git \
 
 
 # Install jupyter-server-proxy and disable announcements
-# Deprecated: jupyter labextension install ..
-# jupyter_server_proxy needs to be at least 4.2.0 to fix CVE-2024-35225
-# jupyterlmod==4.0.3 needs to be pinned for now because they broken the API after that and have not fixed it yet in  5.2.1: https://github.com/cmd-ntrf/jupyter-lmod/issues/79
 RUN /opt/conda/bin/pip install jupyter-server-proxy \
     && /opt/conda/bin/jupyter labextension disable @jupyterlab/apputils-extension:announcements \
-    && /opt/conda/bin/pip install jupyterlmod==4.0.3 \
+    && /opt/conda/bin/pip install jupyterlmod \
     && /opt/conda/bin/pip install jupyterlab-git \
     && /opt/conda/bin/pip install notebook_intelligence \
     && /opt/conda/bin/pip install jupyterlab_rise \
