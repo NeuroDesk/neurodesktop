@@ -107,7 +107,7 @@ if [ "$EUID" -eq 0 ]; then
                 echo "Probing regional servers (Europe, America, Asia)..."
                 EUROPE_HOST=cvmfs-frankfurt.neurodesk.org
                 AMERICA_HOST=cvmfs-jetstream.neurodesk.org
-                ASIA_HOST=cvmfs-brisbane.neurodesk.org2
+                ASIA_HOST=cvmfs-brisbane.neurodesk.org
 
                 EUROPE_url="http://${EUROPE_HOST}/cvmfs/neurodesk.ardc.edu.au/.cvmfspublished"
                 AMERICA_url="http://${AMERICA_HOST}/cvmfs/neurodesk.ardc.edu.au/.cvmfspublished"
