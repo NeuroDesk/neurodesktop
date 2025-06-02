@@ -46,13 +46,14 @@ if [ "$EUID" -eq 0 ]; then
             if [ ! -d "$CACHE_DIR" ]; then
                 echo "Creating CVMFS cache directory at $CACHE_DIR"
                 mkdir -p "$CACHE_DIR"
-                # Make sure the CVMFS user can access the cache directory
-                chmod 755 /home/jovyan
-                # The cache directory needs to be owned by cvmfs user and group
-                chown -R cvmfs:root "$CACHE_DIR"
             else
                 echo "CVMFS cache directory already exists at $CACHE_DIR"
             fi
+
+            # Make sure the CVMFS user can access the cache directory
+            chmod 755 /home/jovyan
+            # The cache directory needs to be owned by cvmfs user and group
+            chown -R cvmfs:root "$CACHE_DIR"
 
             # try to list the directory in case it's autofs mounted outside
             ls /cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/ 2>/dev/null && echo "CVMFS is ready" || echo "CVMFS directory not there. Trying internal fuse mount next."
