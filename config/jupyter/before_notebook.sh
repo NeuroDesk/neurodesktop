@@ -36,9 +36,23 @@ if [ "$EUID" -eq 0 ]; then
             export CVMFS_DISABLE="false"
         fi
 
-
         if [[ "$CVMFS_DISABLE" == "false" ]]; then
             # CVMFS_DISABLE is false and CVMFS should be enabled.
+
+            # needs to be kept in sync with config/cvmfs/default.local
+            CACHE_DIR="/home/jovyan/cvmfs_cache"
+
+            # Create the cache directory if it doesn't exist
+            if [ ! -d "$CACHE_DIR" ]; then
+                echo "Creating CVMFS cache directory at $CACHE_DIR"
+                mkdir -p "$CACHE_DIR"
+                # Make sure the CVMFS user can access the cache directory
+                chmod 755 /home/jovyan
+                # The cache directory needs to be owned by cvmfs user and group
+                chown -R cvmfs:root "$CACHE_DIR"
+            else
+                echo "CVMFS cache directory already exists at $CACHE_DIR"
+            fi
 
             # try to list the directory in case it's autofs mounted outside
             ls /cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/ 2>/dev/null && echo "CVMFS is ready" || echo "CVMFS directory not there. Trying internal fuse mount next."
@@ -79,7 +93,7 @@ if [ "$EUID" -eq 0 ]; then
                         # Handle curl specific errors (e.g., timeout, DNS resolution failure)
                         # Redirect error message to stderr
                         echo "Curl command failed for $url with exit code $exit_code" >&2
-                         # Check for timeout error (exit code 28)
+                        # Check for timeout error (exit code 28)
                         if [ $exit_code -eq 28 ]; then
                             # Redirect error message to stderr
                             echo "Curl request timed out for $url" >&2
@@ -93,8 +107,8 @@ if [ "$EUID" -eq 0 ]; then
                 EUROPE_HOST=cvmfs-frankfurt.neurodesk.org
                 AMERICA_HOST=cvmfs-jetstream.neurodesk.org
                 ASIA_HOST=cvmfs-brisbane.neurodesk.org2
-                
-                EUROPE_url="http://${EUROPE_HOST}/cvmfs/neurodesk.ardc.edu.au/.cvmfspublished" 
+
+                EUROPE_url="http://${EUROPE_HOST}/cvmfs/neurodesk.ardc.edu.au/.cvmfspublished"
                 AMERICA_url="http://${AMERICA_HOST}/cvmfs/neurodesk.ardc.edu.au/.cvmfspublished"
                 ASIA_url="http://${ASIA_HOST}/cvmfs/neurodesk.ardc.edu.au/.cvmfspublished"
 
@@ -113,7 +127,7 @@ if [ "$EUID" -eq 0 ]; then
                 DIRECT_HOST=cvmfs-geoproximity.neurodesk.org
                 CDN_HOST=cvmfs.neurodesk.org
 
-                DIRECT_url="http://${DIRECT_HOST}/cvmfs/neurodesk.ardc.edu.au/.cvmfspublished" 
+                DIRECT_url="http://${DIRECT_HOST}/cvmfs/neurodesk.ardc.edu.au/.cvmfspublished"
                 CDN_url="http://${CDN_HOST}/cvmfs/neurodesk.ardc.edu.au/.cvmfspublished"
 
                 DIRECT_latency=$(get_latency "$DIRECT_url" "$DIRECT_HOST")
@@ -123,7 +137,7 @@ if [ "$EUID" -eq 0 ]; then
 
                 # Determine the fastest mode
                 FASTEST_MODE=$(printf "%s direct\n%s cdn\n" "$DIRECT_latency" "$CDN_latency" | sort -n | head -n 1 | awk '{print $2}')
-                
+
                 echo "Fastest region determined: $FASTEST_REGION"
                 echo "Fastest mode determined: $FASTEST_MODE"
 
@@ -131,19 +145,19 @@ if [ "$EUID" -eq 0 ]; then
                 config_file_suffix="${FASTEST_MODE}.${FASTEST_REGION}"
                 source_config="/etc/cvmfs/config.d/neurodesk.ardc.edu.au.conf.${config_file_suffix}"
                 target_config="/etc/cvmfs/config.d/neurodesk.ardc.edu.au.conf"
-                
+
                 if [ -f "$source_config" ]; then
                     echo "Selected config file: $source_config"
                     cp "$source_config" "$target_config"
-                # else
-                #     echo "Warning: Config file $source_config not found. Using default."
+                    # else
+                    #     echo "Warning: Config file $source_config not found. Using default."
                     # cp /etc/cvmfs/config.d/neurodesk.ardc.edu.au.conf.default $target_config
                 fi
 
                 echo "\
                 ==================================================================
                 Mounting CVMFS"
-                if ( service autofs status > /dev/null ); then
+                if (service autofs status >/dev/null); then
                     echo "autofs is running - not attempting to mount manually:"
                     ls /cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/ 2>/dev/null && echo "CVMFS is ready after autofs mount" || echo "AutoFS not working!"
                 else
@@ -170,13 +184,13 @@ source /opt/neurodesktop/environment_variables.sh
 
 if [ "$START_LOCAL_LLMS" -eq 1 ]; then
     # Check if Ollama is installed
-    if ! command -v ollama &> /dev/null; then
+    if ! command -v ollama &>/dev/null; then
         echo "Ollama is not installed. Installing Ollama..."
         wget -qO- https://ollama.com/install.sh | bash
     fi
 
     # Start the Ollama server in the background
-    if ! pgrep -x "ollama" > /dev/null; then
+    if ! pgrep -x "ollama" >/dev/null; then
         ollama serve &
         echo "Waiting for Ollama server to start..."
         sleep 20
@@ -186,9 +200,9 @@ if [ "$START_LOCAL_LLMS" -eq 1 ]; then
     if [ ! -f "neurodesk.gguf" ]; then
         wget -O neurodesk.gguf \
             "https://huggingface.co/jnikhilreddy/neurodesk-gguf/resolve/main/neurodesk.gguf?download=true"
-        
+
         # Create the Modelfile
-        cat << 'EOL' > Modelfile
+        cat <<'EOL' >Modelfile
 FROM ./neurodesk.gguf
 EOL
     fi
@@ -198,7 +212,7 @@ EOL
 
     ollama run neurodesk &
     ollama run codellama:7b-code &
-    
+
     echo "================================="
     echo "LLM Setup Complete:"
     echo "Ollama server running on port 11434"
