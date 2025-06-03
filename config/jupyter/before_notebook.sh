@@ -183,7 +183,8 @@ fi
 
 source /opt/neurodesktop/environment_variables.sh
 
-if [ "$START_LOCAL_LLMS" -eq 1 ]; then
+# Set default value for START_LOCAL_LLMS
+if [ -v START_LOCAL_LLMS ] && [ "$START_LOCAL_LLMS" -eq 1 ]; then
     # Check if Ollama is installed
     if ! command -v ollama &>/dev/null; then
         echo "Ollama is not installed. Installing Ollama..."
