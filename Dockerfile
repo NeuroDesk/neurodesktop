@@ -153,6 +153,7 @@ RUN apt-get update --yes \
         lxtask \
         man-db \
         nano \
+        nextcloud-client \
         nodejs \
         openssh-client \
         openssh-server \
