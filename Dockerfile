@@ -1,5 +1,4 @@
-FROM quay.io/jupyter/base-notebook:2025-05-30
-# 2025-05-30 is hub-5.3.0
+FROM quay.io/jupyter/base-notebook:hub-5.3.0
 # https://quay.io/repository/jupyter/base-notebook?tab=tags
 
 LABEL maintainer="Neurodesk Project <www.neurodesk.org>"
