@@ -116,11 +116,34 @@ if [ "$EUID" -eq 0 ]; then
                 AMERICA_url="http://${AMERICA_HOST}/cvmfs/neurodesk.ardc.edu.au/.cvmfspublished"
                 ASIA_url="http://${ASIA_HOST}/cvmfs/neurodesk.ardc.edu.au/.cvmfspublished"
 
+                EUROPE_url_backup="http://${EUROPE_HOST_BACKUP}/cvmfs/neurodesk.ardc.edu.au/.cvmfspublished"
+                AMERICA_url_backup="http://${AMERICA_HOST_BACKUP}/cvmfs/neurodesk.ardc.edu.au/.cvmfspublished"
+                ASIA_url_backup="http://${ASIA_HOST_BACKUP}/cvmfs/neurodesk.ardc.edu.au/.cvmfspublished"
+
                 EUROPE_latency=$(get_latency "$EUROPE_url" "$EUROPE_HOST")
+                # check if latency is 999, if so, try the backup server
+                if [ "$EUROPE_latency" == "999" ]; then
+                    echo "Primary Europe server failed, trying backup..."
+                    EUROPE_latency=$(get_latency "$EUROPE_url_backup" "$EUROPE_HOST_BACKUP")
+                fi
                 echo "Europe Latency: $EUROPE_latency"
+
+
                 AMERICA_latency=$(get_latency "$AMERICA_url" "$AMERICA_HOST")
+                # check if latency is 999, if so, try the backup server
+                if [ "$AMERICA_latency" == "999" ]; then
+                    echo "Primary America server failed, trying backup..."
+                    AMERICA_latency=$(get_latency "$AMERICA_url_backup" "$AMERICA_HOST_BACKUP")
+                fi
                 echo "America Latency: $AMERICA_latency"
+                
+                
                 ASIA_latency=$(get_latency "$ASIA_url" "$ASIA_HOST")
+                # check if latency is 999, if so, try the backup server
+                if [ "$ASIA_latency" == "999" ]; then
+                    echo "Primary Asia server failed, trying backup..."
+                    ASIA_latency=$(get_latency "$ASIA_url_backup" "$ASIA_HOST_BACKUP")
+                fi
                 echo "Asia Latency: $ASIA_latency"
 
                 # Find the fastest region
