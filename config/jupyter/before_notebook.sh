@@ -246,3 +246,7 @@ EOL
     echo "Ollama server running on port 11434"
     echo "================================="
 fi
+# Ensure the VNC password file has the correct permissions
+if [ -f "/home/${NB_USER}/.vnc/passwd" ] && [ "$(stat -c %a /home/${NB_USER}/.vnc/passwd)" != "600" ]; then
+    chmod 600 "/home/${NB_USER}/.vnc/passwd"
+fi

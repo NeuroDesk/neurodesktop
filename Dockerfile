@@ -338,7 +338,9 @@ ENV LMOD_CMD=/usr/share/lmod/lmod/libexec/lmod
 # Add startup and config files for neurodesktop, jupyter, guacamole, vnc
 RUN mkdir /home/${NB_USER}/.vnc \
     && chown ${NB_USER} /home/${NB_USER}/.vnc \
-    && /usr/bin/printf '%s\n%s\n%s\n' 'password' 'password' 'n' | vncpasswd
+    && /usr/bin/printf '%s\n%s\n%s\n' 'password' 'password' 'n' | vncpasswd \
+    && chmod 600 -R /home/${NB_USER}/.vnc
+    
 COPY --chown=${NB_UID}:${NB_GID} config/lxde/xstartup /home/${NB_USER}/.vnc
 COPY --chown=${NB_UID}:${NB_GID} config/conda/conda-readme.md /home/${NB_USER}/
 
