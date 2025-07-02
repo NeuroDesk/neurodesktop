@@ -103,6 +103,8 @@ if ! grep -iq 'cpu.*hz' /proc/cpuinfo; then
     cp /proc/cpuinfo $cpuinfo_file
     chmod u+rw $cpuinfo_file
     sed -i '/^$/c\cpu MHz         : 2245.778\n' $cpuinfo_file
+    # add vendor and model name as well:
+    sed -i '/^$/c\vendor_id       : ARM\nmodel name      : Apple-M\n' $cpuinfo_file
     sudo mount --bind $cpuinfo_file /proc/cpuinfo
     echo "[INFO] Added CPU Mhz entry in /proc/cpuinfo to work around a bug in Matlab that expects this value to be present."
 fi
