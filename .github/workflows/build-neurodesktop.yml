@@ -168,6 +168,15 @@ jobs:
           echo "BUILDDATE=$BUILDDATE" >> $GITHUB_ENV
           echo "IMAGEID=$IMAGEID" >> $GITHUB_ENV
           echo "IMAGENAME=$IMAGENAME" >> $GITHUB_ENV
+      - name: Free up build space 
+        run: |
+          echo "Available space before cleanup:"
+          df -h
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL /usr/local/share/boost /usr/share/swift /usr/lib/android-sdk
+          sudo docker image prune --all --force
+          sudo docker builder prune --force
+          echo "Available space after cleanup:"
+          df -h
       - name: Checkout repository
         if: ${{ env.GITHUB_RATE_REMAINING > 0 }}
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
