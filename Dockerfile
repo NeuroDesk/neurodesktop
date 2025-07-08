@@ -286,17 +286,6 @@ RUN echo "${NB_USER} ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers.d/notebook \
 # Enable deletion of non-empty-directories in JupyterLab: https://github.com/jupyter/notebook/issues/4916
 RUN sed -i 's/c.FileContentsManager.delete_to_trash = False/c.FileContentsManager.always_delete_dir = True/g' /etc/jupyter/jupyter_server_config.py
 
-# Copy script to test_containers 
-COPY config/test_neurodesktop.sh /usr/share/test_neurodesktop.sh
-
-# Install version 1.1.1 of fix_bash.sh that is required for test_containers
-RUN chmod +x /usr/share/test_neurodesktop.sh \
-      && git clone https://github.com/civier/fix_bash.git /tmp/fix_bash \
-      && cd /tmp/fix_bash \
-      && git checkout tags/1.1.1 \
-      && cp /tmp/fix_bash/fix_bash.sh /usr/share \
-      && rm -Rf /tmp/fix_bash
-
 #========================================#
 # Configuration (as notebook user)
 #========================================#
@@ -323,7 +312,6 @@ RUN git config --global user.email "user@neurodesk.org" \
 RUN mkdir -p /home/${NB_USER}/.config/matplotlib-mpldir \
     && chmod -R 700 /home/${NB_USER}/.config/matplotlib-mpldir \
     && chown -R ${NB_UID}:${NB_GID} /home/${NB_USER}/.config/matplotlib-mpldir
-
 
 COPY --chown=${NB_UID}:${NB_GID} config/vscode/settings.json /home/${NB_USER}/.config/Code/User/settings.json
 
