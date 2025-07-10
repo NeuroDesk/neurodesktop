@@ -39,6 +39,7 @@ jobs:
                         "s1osggoc-cvmfs.openhtc.io:8080",
                         "s1brisbane-cvmfs.openhtc.io",
                         "cvmfs-sydney.neurodesk.org",
+                        "cvmfs-melbourne.neurodesk.org",
                         "s1perth-cvmfs.openhtc.io",
                         "cvmfs-frankfurt.neurodesk.org",
                         "cvmfs-jetstream.neurodesk.org",
